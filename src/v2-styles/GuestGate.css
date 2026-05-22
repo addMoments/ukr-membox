@@ -1,0 +1,78 @@
+.guest-gate-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 9999px;
+  background: var(--primary, #D5E553);
+  margin-bottom: 32px;
+  font-size: 32px;
+  color: var(--primary-text, #1C1917);
+}
+
+.guest-gate-event-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary, #71716A);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 32px;
+}
+
+.guest-gate-countdown {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.guest-gate-countdown-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 56px;
+}
+
+.guest-gate-countdown-value {
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--text, #1C1917);
+  font-variant-numeric: tabular-nums;
+}
+
+.guest-gate-countdown-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary, #71716A);
+}
+
+.guest-gate-countdown-sep {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--text-tertiary, #a8a29e);
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.guest-gate-date {
+  font-size: 15px;
+  color: var(--text-secondary, #71716A);
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .guest-gate-countdown-value {
+    font-size: 28px;
+  }
+  .guest-gate-countdown-block {
+    min-width: 44px;
+  }
+}

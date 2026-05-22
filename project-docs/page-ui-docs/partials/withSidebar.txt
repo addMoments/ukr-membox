@@ -1,0 +1,20 @@
+Composite component to be used when there is a sidebar involved.
+
+Props:
+sidebarWidth: number
+sidebar: Jsx (one partial: sidebar in question)
+children: Jsx (array of partials)
+
+Layout Desktop:
+A row of two columns.
+Left is the sidebar, the sidebar partial wrapped in a column, its width is sidebarWidth. Render an empty column with sidebarWidth, position relative. Render the sidebar with absolute position inside it so that it follows the scroll. On the right is content, it takes up the entire rest of the width, this part is NOT scrollable. If you make this scrollable two scrollables will be on the page. Only the root app is scrollable.
+
+Layout Mobile+tablet:
+Left sidebar's container's position is absolute. When it is open its X position is 15px. When closed its X position is -(sidebarWidth + 15px)
+
+Sidebar Open State: Whether the root container with App class has the class sidebarOpen. In css do stuff like:
+{mobile-media-query} {
+    .app.sidebar-open .sidebar.container {
+
+    }
+}

@@ -1,0 +1,7 @@
+Sign in page. Users authenticate with email/password or Google.
+
+Partials in order:
+Header
+Sign In Form (create partial for this)
+Footer
+

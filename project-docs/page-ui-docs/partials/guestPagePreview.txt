@@ -1,0 +1,26 @@
+Phone mockup previewing how the guest page will look on mobile.
+
+Props:
+eventTitle: string
+eventDate: string (formatted)
+welcomeMessage: string
+bannerImageUrl: string | null
+pageColor: string (hex)
+pageTextColor: string (hex)
+buttonColor: string (hex)
+buttonTextColor: string (hex)
+
+Layout:
+Title: "Guest Page Preview" (bold)
+Subtitle: "How your event will look on a mobile device"
+
+Phone frame (dark border, rounded corners):
+- Banner image area at top (uses pageColor as background, shows camera placeholder if no image)
+- Event title (bold, centered)
+- Event date (centered, below title)
+- Welcome message paragraph (centered)
+- Bottom navigation bar with 5 items:
+  Home (house icon) | Gallery (grid icon) | Upload (upload icon) | Guestbook (chat icon) | More (ellipsis icon)
+
+Colors in preview update live based on theme settings.
+

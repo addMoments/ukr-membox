@@ -1,0 +1,48 @@
+Form for editing general event settings and guest page content.
+
+Props:
+activationDate: string (ISO datetime)
+activationTimezone: string (e.g., "GMT+3")
+storageStartDate: string (formatted)
+storageEndDate: string (formatted)
+storageDuration: string (e.g., "2 weeks")
+eventDate: string (formatted)
+eventType: string
+displayEventDate: boolean
+passwordRequired: boolean
+title: string
+welcomeMessage: string
+
+Layout:
+Title: "General Settings" (bold)
+Subtitle: "Change the content of the guest home page."
+
+Activation Date section:
+- Dropdown (dark/disabled style) showing date, time, and timezone
+- Helper text: "Please upgrade to a paid plan to change the activation date."
+- Vertical timeline with:
+  - Top marker: "Start of upload & storage period" + date
+  - Badge in middle showing duration (e.g., "2 weeks")
+  - Bottom marker: "End of upload & storage period" + date
+
+2-column row:
+- Left: "Event Date" label, helper "Display purposes only", date picker dropdown
+- Right: "Event Type" label, helper "Your celebration", select dropdown
+
+Toggle row (2 toggles inline):
+- "Display event date" toggle
+- "Password Required" toggle
+
+Title section:
+- Label: "Title"
+- Helper: "Event title for guest"
+- Text input
+
+Welcome Message section:
+- Label: "Welcome Message"
+- Helper: "Greet guests with a message"
+- Textarea (resizable)
+
+Full-width "Save" button at bottom.
+
+

@@ -1,0 +1,11 @@
+A box with filter utilities that renders other boxes. Can be used with event entries or upload entries for example.
+
+Props:
+data []TypeX
+renderItem (TypeX) => (JSX)
+buttons: []{label: String, onClick: ()=>{}}
+
+Layout:
+At the top row is the buttons side by side.
+At the second row is the sort utilities. For now just two buttons. Date ascending and Date descending.
+At the bottom is the flex wrapped boxes, this is the data being rendered by the renderItem prop.

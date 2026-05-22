@@ -1,0 +1,511 @@
+<footer class="v2-footer">
+      <a id="grabPubUrl" style="display: none;" href="https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui"></a>
+        <div class="v2-footer-newsletter">
+            <h2 class="v2-footer-newsletter-title" data-t="newsletter_title">Subscribe to our Weekly Digital Memory Newsletter</h2>
+            <form class="v2-footer-newsletter-form"><input class="v2-footer-newsletter-input" data-t-placeholder="newsletter_placeholder" placeholder="Enter your email"
+                    type="email"><button type="submit" class="v2-footer-newsletter-btn" aria-label="Subscribe"><img class="footer-icon" src="https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/footer/arrow-right.svg" alt=""></button><p class="v2-footer-description v2-ftr-form-desc"></p></form>
+        </div>
+        <div class="v2-footer-content">
+            <div class="v2-footer-brand"><a class="v2-footer-logo" href="/" data-discover="true">
+                    <div class="v2-footer-logo-icon"><img class="footer-icon" src="https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/header/logo.svg" alt=""></div><span
+                        class="v2-footer-logo-text">addmoments</span>
+                </a>
+                <p class="v2-footer-description" data-t="footer_description">The easiest way to collect photos from your guests. Create a digital album for your special events without any app downloads.</p>
+                <div class="v2-footer-social"></div>
+            </div>
+            <div class="v2-footer-column">
+                <h4 class="v2-footer-column-title" data-t="quick_links">Quick Links</h4>
+                <ul class="v2-footer-links"></ul>
+            </div>
+        </div>
+        <div class="v2-footer-bottom">
+            <p class="v2-footer-copyright" data-t="copyright">© 2025 addmoments. All rights reserved.</p>
+            <button
+                class="v2-footer-lang-selector"
+            >
+                <img class="footer-icon" src="https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/footer/globe.svg" alt="">
+                <select id="langSel2">
+                  <option value="en">EN</option>
+                  <option value="uk">UA</option>
+                </select>
+            </button>
+        </div>
+    </footer>
+
+<script defer>
+(()=>{
+  const setUpFooter = (t = (k)=>k)=>{
+    const footerLinks = [
+      { key: "services_prices", href: "/events/new" },
+      { key: "how_it_works", href: "/how-it-works" },
+      { key: "blog", href: "/blog" },
+      { key: "faq", href: "/faq" },
+      { key: "contact_us", href: "/contact-us" }
+    ];
+
+    const footerSocials = [
+      { icon: "globe.svg", href: "https://www.addmoments.com", ariaKey: "aria_website" },
+      { icon: "mail.svg", href: "mailto:info@addmoments.com", ariaKey: "aria_email" }
+    ]
+
+    const root = document.querySelector("footer.v2-footer");
+    const qs = (query) => root.querySelector(query);
+  
+    const linksContainer = qs(".v2-footer-links");
+    
+    footerLinks.forEach(link => {
+      linksContainer.innerHTML += `<li><a class="v2-footer-link" href="${link.href}">${t(link.key)}</a></li>`;
+    });
+  
+    const socialsContainer = qs(".v2-footer-social");
+    const publicUrl = qs("#grabPubUrl").href;
+  
+    const footerAssetRoot = publicUrl +"/assets/footer/";
+    
+    footerSocials.forEach(social => {
+      socialsContainer.innerHTML += `<a href="${social.href}" class="v2-footer-social-link" aria-label="${t(social.ariaKey)}"><img class="footer-icon" src="${footerAssetRoot}${social.icon}" alt=""></a>`;
+    });
+  
+    const addEvent = (query, event, listener)=>(qs(query).addEventListener(event, listener));
+  
+    addEvent(".v2-footer-newsletter-form", "submit", (e)=>{
+      e.preventDefault();
+      const desc = qs(".v2-ftr-form-desc");
+      const email = qs(".v2-footer-newsletter-input").value;
+  
+      desc.innerText = t("newsletter_loading");
+      desc.style.color = "";
+  
+      let msg="";
+      let color = "";
+  
+      fetch("https://serv.addmoments.com.ua/api/form/newsletter", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }).then(async (res)=>{
+        if (!res.ok){
+          const error = await res.text();
+          throw new Error(error);
+        }
+        msg = t("newsletter_success");
+        color = "rgb(87, 181, 63)";
+      }).catch((err)=>{
+        msg = t("newsletter_error_prefix") + err.message + t("newsletter_error_suffix");
+        color = "#dc2626";
+      }).finally(()=>{
+        desc.style.color = color;
+        desc.innerText = msg;
+      })
+
+    });
+  
+  };
+
+  const setUpHeader = (t = (k)=>k)=>{
+    let isFirst = false;
+
+    const headerBtnsSetup = ()=>{
+      const isAdmin = window.location.pathname.startsWith("/event/") ? 1 : 0;
+
+      const btns = document.querySelectorAll('[data-pub]');
+      btns.forEach(btn=>{
+        if (btn.getAttribute('data-pub') == isAdmin){
+          btn.style.display = 'none';
+        } else {
+          btn.style.display = 'block';
+        }
+      });
+    }
+    
+    headerBtnsSetup();
+    window.addEventListener('routechange', ()=>{
+      if (!isFirst){
+        isFirst = true;
+        return;
+      }
+      headerBtnsSetup();
+    });
+
+
+    const headerLinks = {
+      left: [
+        { key: "services_prices", href: "/events/new" },
+        { key: "how_it_works", href: "/how-it-works" }
+      ],
+      right: [
+        { key: "blog", href: "/blog" },
+        { key: "faq", href: "/faq" },
+        { key: "contact_us", href: "/contact-us" }
+      ],
+    };
+    const headerAssetRoot = "https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/header/";
+    const root = document.querySelector("nav.v2-header");
+    const qs = (query)=>(root.querySelector(query));
+    const addEvent = (query, event, listener)=>(qs(query).addEventListener(event, listener));
+
+    const appendHeaderLink = (key, href, section)=>{
+      const text = t(key);
+      const ref = qs(`.v2-header-section.${section}`);
+      const mobile = qs(`#mobile-links`);
+      ref.innerHTML += `<a class="v2-header-nav-link" href="${href}" data-discover="${key}">${text}</a>`;
+      mobile.innerHTML += `<a class="v2-header-nav-link" href="${href}" data-discover="${key}">${text}</a>`;
+    }
+
+    ["left", "right"].forEach(section=>{
+      headerLinks[section].forEach(link=>{
+        appendHeaderLink(link.key, link.href, section);
+      });
+    });
+
+    const isMobileMenuOpen = ()=>{
+      return qs('.v2-header-mobile-menu').classList.contains('open');
+    }
+    const handleMobileToggle = ()=>{
+      const menuOpen = isMobileMenuOpen();
+      qs('.v2-header-mobile-menu').classList[menuOpen ? 'remove' : 'add']('open');
+      const toggleIcon = qs('.v2-header-mobile-toggle .header-icon');
+      qs('.v2-header-mobile-toggle .header-icon').src = headerAssetRoot + (!menuOpen ? 'cross.svg' : 'burger.svg');
+    }
+    addEvent('.v2-header-mobile-toggle', 'click', handleMobileToggle);
+  }
+
+  const makeT = async (lang)=>{
+    const langJson = `https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/lang/${lang}-headfoot.json`;
+    const langData = await fetch(langJson).then(res => res.json());
+    const t = k => langData[k] || k;
+    return t;
+  }
+
+  const setUpAll = async (lang)=>{
+    const t = await makeT(lang);
+    setUpFooter(t);
+    setUpHeader(t);
+
+    document.querySelectorAll('[data-t]').forEach(elem => {
+      const key = elem.getAttribute('data-t');
+      elem.textContent = t(key);
+    });
+
+    document.querySelectorAll('[data-t-placeholder]').forEach(elem => {
+      const key = elem.getAttribute('data-t-placeholder');
+      elem.placeholder = t(key);
+    });
+
+    const langSelectors = [
+      document.querySelector('#langSel'),
+      document.querySelector('#langSel2'),
+    ];
+
+    const currLang = t("lang_code");
+
+    langSelectors.forEach(selector => {
+      selector.value = currLang;
+    });
+  }
+
+  const isWordPress = typeof window.wp !== 'undefined';
+
+  if (!isWordPress){
+    if (window["currLng"]){
+      setUpAll(window["currLng"]);
+    } else {
+      const cap = window["onLng"] || (()=>{});
+      window["onLng"] = (lang)=>{
+        cap(lang);
+        setUpAll(lang);
+      }
+    }
+    return;
+  }
+
+  setUpAll("en");
+})()
+</script>
+
+<style>
+.v2-footer {
+  background: #D8E2FF;
+  padding: 96px 16px;
+}
+
+/* Newsletter Section */
+.v2-footer-newsletter {
+  max-width: 896px;
+  margin: 0 auto;
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.v2-footer-newsletter-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1E2330;
+  margin: 0 0 48px;
+}
+
+@media (min-width: 768px) {
+  .v2-footer-newsletter-title {
+    font-size: 48px;
+  }
+}
+
+.v2-footer-newsletter-title span {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.v2-footer-newsletter-form {
+  max-width: 448px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.v2-footer-newsletter-input {
+  width: 100%;
+  height: 56px;
+  padding: 0 64px 0 24px;
+  border-radius: 9999px;
+  border: none;
+  font-size: 14px;
+  background: white;
+  color: #1E2330;
+  box-sizing: border-box;
+}
+
+.v2-footer-newsletter-input:focus {
+  outline: 2px solid #1E2330;
+  outline-offset: 0;
+}
+
+.v2-footer-newsletter-input::placeholder {
+  color: #9ca3af;
+}
+
+.v2-footer-newsletter-btn {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 40px;
+  height: 40px;
+  background: #1E2330;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.v2-footer-newsletter-btn:hover {
+  background: #000;
+}
+
+.v2-footer-newsletter-btn img.footer-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+/* Footer Content Grid */
+.v2-footer-content {
+  max-width: 1280px;
+  margin: 128px auto 0;
+  padding-top: 48px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: grid;
+  gap: 48px;
+}
+
+@media (min-width: 768px) {
+  .v2-footer-content {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Brand Column */
+.v2-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.v2-footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.v2-footer-logo-icon {
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.v2-footer-logo-icon svg,
+.v2-footer-logo-icon i,
+.v2-footer-logo-icon img.footer-icon {
+  width: 24px;
+  height: 24px;
+  color: #254f1a;
+}
+
+.v2-footer-logo-text {
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.025em;
+  color: #1E2330;
+}
+
+.v2-footer-description {
+  color: #6b7280;
+  max-width: 320px;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 14px;
+  text-align: left;
+}
+
+.v2-footer-social {
+  display: flex;
+  gap: 12px;
+}
+
+.v2-footer-social-link {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background: rgba(37, 79, 26, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #254f1a;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.v2-footer-social-link:hover {
+  background: rgba(37, 79, 26, 0.2);
+}
+
+.v2-footer-social-link svg,
+.v2-footer-social-link i,
+.v2-footer-social-link img.footer-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Link Columns */
+.v2-footer-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.v2-footer-column-title {
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 24px;
+  color: #1E2330;
+}
+
+.v2-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.v2-footer-link {
+  font-size: 14px;
+  color: #4b5563;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.v2-footer-link:hover {
+  color: #000;
+}
+
+/* Bottom Bar */
+.v2-footer-bottom {
+  max-width: 1280px;
+  margin: 80px auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+@media (min-width: 768px) {
+  .v2-footer-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.v2-footer-copyright {
+  margin: 0;
+}
+
+.v2-footer-lang-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: white;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.v2-footer-lang-selector select {
+  border: none;
+  background-color: transparent;
+  
+  font-size: 12px;
+  
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  outline: none;
+
+  font-weight: 700;
+  color: #374151;
+}
+
+.v2-footer-lang-selector svg,
+.v2-footer-lang-selector i,
+.v2-footer-lang-selector img.footer-icon {
+  width: 14px;
+  height: 14px;
+  color: #6b7280;
+}
+
+.v2-footer-lang-selector span {
+  font-weight: 700;
+  color: #374151;
+}
+
+footer.v2-footer {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+.v2-ftr-form-desc {
+  text-align: center;
+  margin-top: 16px;
+  max-width: unset;
+}
+</style>

@@ -1,0 +1,28 @@
+.mockup2 {
+  max-width: 400px;
+}
+
+.mockup2-phone iframe {
+  overflow: hidden;
+  border-radius: 32px;
+}
+
+.mockup2-screen-container {
+  overflow: hidden;
+}
+
+.mockup2-screen {
+  border: none;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mockup2 {
+    max-width: 100%;
+  }
+
+  .mockup2-screen {
+    height: 500px;
+  }
+}
+

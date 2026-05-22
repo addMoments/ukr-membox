@@ -1,0 +1,149 @@
+.bcp {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.bcp-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 360px;
+}
+
+@media (max-width: 640px) {
+  .bcp-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left: preview */
+.bcp-preview {
+  position: relative;
+  background: #f5f5f4;
+  overflow: hidden;
+}
+
+.bcp-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.bcp-preview-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #dae0fc 0%, #e8ebfd 100%);
+  color: #3e4c92;
+  font-size: 4rem;
+}
+
+/* Right: form */
+.bcp-form {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.bcp-title {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #1c1917;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.bcp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.bcp-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #57534e;
+}
+
+.bcp-select,
+.bcp-textarea,
+.bcp-input {
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid #e7e5e4;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #1c1917;
+  background: #fafaf9;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  resize: vertical;
+}
+
+.bcp-select:focus,
+.bcp-textarea:focus,
+.bcp-input:focus {
+  border-color: #d2e823;
+}
+
+.bcp-char-count {
+  font-size: 11px;
+  color: #a8a29e;
+  text-align: right;
+  margin-top: -0.25rem;
+}
+
+.bcp-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.bcp-submit-btn {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  background: #d2e823;
+  color: #1a1d21;
+  border: none;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.bcp-submit-btn:hover {
+  filter: brightness(1.05);
+}
+
+.bcp-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bcp-cancel-btn {
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 1.5px solid #e7e5e4;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #78716c;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.bcp-cancel-btn:hover {
+  border-color: #a8a29e;
+}

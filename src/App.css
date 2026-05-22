@@ -1,0 +1,431 @@
+.App {
+  background-color: #F8FAFD;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top-spacer {
+  height: 8.5vw;
+  max-height: 80px;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 70px;
+}
+
+.logo-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0F172A;
+  letter-spacing: -0.5px;
+  font-weight: 700;
+}
+
+.main-content {
+  flex: 1;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0px 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: center;
+}
+
+.main-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+html body .heading-large {
+  font-size: 43px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -1px;
+  text-align: center;
+}
+
+.footer-spacer {
+  height: 220px;
+  display: block;
+}
+
+.footer {
+  padding: 0px 20px;
+  max-width: 1350px;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-self: center;
+}
+
+.footer-text {
+  font-size: 9px;
+  line-height: 1.1;
+  color: #6B7280;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+html body .footer-links {
+  display: flex!important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 1.6em;
+}
+
+.footer-link {
+  color: #6B7280;
+  text-decoration: none;
+  font-size: 9px;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+  color: #4B5563;
+}
+
+.footer-separator {
+  color: #6B7280;
+  font-size: 9px;
+}
+
+@media (max-width: 768px) {
+  html body .heading-large {
+    font-size: 33px!important;
+  }
+
+  .logo-container {
+    margin-bottom: 55px;
+  }
+
+  .footer-spacer {
+    height: 60px;
+  }
+}
+
+
+p {
+  text-align: center;
+}
+
+/* Common Button Styles */
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: #3B82F6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2563EB;
+}
+
+.btn-secondary {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #E5E7EB;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.btn-link {
+  background: none;
+  color: #3B82F6;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.btn-link:hover {
+  color: #2563EB;
+}
+
+/* Common Card/Box Styles */
+.card {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-sm {
+  padding: 16px;
+}
+
+/* Common Tag/Badge Styles */
+.tag {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.tag-blue {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.tag-gray {
+  background: #E5E7EB;
+  color: #374151;
+}
+
+.tag-yellow {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.tag-red {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.tag-green {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+/* Common Typography */
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6B7280;
+  font-weight: 500;
+  margin: 0;
+}
+
+.text-sm {
+  font-size: 14px;
+}
+
+.text-xs {
+  font-size: 12px;
+}
+
+/* Common Layout Helpers */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.gap-8 {
+  gap: 8px;
+}
+
+.gap-12 {
+  gap: 12px;
+}
+
+.gap-16 {
+  gap: 16px;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+/* Common Form Styles */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  padding: 10px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0F172A;
+  background: white;
+  transition: all 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #9CA3AF;
+}
+
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.form-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #E5E7EB;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.form-checkbox:checked {
+  background-color: #3B82F6;
+  border-color: #3B82F6;
+}
+
+.form-checkbox-label {
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.form-error {
+  color: #DC2626;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.form-link {
+  color: #3B82F6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.form-link:hover {
+  color: #2563EB;
+  text-decoration: underline;
+}
+
+.form-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #9CA3AF;
+  font-size: 13px;
+  margin: 20px 0;
+}
+
+.form-divider::before,
+.form-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.form-divider::before {
+  margin-right: 12px;
+}
+
+.form-divider::after {
+  margin-left: 12px;
+}
+
+.hide {
+  display: none;
+}
+
+/* Common Responsive Adjustments */
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
+  
+  .title {
+    font-size: 18px;
+  }
+  
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .form-input,
+  .form-textarea,
+  .form-select {
+    padding: 9px 11px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+

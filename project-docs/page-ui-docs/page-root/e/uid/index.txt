@@ -1,0 +1,6 @@
+Participant's upload utility page.
+
+Partials in order:
+ParticipantHeader
+participantUpload
+Footer

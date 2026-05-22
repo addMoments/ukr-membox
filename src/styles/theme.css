@@ -1,0 +1,16 @@
+.theme-page-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 968px) {
+  .theme-page-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+

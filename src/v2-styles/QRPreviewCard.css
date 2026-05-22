@@ -1,0 +1,225 @@
+/* QRPreviewCard Component */
+
+.qr-preview-card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.06);
+  padding: 32px;
+}
+
+.qr-preview-card-header {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1C1917;
+  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qr-preview-card-header i {
+  color: #A8A29E;
+}
+
+.qr-preview-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Inner Preview Card */
+.qr-preview-inner {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: #F5F3F1;
+  border: 1px solid #E7E5E4;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.qr-preview-inner:hover {
+  transform: scale(1.01);
+}
+
+/* Top and bottom accent bars */
+.qr-preview-inner::before,
+.qr-preview-inner::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: #3E4C92;
+}
+
+.qr-preview-inner::before {
+  top: 0;
+}
+
+.qr-preview-inner::after {
+  bottom: 0;
+}
+
+/* Event Title Section */
+.qr-preview-title {
+  margin-top: 16px;
+}
+
+.qr-preview-title p {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #A8A29E;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+}
+
+.qr-preview-title h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1C1917;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* QR Code Container */
+.qr-preview-qr-container {
+  margin: 16px 0;
+  position: relative;
+}
+
+.qr-preview-qr-dashed {
+  position: absolute;
+  inset: -4px;
+  border: 2px dashed #D6D3D1;
+  border-radius: 16px;
+  transform: rotate(2deg);
+}
+
+.qr-preview-qr-box {
+  background: white;
+  padding: 12px;
+  border: 1px solid #E7E5E4;
+  border-radius: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.qr-preview-qr-box img {
+  width: 140px;
+  height: 140px;
+  display: block;
+}
+
+.qr-preview-camera-icon {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: 28px;
+  height: 28px;
+  background: #3E4C92;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.qr-preview-camera-icon i {
+  font-size: 11px;
+  color: white;
+}
+
+/* Instructions */
+.qr-preview-instructions {
+  margin-bottom: 16px;
+}
+
+.qr-preview-instructions p {
+  margin: 0;
+}
+
+.qr-preview-instructions p:first-child {
+  font-weight: 700;
+  color: #1C1917;
+  font-size: 13px;
+}
+
+.qr-preview-instructions p:last-child {
+  font-size: 11px;
+  color: #78716C;
+  margin-top: 4px;
+}
+
+/* Footer */
+.qr-preview-footer {
+  width: 100%;
+  border-top: 1px solid #E7E5E4;
+  padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  color: #A8A29E;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Status Message */
+.qr-preview-status {
+  margin-top: 20px;
+  font-size: 10px;
+  color: #78716C;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qr-preview-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: qr-pulse 2s infinite;
+}
+
+.qr-preview-status-dot.inactive {
+  background: #A8A29E;
+  animation: none;
+}
+
+@media (max-width: 767px) {
+  .qr-preview-card {
+    padding: 24px;
+    border-radius: 20px;
+  }
+
+  .qr-preview-inner {
+    padding: 18px;
+  }
+
+  .qr-preview-qr-box img {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@keyframes qr-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

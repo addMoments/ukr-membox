@@ -1,0 +1,28 @@
+Form for customizing the guest page appearance.
+
+Props:
+pageColor: string (hex)
+pageTextColor: string (hex)
+buttonColor: string (hex)
+buttonTextColor: string (hex)
+bannerImageUrl: string | null
+
+Layout:
+Title: "Page Theme" (bold)
+Subtitle: "Change the colors and image of the guest page."
+
+2x2 grid of color inputs:
+- Row 1: "Page Color" | "Page Text Color"
+- Row 2: "Button Color" | "Button Text Color"
+Each input has a small color swatch on the left and hex value displayed.
+
+Banner Image section:
+Label: "Banner Image"
+Helper text: "Examples: A portrait, logo, etc."
+Large image preview (aspect ratio ~2:3, rounded corners).
+Overlay buttons on right side of image:
+- "Edit" button (pencil icon, neutral style)
+- "Delete" button (trash icon, red/danger style)
+
+Full-width "Save" button at bottom.
+

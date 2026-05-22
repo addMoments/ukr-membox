@@ -1,0 +1,62 @@
+Event creation form - multi-step form for creating new events.
+
+Props:
+onSubmit: (eventData: { name: string, type: string, bannerImage?: File, plan: string, activationDate?: Date }) => void (fires when all steps complete)
+
+Internal State:
+formStep: number (controls which step is displayed)
+
+Layout - Step 1:
+- Title: "Tell Us About Your Event"
+- Event Name text input field (required)
+- Event Type section:
+  - 2-column grid of radio button options (selected option has light background):
+    - wedding
+    - birthday
+    - holiday
+    - graduation
+    - corporate
+    - baby shower
+    - memorial
+    - other
+- Banner Image section:
+  - Label: "Banner Image (optional)"
+  - Helper text: "Examples: A portrait, logo, etc."
+  - "Select Image" button with image icon
+- "Create Event" primary button (full width, dark green)
+
+Layout - Step 2:
+- Title: "Activate Event"
+- Pricing plans section (3 cards in a row with radio buttons):
+  - Trial (selected by default, green border):
+    - $0 /one-time
+    - "Try before you buy"
+    - + 20 uploads
+    - + 2 week storage
+    - + 2 gallery albums
+    - - Collaborators (grayed out/not included)
+  - Plus:
+    - $47 /one-time
+    - "Great for small events"
+    - + 500 uploads
+    - + 1 year storage
+    - + 2 gallery albums
+    - + Collaborators
+  - Premium:
+    - $97 /one-time
+    - "Worry-free solution"
+    - + Unlimited uploads
+    - + 1 year storage
+    - + Unlimited albums
+    - + Collaborators
+- Activation Date section:
+  - Label: "Activation Date"
+  - DateTime input field (default: current date/time)
+  - Helper text: "Free trials activate immediately. An activation date can be set on paid plans or when upgrading a free trial."
+  - Timeline visualization:
+    - "Start of upload & storage period" with date
+    - Duration badge (e.g., "2 weeks")
+    - "End of upload & storage period" with calculated end date
+- "Activate Event" primary button (full width, dark green)
+
+

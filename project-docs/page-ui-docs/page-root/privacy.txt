@@ -1,0 +1,7 @@
+Privacy Policy page.
+
+Partials in order:
+Header
+Privacy Policy Content (leave empty for now, placeholder)
+Footer
+

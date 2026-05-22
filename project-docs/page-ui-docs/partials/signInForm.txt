@@ -1,0 +1,15 @@
+Sign in form component.
+
+Props:
+onSubmit: (email: string, password: string) => void
+
+Layout:
+A centered form card with the following elements:
+- Title: "Sign In to MemBox"
+- Email input field
+- Password input field with "Forgot password?" link that navigates to /recover
+- Primary button "Sign In"
+- Divider with text "OR"
+- Google sign-in button (secondary style with Google icon)
+- Bottom text: "Don't have an account?" with link to /signup
+

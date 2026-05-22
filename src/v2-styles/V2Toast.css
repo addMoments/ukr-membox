@@ -1,0 +1,108 @@
+.v2-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 280px;
+  max-width: 420px;
+  padding: 14px 16px;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18), 0 4px 8px rgba(15, 23, 42, 0.08);
+  animation: v2-toast-slide-in 0.22s ease-out;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@keyframes v2-toast-slide-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.v2-toast-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.v2-toast-success .v2-toast-icon {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.v2-toast-info .v2-toast-icon {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.v2-toast-error .v2-toast-icon {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.v2-toast-message {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  color: #0f172a;
+}
+
+.v2-toast-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+  font-size: 13px;
+}
+
+.v2-toast-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.v2-toast-success {
+  border-color: #bbf7d0;
+}
+
+.v2-toast-info {
+  border-color: #bfdbfe;
+}
+
+.v2-toast-error {
+  border-color: #fecaca;
+}
+
+@media (max-width: 640px) {
+  .v2-toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    min-width: 0;
+    max-width: none;
+  }
+}

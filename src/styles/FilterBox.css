@@ -1,0 +1,46 @@
+.filter-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.filter-box-sort-button.active {
+  background-color: #3B82F6;
+  color: #FFFFFF;
+  border-color: #3B82F6;
+}
+
+.filter-box-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.filter-box-items > div {
+  flex: 0 0 280px;
+  min-width: 280px;
+}
+
+@media (max-width: 768px) {
+  .filter-box {
+    gap: 12px;
+  }
+
+  .filter-box-items {
+    gap: 12px;
+  }
+
+  .filter-box-items > div {
+    flex: 0 0 200px;
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-box-items > div {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,28 @@
+Header to use in dashboard + public pages.
+
+On the left is the app icon (use a random fontawesome icon for now) 
+
+Props:
+children
+self: User
+
+Layout Desktop:
+A row of columns. Form the left:
+1: An icon and the app's name. Use a random fontawesome icon + title is MemBox.
+2: Render children here. Align it to left.
+3a: If user is not null:
+User profile icon + chevron down. When clicked it opens a dropdown. Dropdown's rows are:
+- mail adress (non clickable)
+- Profile
+- Contact Us
+- Log out
+3b: Is user is null: 
+Two buttons side by side. 
+- Primary button that says Sign In
+- Secondary button that says Sign Up
+
+Layout mobile:
+0: Burger button.
+1: Hide the app name
+2: Render as usual
+3: One button that says Login. It takes you to the Sign In page.

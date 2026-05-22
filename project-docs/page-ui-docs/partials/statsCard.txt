@@ -1,0 +1,11 @@
+A card displaying key-value stat rows.
+
+Props:
+title: string
+stats: Array<{ label: string, value: number }>
+
+Layout:
+A bordered card with padding.
+Title at top (bold).
+List of rows, each row has label on left and value on right.
+

@@ -1,0 +1,14 @@
+Event general settings page with live guest page preview.
+
+Partials in order:
+Header
+WithSidebar(
+    eventSidebar,
+    [
+        2-column layout (responsive: stack on mobile):
+        - Left column (wider): generalSettings
+        - Right column: guestPagePreview
+    ]
+)
+Footer
+

@@ -1,0 +1,8 @@
+Process: Documenting a UI from an image
+
+1. User shares screenshot of a page/design
+2. Read existing docs in page-ui-docs/ to understand conventions
+3. Identify distinct "islands" (partials) on the page
+4. For each new partial: create a .txt file in partials/ with props and layout description
+5. Update or create the page doc in page-root/ referencing the partials
+6. Append new tasks to task-list.txt Dont change tasks. If you need to change something append a update that thing task instead

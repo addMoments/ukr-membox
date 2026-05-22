@@ -1,0 +1,24 @@
+Public Stack
+/ Home
+/signin
+/signup
+/recover
+/faq
+/privacy
+/tos
+/blog
+
+Private Stack
+/events
+/event/{url-uid}
+/event/{url-uid}/gallery
+/event/{url-uid}/guestbook
+/event/{url-uid}/trash
+/event/{url-uid}/collaborators
+/event/{url-uid}/settings
+/event/{url-uid}/theme
+/profile
+
+Participant Stack
+/e/{url-uid}
+/e/{url-uid}/uploads

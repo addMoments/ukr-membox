@@ -1,0 +1,299 @@
+.addon-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(28, 25, 23, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.addon-modal {
+  background: white;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 32px;
+  box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.addon-modal-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1C1917;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.addon-modal-close:hover {
+  background: white;
+}
+
+.addon-modal-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+}
+
+.addon-modal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #F0F0EC;
+}
+
+.addon-modal-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #DAE0FC 0%, #E8E4F0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3E4C92;
+  font-size: 48px;
+}
+
+.addon-modal-image-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 80%, white 100%);
+  pointer-events: none;
+}
+
+.addon-modal-content {
+  padding: 8px 40px 16px;
+  text-align: center;
+}
+
+.addon-modal-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1C1917;
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+}
+
+.addon-modal-desc {
+  color: #78716C;
+  font-weight: 500;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 15px;
+}
+
+.addon-modal-config {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.addon-modal-config-row {
+  background: #FAFAF9;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.addon-modal-config-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #A8A29E;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.addon-modal-config-value {
+  color: #1C1917;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.addon-modal-form {
+  padding: 16px 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.addon-modal-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 20px;
+  background: #FAFAF9;
+  border: none;
+  border-radius: 24px;
+  color: #1C1917;
+  font-weight: 500;
+  font-size: 15px;
+  font-family: inherit;
+  resize: none;
+  transition: box-shadow 0.2s;
+}
+
+.addon-modal-textarea::placeholder {
+  color: #D6D3D1;
+}
+
+.addon-modal-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(62, 76, 146, 0.2);
+}
+
+.addon-modal-submit {
+  width: 100%;
+  padding: 16px;
+  background: #DAE0FC;
+  color: #3E4C92;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: filter 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.addon-modal-submit:hover {
+  filter: brightness(0.95);
+}
+
+.addon-modal-note {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #A8A29E;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+/* Tracking body */
+.addon-modal-tracking {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0 8px;
+}
+
+.addon-modal-status-pill {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.addon-modal-tracking-card {
+  width: 100%;
+  background: #fafaf9;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.addon-modal-tracking-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a8a29e;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.addon-modal-tracking-number {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1c1917;
+  letter-spacing: 0.03em;
+}
+
+.addon-modal-tracking-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3e4c92;
+  text-decoration: none;
+}
+
+.addon-modal-tracking-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .addon-modal-overlay {
+    padding: 16px;
+  }
+
+  .addon-modal {
+    border-radius: 24px;
+  }
+
+  .addon-modal-close {
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .addon-modal-content {
+    padding: 8px 24px 12px;
+  }
+
+  .addon-modal-title {
+    font-size: 20px;
+  }
+
+  .addon-modal-desc {
+    font-size: 14px;
+  }
+
+  .addon-modal-form {
+    padding: 12px 24px 32px;
+    gap: 20px;
+  }
+
+  .addon-modal-textarea {
+    min-height: 120px;
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .addon-modal-submit {
+    padding: 14px;
+    font-size: 13px;
+  }
+}

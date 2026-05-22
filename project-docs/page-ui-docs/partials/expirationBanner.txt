@@ -1,0 +1,12 @@
+A warning banner that appears when an event is expiring soon.
+Soft red/pink background with rounded corners.
+
+Props:
+expirationDate: Date
+extendedDate: Date
+
+Layout:
+A box with padding.
+First line: Warning icon + bold title "Event Expiring"
+Second line: Text with expiration date in bold, inline links for "download" and "upgrade", extended date in bold.
+

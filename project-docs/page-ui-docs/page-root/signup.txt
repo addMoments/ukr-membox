@@ -1,0 +1,7 @@
+Sign up page. Users create a new account with email/password or Google.
+
+Partials in order:
+Header
+Sign Up Form (create partial for this)
+Footer
+

@@ -1,0 +1,18 @@
+Sign up form component.
+
+Props:
+onSubmit: (name: string, email: string, password: string) => void
+
+Layout:
+A centered form card with the following elements:
+- Title: "Create Your Account"
+- Name input field
+- Email input field
+- Password input field
+- Confirm password input field
+- Checkbox with "I agree to the Terms of Service and Privacy Policy" (with links to /tos and /privacy)
+- Primary button "Sign Up"
+- Divider with text "OR"
+- Google sign-up button (secondary style with Google icon)
+- Bottom text: "Already have an account?" with link to /signin
+

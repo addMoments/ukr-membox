@@ -1,0 +1,12 @@
+Sidebar for event console.
+Rows in order:
+
+First row is not a button. It has a text that says the event title. Right under it is a text link that says 'Switch Events' that takes the user to events list page.
+Other rows are icon+titles of links. Links are:
+Dashboard
+Gallery
+Guestbook
+Trash
+Theme
+Settings
+Collaborators

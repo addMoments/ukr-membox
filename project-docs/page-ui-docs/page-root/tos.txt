@@ -1,0 +1,7 @@
+Terms of Service page.
+
+Partials in order:
+Header
+Terms of Service Content (leave empty for now, placeholder)
+Footer
+

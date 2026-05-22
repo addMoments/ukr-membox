@@ -1,0 +1,51 @@
+.signin-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.signin-form-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.signin-form-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.signin-forgot-password {
+  text-align: right;
+  margin-top: 6px;
+}
+
+.signin-submit-btn,
+.signin-google-btn {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+}
+
+.signin-google-btn {
+  margin-bottom: 20px;
+}
+
+.signin-footer {
+  text-align: center;
+  font-size: 14px;
+  color: #6B7280;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .signin-form-container {
+    min-height: 50vh;
+  }
+
+  .signin-form-card {
+    max-width: 100%;
+  }
+}
+

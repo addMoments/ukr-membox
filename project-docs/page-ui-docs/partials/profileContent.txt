@@ -1,0 +1,6 @@
+User profile content component. Leave empty for now, awaiting design specs.
+
+Props:
+user: User
+onUpdate: (updates: Partial<User>) => void
+

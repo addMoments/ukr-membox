@@ -1,0 +1,11 @@
+Event dashboard home page.
+
+Partials in order:
+Header
+WithSidebar(
+    eventsidebar,
+    [
+        eventHomeContent
+    ]
+)
+Footer

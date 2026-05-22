@@ -1,0 +1,51 @@
+IMPLEMENTATION TASK LIST
+
+□ Structure setup - Create all empty page files (signin, signup, recover, faq, privacy, tos, events, profile, event/uid pages, e/uid pages)
+□ EventEntry component - Event card display with tags, title, dates, buttons
+□ UploadEntry component - Upload card with layers (content, gradient, name/buttons)
+□ Table component - Basic table with header and content rows
+□ FilterBox composite - Container with filter utilities, sort buttons, flex-wrapped items
+□ signInForm partial - Email/password sign in with Google option
+□ signUpForm partial - Registration form with Google option
+□ passwordRecoveryForm partial - Password reset email form
+□ profileContent partial - User profile management (placeholder)
+□ eventHomeContent partial - Event dashboard home content (placeholder)
+□ eventSidebar partial - Event console sidebar navigation
+□ participant-header partial - Participant navigation header
+□ participantUpload partial - Participant upload interface (placeholder)
+□ publicHomeContent partial - Public home page content (placeholder)
+□ withSidebar partial - Sidebar layout wrapper (handles mobile/desktop)
+□ Update Header partial - Match documentation specs (user dropdown, mobile burger menu)
+□ Update Footer partial - Match documentation specs (3-column layout with links)
+□ Implement / page - Use Header + PublicHomeContent + Footer
+□ Implement /signin page - Use Header + signInForm + Footer
+□ Implement /signup page - Use Header + signUpForm + Footer
+□ Implement /recover page - Use Header + passwordRecoveryForm + Footer
+□ Implement /faq page - Header + placeholder content + Footer
+□ Implement /privacy page - Header + placeholder content + Footer
+□ Implement /tos page - Header + placeholder content + Footer
+□ Implement /events page - Header + FilterBox with EventEntry + Footer
+□ Implement /event/:uid page - Header + WithSidebar (eventSidebar, eventHomeContent) + Footer
+□ Implement /event/:uid/gallery page - Header + WithSidebar (eventSidebar, FilterBox with UploadEntry) + Footer
+□ Implement /event/:uid/guestbook page - Header + WithSidebar (eventSidebar, FilterBox with UploadEntry) + Footer
+□ Implement /event/:uid/trash page - Header + WithSidebar (eventSidebar, FilterBox with UploadEntry) + Footer
+□ Implement /event/:uid/collaborators page - Header + WithSidebar (eventSidebar, invite row + Table) + Footer
+□ Implement /event/:uid/settings page - Header + WithSidebar (eventSidebar, placeholder) + Footer
+□ Implement /event/:uid/theme page - Header + WithSidebar (eventSidebar, placeholder) + Footer
+□ Implement /profile page - Header + profileContent + Footer
+□ Implement /e/:uid page - ParticipantHeader + participantUpload + Footer
+□ Implement /e/:uid/uploads page - ParticipantHeader + FilterBox with UploadEntry + Footer
+□ Update App.tsx routing - Add all routes with lazy loading
+□ Add Suspense fallback component
+□ expirationBanner partial - Warning banner for expiring events
+□ statsCard partial - Card with key-value stat rows
+□ qrCodeCard partial - QR code and guest link sharing card
+□ downloadCard partial - Bulk zip download card
+□ Update eventHomeContent partial - Use new partials (expirationBanner, statsCard, qrCodeCard, downloadCard)
+□ Update /event/:uid/theme page - Use themeSettings + guestPagePreview partials
+□ generalSettings partial - Event settings form with activation timeline, date/type, toggles, title, welcome message
+□ Update /event/:uid/settings page - Use generalSettings + guestPagePreview partials in 2-column layout
+□ guestLayout partial - Wrapper with banner image, event title, date, and children slot
+□ Update participantUpload partial - Use guestLayout with display modes (default, media, guestbook)
+□ eventCreationForm partial - Multi-step form for creating events (step 1: name, type, banner image; step 2: pricing plan, activation date)
+□ Implement /events/new page - Header + eventCreationForm + Footer

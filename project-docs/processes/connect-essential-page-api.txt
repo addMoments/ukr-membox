@@ -1,0 +1,45 @@
+Connect Essential Page to API - Session Report
+==============================================
+
+Goal: Connect the /event/:uid page to use real Event data from API instead of hardcoded values.
+
+Files Modified:
+---------------
+
+1. src/partials/EventHomeContent.tsx
+   - Added import: Event type from ../types/events
+   - Changed props interface: replaced individual props (eventName, eventUrl, etc.) with single `event: Event` prop
+   - Removed redundant props: isExpiring, expirationDate, extendedDate, eventUrl, qrCodeUrl
+   - Derived expiration logic from event.active_until (checks if expires within 7 days)
+   - Now uses event.name instead of eventName prop
+   - User also added eventGuestUrl() helper for URL generation
+
+2. src/client/events.ts
+   - Added getEvent(uid: string): Promise<Event> function
+   - Uses PostgREST query: ${DB_ROOT}/events?uid=eq.${uid}
+   - Returns single object via Accept: application/vnd.pgrst.object+json header
+   - Exported alongside getMyEvents
+
+3. src/pages/event-detail/index.tsx (user changes)
+   - Added state: const [event, setEvent] = useState<Event>({} as Event)
+   - Added useEffect to fetch event on mount
+   - Uses URL parsing + unpackUUID() for packed UID handling
+   - EventSidebar now receives event.uid and event.name
+   - EventHomeContent now receives event prop
+   - Note: useEffect missing dependency array [] - needs fix
+
+Pattern Established:
+--------------------
+- Page components use useState + useEffect to fetch data
+- Client functions in src/client/ use fetchWithCreds + PostgREST
+- Partials/components receive typed interfaces (Event, User, etc.) as props
+- Derived data (like isExpiring) calculated inside component from interface fields
+
+PostgREST Query Pattern:
+------------------------
+- Filter by field: ?field=eq.value
+- Single object response: Accept: application/vnd.pgrst.object+json header
+- Auth handled by fetchWithCreds (JWT in header/cookie)
+
+You dont hav to write a report here after you are done.
+READ BACKEND DOCS, READ create-tables.sql !!

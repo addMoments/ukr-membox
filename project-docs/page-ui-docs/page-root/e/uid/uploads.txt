@@ -1,0 +1,9 @@
+Participant's my uploads page.
+
+Partials in order:
+ParticipantHeader
+guestLayout
+Footer
+
+guestLayout children:
+FilterBox (without utilities row) containing UploadEntry items

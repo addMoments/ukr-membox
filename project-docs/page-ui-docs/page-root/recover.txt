@@ -1,0 +1,7 @@
+Password recovery page. Users can reset their password via email.
+
+Partials in order:
+Header
+Password Recovery Form (create partial for this)
+Footer
+

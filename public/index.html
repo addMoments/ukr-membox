@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet' integrity='sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN' crossorigin='anonymous'>
+    <meta
+      name="description"
+      content="Add Moments - The easiest way to collect media from your guests."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Add Moments</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+    <link rel="stylesheet" href="%PUBLIC_URL%/assets/header/style-am-v2.css">
+    <link rel="stylesheet" href="%PUBLIC_URL%/assets/footer/style.css">
+    <script defer src="%PUBLIC_URL%/assets/hfSetup.js"></script>
+  </head>
+  <body>
+    <!-- HEADER START -->
+    <nav class="v2-header">
+      <div class="v2-header-container"><a class="v2-header-logo" href="/" data-discover="true" aria-label="Homepage">
+          <div class="v2-header-logo-icon"><img class="header-logo" src="%PUBLIC_URL%/assets/header/addmoments_logo.svg" alt="Addmoments"></div>
+        </a>
+        <div class="v2-header-nav">
+          <div class="v2-header-section left">
+          </div>
+          <div class="v2-header-section right">
+          </div>
+        </div>
+        <div class="v2-header-actions"> <select id="langSel" class="v2-header-lang-selector">
+          <option value="en">EN</option>
+          <option value="uk">UA</option>
+        </select><a data-pub="1" class="v2-header-cta signin"
+            href="/signin" data-discover="true" data-t="sign_in">Sign in</a><a class="v2-header-cta " href="/events/services-and-prices?entry=get-started"
+            data-discover="true" data-t="get_started" data-pub="1">Get started</a><a class="v2-header-cta signin"
+            href="/signout" data-discover="true" data-t="sign_out" data-pub="0">Sign out</a></div>
+        <div class="v2-header-mobile-actions header-mobile-mode">
+          <a class="v2-header-cta v2-header-cta-mobile" href="/events/services-and-prices?entry=get-started"
+            data-discover="true" data-t="get_started" data-pub="1">Get started</a><button class="v2-header-mobile-toggle header-mobile-mode"
+          aria-label="Open menu">  <img class="header-icon" src="%PUBLIC_URL%/assets/header/burger.svg" alt="">   </button>
+        </div>
+      </div>
+      <div class="v2-header-mobile-menu ">
+        <div id="mobile-links"></div>
+        <div class="v2-header-mobile-lang">
+          <select id="langSelMobile" class="v2-header-mobile-lang-select">
+            <option value="en">EN</option>
+            <option value="uk">UA</option>
+          </select>
+        </div>
+        <a class="v2-header-cta signin" data-pub="1" href="/signin" data-discover="true" data-t="sign_in">Sign in</a>
+        <a class="v2-header-cta " data-pub="1" href="/events/services-and-prices?entry=get-started" data-discover="true" data-t="get_started">Get started</a>
+        <a class="v2-header-cta signin" data-pub="0" href="/signout" data-discover="true" data-t="sign_out">Sign out</a>
+      </div>
+    </nav>
+    <!-- HEADER END -->
+
+
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    
+
+    <!-- FOOTER START -->
+    <footer class="v2-footer">
+      <a id="grabPubUrl" style="display: none;" href="%PUBLIC_URL%"></a>
+        <div class="v2-footer-content">
+            <div class="v2-footer-brand"><a class="v2-footer-logo" href="https://addmoments.com.ua/" data-discover="true">
+                    <div class="v2-footer-logo-icon"><img class="footer-brand-logo" src="%PUBLIC_URL%/assets/header/addmoments_logo.svg" alt="addmoments"></div>
+                </a>
+                <p class="v2-footer-description" data-t="footer_description">The easiest way to collect photos from your guests. Create a digital album for your special events without any app downloads.</p>
+                <div class="v2-footer-social"></div>
+            </div>
+            <div class="v2-footer-column">
+                <h4 class="v2-footer-column-title v2-footer-title-company">Company</h4>
+                <ul class="v2-footer-links v2-footer-links-company"></ul>
+            </div>
+            <div class="v2-footer-column">
+                <h4 class="v2-footer-column-title v2-footer-title-product">Product</h4>
+                <ul class="v2-footer-links v2-footer-links-product"></ul>
+            </div>
+            <div class="v2-footer-column">
+                <h4 class="v2-footer-column-title v2-footer-column-title-empty">&nbsp;</h4>
+                <ul class="v2-footer-links v2-footer-links-more"></ul>
+            </div>
+        </div>
+        <div class="v2-footer-bottom">
+            <p class="v2-footer-copyright">© 2026 <a class="v2-footer-copyright-link" href="https://addmoments.com.ua/">addmoments</a>. All rights reserved.</p>
+            <button
+                class="v2-footer-lang-selector"
+            >
+                <svg class="v2-footer-lang-globe" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
+                  <path d="M3 12H21" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  <path d="M12 3C14.7 5.6 16.2 8.8 16.2 12C16.2 15.2 14.7 18.4 12 21" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  <path d="M12 3C9.3 5.6 7.8 8.8 7.8 12C7.8 15.2 9.3 18.4 12 21" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                <span class="v2-footer-lang-text">English (US)</span>
+                <select id="langSel2">
+                  <option value="en">English (US)</option>
+                  <option value="uk">Українська (UA)</option>
+                </select>
+            </button>
+        </div>
+    </footer>
+    <!-- FOOTER END -->
+  </body>
+</html>
+

@@ -1,0 +1,2 @@
+Home Page content.
+Just render some buttons here for now, we need the designs to be delivered before we write this proper.

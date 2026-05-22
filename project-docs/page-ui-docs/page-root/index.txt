@@ -1,0 +1,7 @@
+Home page
+links to signin, signup, recover, compliance and blogs.
+
+Partials In Order:
+Header
+PublicHomeContent
+Footer

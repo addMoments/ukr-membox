@@ -1,0 +1,11 @@
+Where user sees the uploads of type 'photo' and 'video'.
+
+Partials in order:
+Header
+WithSidebar(
+    eventsidebar,
+    [
+        FilterBox(with uploads)
+    ]
+)
+Footer

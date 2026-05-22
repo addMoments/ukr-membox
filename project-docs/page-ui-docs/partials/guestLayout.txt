@@ -1,0 +1,27 @@
+Wrapper layout for guest pages with event banner and info.
+
+Props:
+bannerImageUrl: string | null
+eventTitle: string
+eventDate: string (formatted)
+children: ReactNode
+
+Layout:
+Centered container, max-width constrained.
+
+Banner image:
+- Large rectangular image (aspect ~4:3 or similar)
+- Rounded corners
+- Falls back to placeholder if null
+
+Event title:
+- Large, bold text
+- Below the banner
+
+Event date:
+- Smaller, muted text
+- Below the title
+
+Children slot:
+- Renders below the event info
+

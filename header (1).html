@@ -1,0 +1,362 @@
+<header class="am-header" id="amHeader">
+  <div class="am-inner">
+
+    <!-- Brand (senin verdiğin gibi) -->
+    <a href="https://addmoments.com.ua/" class="logo-link" aria-label="Homepage">
+      <img
+        src="https://addmoments.com.ua/wp-content/uploads/2026/01/logo-hd-bg.svg"
+        alt="Addmoments"
+        class="logo"
+        loading="eager"
+        decoding="async"
+      />
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="am-nav" aria-label="Primary navigation">
+      <div class="am-desktop">
+        <ul class="am-menu" id="1-menu">
+          <li><a href="#">Services &amp; Prices</a></li>
+          <li><a href="https://addmoments.com.ua/how-it-works/">How it works</a></li>
+        </ul>
+
+        <ul class="am-menu" id="2-menu">
+          <li><a href="https://addmoments.com.ua/faq/">FaQ</a></li>
+          <li><a href="https://addmoments.com.ua/blog/">Blog</a></li>
+          <li><a href="#">Contacts</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Actions (desktop) -->
+    <div class="am-actions">
+      <div class="am-lang">
+        <button class="am-lang-btn" type="button" aria-expanded="false" aria-controls="amLangMenu">
+          EN <span class="am-chev" aria-hidden="true">▾</span>
+        </button>
+        <div class="am-lang-menu" id="amLangMenu" hidden>
+          <a class="am-lang-item" href="#">UA</a>
+        </div>
+      </div>
+
+      <a class="am-cta" href="#" target="_self" rel="noopener">Get started</a>
+    </div>
+
+    <!-- Mobile actions (GET STARTED KAYBOLMAZ) -->
+    <div class="am-mobile-actions">
+      <a class="am-cta am-cta--mobilebar" href="#" target="_self" rel="noopener">Get started</a>
+
+      <button class="am-burger" type="button" aria-expanded="false" aria-controls="amMobilePanel">
+        <span class="am-sr">Menüyü aç</span>
+        <span class="am-burger-lines" aria-hidden="true"></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile full-screen panel -->
+  <div class="am-mobile" id="amMobilePanel" hidden>
+    <div class="am-mobile-top">
+      <!-- Brand (aynı yapı) -->
+      <a href="https://addmoments.com.ua/" class="logo-link logo-link--panel" aria-label="Homepage">
+        <img
+          src="https://addmoments.com.ua/wp-content/uploads/2026/01/logo-hd-bg.svg"
+          alt="Addmoments"
+          class="logo"
+          loading="eager"
+          decoding="async"
+        />
+      </a>
+
+      <button class="am-close" type="button" aria-label="Menüyü kapat">
+        <span class="am-close-x" aria-hidden="true">×</span>
+      </button>
+
+      <!-- Get started (panel içinde de var) -->
+      <a class="am-cta am-cta--panel" href="#" target="_self" rel="noopener">Get started</a>
+    </div>
+
+    <nav class="am-mobile-nav" aria-label="Mobile navigation">
+      <ul class="am-menu am-menu-mobile" id="mobile">
+        <li><a href="#">Services &amp; Prices</a></li>
+        <li><a href="https://addmoments.com.ua/how-it-works/">How it works</a></li>
+        <li><a href="https://addmoments.com.ua/faq/">FaQ</a></li>
+        <li><a href="https://addmoments.com.ua/blog/">Blog</a></li>
+        <li><a href="#">Contacts</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  :root{
+    --bg:#fff;
+    --text:#0A251E;
+    --muted:#6B7280;
+    --chip:#F3F4F6;
+    --accent:#D2E823;
+    --max:1242px;
+    --r:30px;
+  }
+
+  *{ box-sizing:border-box; }
+  body{ margin:0; }
+
+  /* Header */
+  .am-header{ position:sticky; top:0; z-index:999; background:var(--bg); }
+  .am-inner{
+    max-width:var(--max);
+    margin:0 auto;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+
+  /* Brand (logo) */
+  .logo-link{ display:inline-flex; align-items:center; text-decoration:none; }
+  .logo{
+    height: 45px;            /* görsele yakın */
+    width: auto;
+    display:block;
+  }
+
+  /* Desktop nav */
+  .am-nav{ flex:1 1 auto; display:flex; align-items:center; }
+  .am-desktop{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+  }
+
+  .am-menu{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .am-menu a{
+    text-decoration:none;
+    color:var(--muted);
+    font-family: Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:8px 2px;
+  }
+  .am-menu a:hover{ color:var(--text); }
+
+  /* Desktop actions */
+  .am-actions{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .am-lang{ position:relative; }
+  .am-lang-btn{
+    border:0;
+    background:var(--chip);
+    border-radius:var(--r);
+    padding:9px 14px;
+    color:var(--muted);
+    font-family: Montserrat, system-ui, sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .am-lang-menu{
+    position:absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background:var(--bg);
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:6px;
+    min-width:90px;
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+  }
+  .am-lang-item{
+    display:block;
+    padding:10px 12px;
+    border-radius:12px;
+    text-decoration:none;
+    color:var(--text);
+    font-family: Montserrat, system-ui, sans-serif;
+    font-weight:700;
+    font-size:14px;
+  }
+  .am-lang-item:hover{ background:var(--chip); }
+
+  /* CTA */
+  .am-cta{
+    background:var(--accent);
+    color:#fff;
+    text-decoration:none;
+    border-radius:var(--r);
+    padding:10px 16px;
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-weight:700;
+    font-size:14px;
+    white-space:nowrap;
+  }
+  .am-cta:hover{ background:var(--text); color:var(--accent); }
+
+  /* Mobile actions bar (logo yanında CTA + burger) */
+  .am-mobile-actions{
+    display:none;
+    margin-left:auto;
+    align-items:center;
+    gap:10px;
+  }
+
+  /* Burger */
+  .am-burger{
+    border:0;
+    background:transparent;
+    cursor:pointer;
+    padding:10px;
+  }
+  .am-burger-lines{
+    width:26px; height:2px; background:var(--text); display:block; position:relative;
+  }
+  .am-burger-lines::before,.am-burger-lines::after{
+    content:""; position:absolute; left:0; width:26px; height:2px; background:var(--text);
+  }
+  .am-burger-lines::before{ top:-8px; }
+  .am-burger-lines::after{ top:8px; }
+
+  /* Mobile panel */
+  .am-mobile{
+    position:fixed;
+    inset:0;
+    background:var(--bg);
+    z-index:1000;
+    padding:14px 18px 24px;
+    overflow:auto;
+  }
+
+  .am-mobile-top{
+    display:grid;
+    grid-template-columns: 1fr auto auto;
+    align-items:center;
+    gap:12px;
+  }
+
+  .logo-link--panel .logo{ height:22px; }
+
+  .am-close{
+    width:40px; height:40px;
+    border:2px solid #111827;
+    border-radius:10px;
+    background:transparent;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .am-close-x{ font-size:26px; line-height:1; color:#111827; transform: translateY(-1px); }
+
+  .am-mobile-nav{ padding-top:18px; }
+
+  .am-menu-mobile{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:18px;
+    padding:8px 0;
+  }
+  .am-menu-mobile a{
+    color:#374151;
+    font-weight:600;
+    font-size:16px;
+    padding:4px 0;
+  }
+
+  /* A11y helper */
+  .am-sr{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  /* Responsive switches */
+  @media (max-width: 900px){
+    .am-nav{ display:none; }         /* menüler mobil panelde */
+    .am-actions{ display:none; }     /* EN desktop’ta gizlensin */
+    .am-mobile-actions{ display:flex; } /* Get started mobilde hep burada */
+  }
+
+  @media (min-width: 901px){
+    .am-mobile{ display:none !important; }
+  }
+
+  @media (max-width: 420px){
+    .am-cta--mobilebar{ padding:10px 14px; font-size:12px; }
+    .am-cta--panel{ padding:10px 14px; font-size:12px; }
+  }
+</style>
+
+<script>
+  (function(){
+    const mobilePanel = document.getElementById('amMobilePanel');
+    const burger = document.querySelector('.am-burger');
+    const closeBtn = document.querySelector('.am-close');
+
+    const langBtn = document.querySelector('.am-lang-btn');
+    const langMenu = document.getElementById('amLangMenu');
+
+    function openMobile(){
+      mobilePanel.hidden = false;
+      burger.setAttribute('aria-expanded', 'true');
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobile(){
+      mobilePanel.hidden = true;
+      burger.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+
+    if(burger && mobilePanel){
+      burger.addEventListener('click', () => {
+        const isOpen = burger.getAttribute('aria-expanded') === 'true';
+        if(isOpen) closeMobile(); else openMobile();
+      });
+    }
+    if(closeBtn){ closeBtn.addEventListener('click', closeMobile); }
+
+    // Desktop language dropdown (desktopta kullanıyorsan)
+    if(langBtn && langMenu){
+      langBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = langBtn.getAttribute('aria-expanded') === 'true';
+        langBtn.setAttribute('aria-expanded', String(!open));
+        langMenu.hidden = open;
+      });
+      document.addEventListener('click', (e) => {
+        if(!e.target.closest('.am-lang')){
+          langBtn.setAttribute('aria-expanded','false');
+          langMenu.hidden = true;
+        }
+      });
+    }
+
+    // ESC
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && mobilePanel && !mobilePanel.hidden) closeMobile();
+    });
+
+    // resize -> panel kapat
+    window.addEventListener('resize', () => {
+      if(window.innerWidth > 900 && mobilePanel && !mobilePanel.hidden) closeMobile();
+    });
+  })();
+</script>

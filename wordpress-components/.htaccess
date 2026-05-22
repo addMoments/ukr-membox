@@ -1,0 +1,9 @@
+# BEGIN Addmoments
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^(ui)(?:/(.*))?$ https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/$1/$2 [R=307,L,QSA]
+RewriteRule ^(auth|api|l)(?:/(.*))?$ https://serv.addmoments.com.ua/$1/$2 [R=307,L,QSA]
+RewriteCond %{QUERY_STRING} !(^|&)rnf=1(&|$)
+RewriteRule ^(event|events|guest|checkout|payment|signin|recover|notice|signup|signout|reset-password)(?:/(.*))?$ /reactApp.html [L]
+</IfModule>
+# END Addmoments

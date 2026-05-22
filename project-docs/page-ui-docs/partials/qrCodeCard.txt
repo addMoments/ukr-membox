@@ -1,0 +1,23 @@
+A card for sharing the event QR code and guest link.
+
+Props:
+eventUrl: string
+qrCodeUrl: string
+
+Layout:
+A bordered card with padding.
+Title: "QR Code and Guest Link"
+Description paragraph explaining the feature.
+"How To Use:" bold label.
+Numbered list with 3 items. Item 2 has a link "Canva templates".
+
+Two-column layout at bottom:
+Left column:
+- Readonly text input showing truncated URL
+- "Copy URL" button with copy icon
+
+Right column:
+- QR Code image
+- "Download QR Code" button with download icon
+- "Open Guest Page" button with external link icon
+

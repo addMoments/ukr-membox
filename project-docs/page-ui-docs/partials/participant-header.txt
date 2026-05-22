@@ -1,0 +1,8 @@
+Header to be used in the participant side of the app. Just a row of text links.
+
+Props:
+Links []{label: string, onClick: ()=>{}}
+
+Links are: 
+Upload
+My Uploads

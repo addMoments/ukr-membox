@@ -1,0 +1,6 @@
+Event list page.
+Partials in order:
+
+Header
+FilterBox(with event components)
+Footer

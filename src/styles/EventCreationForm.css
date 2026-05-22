@@ -1,0 +1,266 @@
+.ecf-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  min-height: 60vh;
+}
+
+.ecf-card {
+  width: 100%;
+  max-width: 600px;
+}
+
+.ecf-title {
+  text-align: center;
+  margin-bottom: 28px;
+  font-size: 24px;
+}
+
+.ecf-helper-text {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 4px 0 12px 0;
+}
+
+/* Event Type Grid */
+.ecf-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.ecf-type-option {
+  display: block;
+  cursor: pointer;
+}
+
+.ecf-type-radio {
+  display: none;
+}
+
+.ecf-type-label {
+  display: block;
+  padding: 12px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  text-transform: capitalize;
+  text-align: center;
+  transition: all 0.2s;
+  background: white;
+}
+
+.ecf-type-radio:checked + .ecf-type-label {
+  background: #D1FAE5;
+  border-color: #10B981;
+  color: #065F46;
+  font-weight: 600;
+}
+
+.ecf-type-label:hover {
+  border-color: #10B981;
+}
+
+/* Banner Button */
+.ecf-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ecf-banner-preview {
+  margin-top: 12px;
+  max-width: 200px;
+  max-height: 120px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Submit Button */
+.ecf-submit-btn {
+  width: 100%;
+  background: #166534;
+  color: white;
+  margin-top: 20px;
+  padding: 14px 20px;
+  font-size: 16px;
+}
+
+.ecf-submit-btn:hover {
+  background: #14532D;
+}
+
+/* Pricing Plans Grid */
+.ecf-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ecf-plan-card {
+  display: block;
+  cursor: pointer;
+}
+
+.ecf-plan-radio {
+  display: none;
+}
+
+.ecf-plan-content {
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s;
+  background: white;
+  height: 100%;
+}
+
+.ecf-plan-radio:checked + .ecf-plan-content {
+  border-color: #10B981;
+  background: #F0FDF4;
+}
+
+.ecf-plan-content:hover {
+  border-color: #10B981;
+}
+
+.ecf-plan-header {
+  margin-bottom: 8px;
+}
+
+.ecf-plan-name {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 4px;
+}
+
+.ecf-plan-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.ecf-plan-period {
+  font-size: 14px;
+  font-weight: 400;
+  color: #6B7280;
+}
+
+.ecf-plan-tagline {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 16px 0;
+  text-align: left;
+}
+
+.ecf-plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ecf-plan-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  padding: 6px 0;
+}
+
+.ecf-plan-feature i {
+  font-size: 10px;
+  color: #10B981;
+}
+
+.ecf-feature-disabled {
+  color: #9CA3AF;
+}
+
+.ecf-feature-disabled i {
+  color: #9CA3AF;
+}
+
+/* Timeline Visualization */
+.ecf-timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 24px 0;
+  padding: 20px;
+  background: #F9FAFB;
+  border-radius: 12px;
+}
+
+.ecf-timeline-point {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ecf-timeline-dot {
+  width: 12px;
+  height: 12px;
+  background: #10B981;
+  border-radius: 50%;
+  margin-bottom: 4px;
+}
+
+.ecf-timeline-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.ecf-timeline-date {
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.ecf-timeline-line {
+  display: flex;
+  align-items: center;
+  padding: 12px 0 12px 5px;
+  border-left: 2px dashed #10B981;
+  margin-left: 5px;
+}
+
+.ecf-timeline-duration {
+  margin-left: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ecf-plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ecf-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ecf-plan-content {
+    padding: 16px;
+  }
+
+  .ecf-plan-price {
+    font-size: 24px;
+  }
+
+  .ecf-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ecf-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+

@@ -1,0 +1,182 @@
+/* MediaCard Component */
+
+.media-card {
+  break-inside: avoid;
+  margin-bottom: 24px;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
+  transition: box-shadow 0.5s;
+}
+
+.media-card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+.media-card-image {
+  width: 100%;
+  height: auto;
+  min-height: 120px;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.7s;
+}
+
+.media-card:hover .media-card-image {
+  transform: scale(1.05);
+}
+
+/* Video Badge */
+.media-card-video-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Play Button */
+.media-card-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 8px));
+  background: rgba(255, 255, 255, 0.9);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #1c1917;
+}
+
+.media-card:hover .media-card-play-btn {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+/* Hover Overlay */
+.media-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.402);
+
+  cursor: pointer;
+
+
+
+
+  background: linear-gradient(187deg,rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+}
+
+.media-card:hover .media-card-overlay {
+  opacity: 1;
+}
+
+.media-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  font-size: 14px;
+}
+
+.media-card-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.media-card-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.media-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.media-card-name {
+  font-weight: 500;
+}
+
+.media-card-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.media-card:hover .media-card-actions {
+  opacity: 1;
+}
+
+.media-card-action-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+  font-size: 18px;
+}
+
+.media-card-action-btn:hover {
+  color: #DAE0FC;
+}
+
+.media-card-broken {
+  width: 100%;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 32px;
+  border-radius: 8px;
+}

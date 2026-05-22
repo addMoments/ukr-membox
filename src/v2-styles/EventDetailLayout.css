@@ -1,0 +1,62 @@
+/* EventDetailLayout - Flex layout for event detail pages with sidebar */
+
+.event-detail-layout {
+  display: flex;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 40px 24px;
+  gap: 40px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .event-detail-layout {
+    padding: 40px 40px;
+  }
+}
+
+.event-detail-main {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 80px;
+}
+
+.event-detail-mobile-nav-toggle,
+.event-detail-mobile-nav-backdrop {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .event-detail-mobile-nav-toggle {
+    display: inline-flex;
+    position: fixed;
+    left: 16px;
+    top: 92px;
+    z-index: 998;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid #E7E5E4;
+    background: white;
+    color: #1C1917;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .event-detail-mobile-nav-toggle i {
+    font-size: 16px;
+  }
+
+  .event-detail-mobile-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1099;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+}

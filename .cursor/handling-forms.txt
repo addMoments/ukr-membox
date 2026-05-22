@@ -1,0 +1,24 @@
+# Form Handling
+
+Use `<form onSubmit={handler}>` with `type="submit"` buttons. Never use `<section>` + `onClick`.
+
+## Handler Pattern
+
+```tsx
+import { parse_submit_event } from '../../utils/form_event_parse';
+
+const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const data = parse_submit_event(e); // calls preventDefault, returns Record<string, any>
+  // data is ready for API — keys match input names
+};
+```
+
+## Input Rules
+
+- **Uncontrolled only** — use `defaultValue` / `defaultChecked`, never `value` + `onChange`
+- **Names = DB columns** — e.g. `name="whatever the column for the entity happens to be"` not `name="welcomeMessage"`
+- The utility auto-converts types: checkbox→boolean, number→number, date→timestamp(ms), file→File[]
+
+## Hydrating Forms
+
+Use `put_form_state(formElement, stateObject)` to populate a form from data (reverse of parse).

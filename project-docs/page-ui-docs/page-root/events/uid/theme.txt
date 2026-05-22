@@ -1,0 +1,13 @@
+Event visual settings.
+
+Partials in order:
+Header
+WithSidebar(
+    eventSidebar,
+    [
+        Two-column layout (responsive: stack on mobile):
+        Left column: themeSettings
+        Right column: guestPagePreview
+    ]
+)
+Footer

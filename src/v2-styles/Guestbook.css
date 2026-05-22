@@ -1,0 +1,430 @@
+/* Guestbook Page Styles */
+
+.guestbook-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .guestbook-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+.guestbook-stat-card {
+  background: #FAFAF9;
+  padding: 24px 28px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  border: 1px solid white;
+}
+
+.guestbook-stat-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #78716c;
+  margin: 0 0 4px 0;
+}
+
+.guestbook-stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1c1917;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+/* Messages Container */
+.guestbook-container {
+  background: white;
+  border-radius: 28px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  border: 1px solid #f5f5f4;
+}
+
+/* Filter Header */
+.guestbook-filter-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid #f5f5f4;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .guestbook-filter-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 32px;
+  }
+}
+
+.guestbook-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .guestbook-search-wrapper {
+    width: 360px;
+  }
+}
+
+.guestbook-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a8a29e;
+  pointer-events: none;
+}
+
+.guestbook-search-input {
+  width: 100%;
+  padding: 12px 20px 12px 44px;
+  background: rgba(250, 250, 249, 0.5);
+  border: 1px solid #e7e5e4;
+  border-radius: 9999px;
+  font-size: 14px;
+  color: #1c1917;
+  transition: all 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.guestbook-search-input::placeholder {
+  color: #a8a29e;
+}
+
+.guestbook-search-input:focus {
+  outline: none;
+  border-color: #DAE0FC;
+  box-shadow: 0 0 0 3px rgba(218, 224, 252, 0.3);
+}
+
+.guestbook-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.guestbook-filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.guestbook-filter-tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 9999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-family: inherit;
+}
+
+.guestbook-filter-tab.inactive {
+  background: #f5f5f4;
+  color: #57534e;
+}
+
+.guestbook-filter-tab.inactive:hover {
+  background: #e7e5e4;
+}
+
+.guestbook-filter-tab.active {
+  background: #1c1917;
+  color: white;
+}
+
+/* Messages Table */
+.guestbook-table-wrapper {
+  overflow-x: auto;
+}
+
+.guestbook-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.guestbook-table thead tr {
+  background: rgba(250, 250, 249, 0.5);
+}
+
+.guestbook-table th {
+  padding: 14px 28px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #a8a29e;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.guestbook-table th:last-child {
+  text-align: right;
+}
+
+.guestbook-table tbody tr {
+  border-bottom: 1px solid #f5f5f4;
+  transition: background 0.15s;
+}
+
+.guestbook-table tbody tr:hover {
+  background: rgba(250, 250, 249, 0.3);
+}
+
+.guestbook-table td {
+  padding: 20px 28px;
+  vertical-align:middle;
+}
+
+.guestbook-table td:last-child {
+  text-align: right;
+}
+
+/* Guest Cell */
+.guestbook-guest-name {
+  font-weight: 700;
+  color: #1c1917;
+  white-space: nowrap;
+  margin: 0;
+  font-size: 14px;
+}
+
+.guestbook-guest-time {
+  font-size: 12px;
+  color: #a8a29e;
+  margin: 4px 0 0 0;
+}
+
+/* Message Cell */
+.guestbook-message-cell {
+  max-width: 400px;
+}
+
+.guestbook-message-text {
+  color: #57534e;
+  line-height: 1.6;
+  font-size: 14px;
+  margin: 0;
+}
+
+.guestbook-message-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 12px;
+}
+
+.guestbook-message-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Status Pills */
+.guestbook-status-pill {
+  padding: 5px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.guestbook-status-pill.pending {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.guestbook-status-pill.approved,
+.guestbook-status-pill.visible {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.guestbook-status-pill.hidden {
+  background: #F3F4F6;
+  color: #4B5563;
+}
+
+/* Action Buttons */
+.guestbook-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.guestbook-action-btn {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-family: inherit;
+}
+
+.guestbook-action-btn.approve {
+  background: #DAE0FC;
+  color: #2D334A;
+}
+
+.guestbook-action-btn.approve:hover {
+  opacity: 0.85;
+}
+
+.guestbook-action-btn.secondary {
+  background: #f5f5f4;
+  color: #57534e;
+}
+
+.guestbook-action-btn.secondary:hover {
+  background: #e7e5e4;
+}
+
+.guestbook-action-btn.delete {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.guestbook-action-btn.delete:hover {
+  background: #FECACA;
+}
+
+/* Pagination Footer */
+.guestbook-pagination {
+  padding: 24px 28px;
+  background: rgba(250, 250, 249, 0.3);
+  border-top: 1px solid #f5f5f4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guestbook-pagination-info {
+  font-size: 14px;
+  color: #a8a29e;
+  margin: 0;
+}
+
+.guestbook-pagination-info strong {
+  color: #1c1917;
+  font-weight: 600;
+}
+
+.guestbook-pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guestbook-pagination-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: 1px solid #e7e5e4;
+  background: white;
+  color: #a8a29e;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guestbook-pagination-btn:hover {
+  background: white;
+  color: #1c1917;
+  border-color: #d6d3d1;
+}
+
+.guestbook-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty State */
+.guestbook-empty {
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.guestbook-empty-icon {
+  width: 64px;
+  height: 64px;
+  background: #f5f5f4;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+  font-size: 28px;
+  color: #a8a29e;
+}
+
+.guestbook-empty-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1c1917;
+  margin: 0 0 8px 0;
+}
+
+.guestbook-empty-text {
+  font-size: 14px;
+  color: #78716c;
+  margin: 0;
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+  .guestbook-table th,
+  .guestbook-table td {
+    padding: 16px 20px;
+  }
+  
+  .guestbook-message-cell {
+    max-width: 200px;
+  }
+  
+  .guestbook-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .guestbook-pagination {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+}
+
+/* Voice message indicator */
+.guestbook-voice-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f5f5f4;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #57534e;
+}
+
+.guestbook-voice-indicator svg {
+  color: #a8a29e;
+}

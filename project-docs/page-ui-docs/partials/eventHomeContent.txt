@@ -1,0 +1,12 @@
+Event dashboard home page content.
+
+Layout:
+ExpirationBanner (conditional - only if event is expiring)
+Page title: "Dashboard: {eventName}" (h2)
+
+Two-column grid of StatsCards:
+- Left: Gallery Stats (Photos Uploaded, Videos Uploaded)
+- Right: Guestbook Stats (Written Messages, Audio Messages, Video Messages)
+
+QRCodeCard
+DownloadCard

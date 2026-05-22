@@ -1,0 +1,12 @@
+Where user sees the collaborators of the project. And adds to them.
+
+Partials in order:
+Header
+WithSidebar(
+    eventsidebar,
+    [
+        A row with a text input + primary button that says Invite.
+        Table (columns: email, role, actions)
+    ]
+)
+Footer

@@ -1,0 +1,119 @@
+.qr-code-card {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.qr-code-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 12px;
+}
+
+.qr-code-card-description {
+  font-size: 14px;
+  color: #6B7280;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+  text-align: left;
+}
+
+.qr-code-card-how-to {
+  margin-bottom: 24px;
+}
+
+.qr-code-card-how-to-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 8px;
+}
+
+.qr-code-card-list {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0;
+  padding-left: 24px;
+}
+
+.qr-code-card-list li {
+  margin-bottom: 6px;
+}
+
+.qr-code-card-link {
+  color: #3B82F6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.qr-code-card-link:hover {
+  text-decoration: underline;
+  color: #2563EB;
+}
+
+.qr-code-card-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.qr-code-card-url-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qr-code-card-input {
+  padding: 10px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #6B7280;
+  background: #F9FAFB;
+  font-family: inherit;
+}
+
+.qr-code-card-qr-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.qr-code-card-image {
+  width: 180px;
+  height: 180px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.qr-code-card-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .qr-code-card {
+    padding: 20px;
+  }
+  
+  .qr-code-card-content {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  
+  .qr-code-card-image {
+    width: 150px;
+    height: 150px;
+  }
+}
+

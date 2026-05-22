@@ -1,0 +1,14 @@
+Event creation page - Route: /events/new
+
+Description:
+Multi-step event creation flow. User fills out event details across multiple steps.
+
+Layout:
+- Header partial
+- eventCreationForm partial (manages its own formStep state, calls onSubmit when complete)
+- Footer partial
+
+Notes:
+- Form has multiple steps
+- After successful creation, redirects to /events/:uid
+

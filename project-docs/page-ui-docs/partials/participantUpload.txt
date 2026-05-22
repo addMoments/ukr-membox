@@ -1,0 +1,48 @@
+Guest upload interface with multiple display modes.
+
+Props:
+bannerImageUrl: string | null
+eventTitle: string
+eventDate: string (formatted)
+mode: "default" | "media" | "guestbook"
+
+Layout:
+Uses guestLayout partial. Children vary by mode.
+
+---
+
+Mode: "default"
+Navigation buttons (stacked vertically, full-width, rounded, primary style):
+- "Upload Files" button (upload icon)
+- "My Uploads" button (image/gallery icon)
+- "Guestbook" button (message/book icon)
+
+---
+
+Mode: "media"
+Title: "Share your photo with a message!"
+
+Source buttons (stacked vertically, full-width, rounded):
+- "Take Photo" button (camera icon, accent/purple style)
+- "From Gallery" button (upload icon, secondary/dark style)
+
+Message input:
+- Label: "Message (0/200) (optional)" with character count
+- Textarea placeholder: "Add a message"
+
+Submit button:
+- "Upload" button (upload icon, green/success style, full-width)
+
+---
+
+Mode: "guestbook"
+Entries scroller (top area, takes remaining vertical space):
+- Vertical scroll container
+- Shows other users' guestbook entries
+- Ordered oldest to newest (latest at bottom)
+- Scroll position starts at bottom (newest visible first)
+
+Message input (bottom, fixed):
+- Textarea for message
+- Audio record button (microphone icon)
+- Submit button

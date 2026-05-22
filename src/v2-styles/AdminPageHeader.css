@@ -1,0 +1,131 @@
+/* Admin Page Header with Breadcrumb */
+
+.admin-page-header {
+  margin-bottom: 40px;
+}
+
+.admin-page-header-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a8a29e;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.admin-page-header-breadcrumb a {
+  color: #a8a29e;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.admin-page-header-breadcrumb a:hover {
+  color: #57534e;
+}
+
+.admin-page-header-breadcrumb span.current {
+  color: #1c1917;
+}
+
+.admin-page-header-separator {
+  font-size: 14px;
+  color: #a8a29e;
+}
+
+.admin-page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-page-header-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1c1917;
+  letter-spacing: -0.02em;
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.admin-page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-page-header-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: #1c1917;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+
+.admin-page-header-link:hover {
+  background: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+}
+
+.admin-page-header-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.admin-page-header-link i {
+  font-size: 12px;
+}
+
+@media (min-width: 768px) {
+  .admin-page-header-title {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-page-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-page-header-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .admin-page-header-link {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+    min-width: 0;
+    padding: 9px 12px;
+    font-size: 12px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-page-header-link {
+    flex-basis: 100%;
+  }
+}

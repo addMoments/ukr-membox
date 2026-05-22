@@ -1,0 +1,11 @@
+A box that represents an event. 
+
+Props:
+event: Event
+
+Layout:
+A box of rows.
+Top row are tags. Example tags are: Free, Silver, Gold, Expired, Active
+Second row is the event title.
+Third row is the start and end time.
+Bottom row is two buttons.

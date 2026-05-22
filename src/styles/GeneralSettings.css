@@ -1,0 +1,211 @@
+.general-settings {
+  max-width: 500px;
+}
+
+.general-settings-subtitle {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.general-settings-section {
+  margin-bottom: 28px;
+}
+
+.general-settings-activation-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #1F2937;
+  color: #9CA3AF;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: not-allowed;
+}
+
+.general-settings-activation-dropdown i:first-child {
+  color: #6B7280;
+}
+
+.general-settings-dropdown-icon {
+  margin-left: auto;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.general-settings-upgrade-hint {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 8px 0 20px 0;
+  text-align: left;
+}
+
+/* Timeline */
+.general-settings-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 8px;
+}
+
+.general-settings-timeline-marker {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.general-settings-timeline-dot {
+  width: 12px;
+  height: 12px;
+  background: #3B82F6;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.general-settings-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.general-settings-timeline-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.general-settings-timeline-date {
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.general-settings-timeline-line {
+  display: flex;
+  align-items: center;
+  padding: 12px 0 12px 4px;
+  position: relative;
+}
+
+.general-settings-timeline-line::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #E5E7EB;
+}
+
+.general-settings-timeline-badge {
+  margin-left: 20px;
+  text-transform: none;
+}
+
+/* Two-column row */
+.general-settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.general-settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.general-settings-field .form-input,
+.general-settings-field .form-select {
+  margin-top: 4px;
+}
+
+.general-settings-helper {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+  text-align: left;
+}
+
+/* Toggle styles */
+.general-settings-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.general-settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.general-settings-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.general-settings-toggle-slider {
+  width: 44px;
+  height: 24px;
+  background: #E5E7EB;
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.general-settings-toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.general-settings-toggle-input:checked + .general-settings-toggle-slider {
+  background: #3B82F6;
+}
+
+.general-settings-toggle-input:checked + .general-settings-toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.general-settings-toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Form group helper text override */
+.general-settings .form-group .general-settings-helper {
+  margin-bottom: 4px;
+}
+
+/* Save button */
+.general-settings-save-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .general-settings-row {
+    grid-template-columns: 1fr;
+  }
+
+  .general-settings-toggles {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+

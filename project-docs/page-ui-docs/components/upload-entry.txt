@@ -1,0 +1,11 @@
+This is the component that represent one client upload. 
+
+Props: 
+info: ClientInfo, 
+upload UploadEntry,
+buttons: []{iconname: fontawesome icon name, onCLick}
+
+Layout:  
+Layer 1 is uploader's name at the bottom left. At the top right is a row that has the buttons. At the middle is a play button that only is visible for audio and video.
+Layer 2 is a gradient, black at the bottom, transparent at the top.
+Layer 3 is the content. If the uploadType is a 'photo' 'video' or 'voice' value a url. If it is text its just text content. For photos display the image here. For videos display the thumbnail here. For audio display a voice recording icon.

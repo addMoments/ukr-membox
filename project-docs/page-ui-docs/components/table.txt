@@ -1,0 +1,5 @@
+A basic reusable table.
+
+Props:
+headerRow: []String
+Content [][]string | {label, onClick}

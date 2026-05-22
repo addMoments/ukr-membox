@@ -1,0 +1,21 @@
+Footer component to be used across all pages.
+
+Props:
+None
+
+Layout Desktop:
+A footer with three columns:
+1. Left column: App logo (icon + "MemBox" text) and tagline "Share memories that matter"
+2. Middle column: Links section with title "Links"
+   - FAQ
+   - Privacy Policy
+   - Terms of Service
+   - Contact Us
+3. Right column: Social media icons (leave placeholder for now)
+
+Bottom row: Copyright text "© 2025 MemBox. All rights reserved."
+
+Layout Mobile:
+Stack columns vertically in the same order.
+Center align all content.
+

@@ -1,0 +1,11 @@
+A card for bulk downloading all guest uploads as a zip file.
+
+Props:
+none (uses event context)
+
+Layout:
+A bordered card with padding.
+Title: "Download"
+Description paragraph explaining zip download and recommending to wait until all uploads are in. Mentions 10-20 minute wait time.
+Full-width "Start Download" button with download icon.
+

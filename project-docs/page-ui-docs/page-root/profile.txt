@@ -1,0 +1,7 @@
+User profile page. User can view and edit their account information.
+
+Partials in order:
+Header
+Profile Content (create partial for this - name, email, password change, account settings)
+Footer
+

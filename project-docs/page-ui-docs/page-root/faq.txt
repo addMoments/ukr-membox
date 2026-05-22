@@ -1,0 +1,7 @@
+FAQ (Frequently Asked Questions) page.
+
+Partials in order:
+Header
+FAQ Content (leave empty for now, placeholder)
+Footer
+

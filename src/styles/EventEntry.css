@@ -1,0 +1,20 @@
+.event-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.event-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.event-actions .btn {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .event-actions {
+    flex-direction: column;
+  }
+}
