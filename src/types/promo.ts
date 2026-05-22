@@ -1,3 +1,5 @@
+import { AdminPartnership } from './partnership';
+
 export interface PromoValidationRequest {
   promo_code: string;
   purchase_info: Record<string, number>;
@@ -20,6 +22,8 @@ export interface AdminPromo {
   valid_until?: string | null;
   usage_limit_total?: number | null;
   usage_count?: number;
+  partnership_uid?: string | null;
+  partnership?: AdminPartnership | null;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -27,6 +31,8 @@ export interface AdminPromo {
 
 export interface CreatePromoPayload {
   code: string;
+  partnership_uid: string;
+  discount_type?: string;
   discount_value: number;
   valid_from?: string;
   valid_until?: string;
@@ -36,6 +42,8 @@ export interface CreatePromoPayload {
 
 export interface UpdatePromoPayload {
   code?: string;
+  partnership_uid?: string | null;
+  discount_type?: string;
   discount_value?: number;
   valid_from?: string | null;
   valid_until?: string | null;
@@ -50,6 +58,8 @@ export interface PromoReportRow {
   gross_total: number;
   discount_total: number;
   net_total: number;
+  partnership_uid?: string | null;
+  partnership?: AdminPartnership | null;
   first_used_at?: string | null;
   last_used_at?: string | null;
 }

@@ -95,7 +95,7 @@
 }
 
 .admin-order-filter-card .admin-panel-form {
-  align-items: end;
+  align-items: flex-end;
 }
 
 .admin-order-filter-card .admin-control-group {
@@ -110,6 +110,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-top: auto;
 }
 
 .admin-order-filter-clear {
@@ -591,13 +592,27 @@
   color: #1c1917;
 }
 
+.admin-promo-create-actions {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 37px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.admin-promo-create-actions .admin-save-btn {
+  align-self: center;
+}
+
 .admin-promo-row {
   display: block;
 }
 
 .admin-promo-edit-form {
   display: grid;
-  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
   gap: 0.9rem;
   align-items: end;
 }
@@ -628,6 +643,8 @@
   background: #fafaf9;
   color: #1c1917;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   cursor: pointer;
 }
 
@@ -653,12 +670,13 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   padding: 1.25rem;
   display: grid;
-  grid-template-columns: minmax(160px, 0.8fr) minmax(260px, 1.5fr) minmax(200px, 1fr);
+  grid-template-columns: minmax(140px, 0.7fr) minmax(180px, 0.9fr) minmax(260px, 1.5fr) minmax(200px, 1fr);
   gap: 1rem;
   align-items: center;
 }
 
 .admin-promo-report-code,
+.admin-promo-report-partnership,
 .admin-promo-report-dates {
   display: flex;
   flex-direction: column;
@@ -671,6 +689,7 @@
 }
 
 .admin-promo-report-code span,
+.admin-promo-report-partnership strong,
 .admin-promo-report-dates span {
   color: #78716c;
   font-size: 12px;
@@ -690,14 +709,46 @@
   gap: 0.55rem;
 }
 
+.admin-partnership-metrics {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
 @media (max-width: 720px) {
   .admin-panel-row {
     grid-template-columns: 1fr;
   }
 
+  .admin-order-filter-card .admin-panel-form {
+    align-items: stretch;
+  }
+
+  .admin-order-filter-card .admin-control-group,
+  .admin-order-filter-card .admin-control-input,
+  .admin-order-filter-card .admin-save-btn,
+  .admin-order-filter-clear {
+    width: 100%;
+  }
+
+  .admin-order-filter-card .admin-save-btn,
+  .admin-order-filter-clear {
+    align-self: stretch;
+  }
+
   .admin-promo-edit-form,
   .admin-promo-report-row,
-  .admin-promo-report-metrics {
+  .admin-promo-report-metrics,
+  .admin-partnership-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .admin-promo-create-actions {
+    width: 100%;
+  }
+
+  .admin-promo-create-actions .admin-save-btn {
+    width: 100%;
   }
 }

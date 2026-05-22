@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addPanelOrderAdmin, deletePanelAdmin, getPanelAdmins } from '../../client/admin';
 import { AddPanelOrderAdminPayload, AdminPanelAdmin } from '../../types/admin';
+import { adminText } from '../../utils/admin_i18n';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
 import '../../v2-styles/AdminPageHeader.css';
@@ -14,6 +15,8 @@ function formatDate(str: string) {
   if (!str) return '—';
   return new Date(str).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
+
+const at = adminText;
 
 // Ne: Super admin icin order admin yonetim ekranini render eder.
 // Nasil: Listeyi endpointten yukler; uncontrolled hesap olusturma formuyla ekleme, confirm ile silme yapar.
@@ -29,7 +32,7 @@ function PanelAdmins() {
     getPanelAdmins()
       .then((data) => setAdmins(data))
       .catch((err) => {
-        const text = err instanceof Error ? err.message : 'Failed to load panel admins.';
+        const text = err instanceof Error ? err.message : at('admin.panelAdmins.errors.load', 'Failed to load panel admins.', 'Не вдалося завантажити адміністраторів панелі.');
         setMessage({ ok: false, text });
       })
       .finally(() => setLoading(false));
@@ -49,11 +52,11 @@ function PanelAdmins() {
     const password = String(formData.get('password') || '');
     const confirmPassword = String(formData.get('confirm_password') || '');
 
-    if (!email) return { error: 'Email is required.' };
-    if (!name) return { error: 'Name is required.' };
-    if (!password) return { error: 'Password is required.' };
-    if (!confirmPassword) return { error: 'Confirm password is required.' };
-    if (password !== confirmPassword) return { error: 'Passwords do not match.' };
+    if (!email) return { error: at('admin.panelAdmins.errors.emailRequired', 'Email is required.', 'Потрібно вказати email.') };
+    if (!name) return { error: at('admin.panelAdmins.errors.nameRequired', 'Name is required.', 'Потрібно вказати ім\'я.') };
+    if (!password) return { error: at('admin.panelAdmins.errors.passwordRequired', 'Password is required.', 'Потрібно вказати пароль.') };
+    if (!confirmPassword) return { error: at('admin.panelAdmins.errors.confirmPasswordRequired', 'Confirm password is required.', 'Потрібно підтвердити пароль.') };
+    if (password !== confirmPassword) return { error: at('admin.panelAdmins.errors.passwordsDoNotMatch', 'Passwords do not match.', 'Паролі не збігаються.') };
 
     return {
       payload: {
@@ -72,19 +75,19 @@ function PanelAdmins() {
     const { payload, error } = buildCreatePayload(form);
 
     if (!payload) {
-      setMessage({ ok: false, text: error || 'Please check the form.' });
+      setMessage({ ok: false, text: error || at('admin.common.pleaseCheckForm', 'Please check the form.', 'Перевірте форму.') });
       return;
     }
 
     setSaving(true);
-    setMessage({ ok: true, text: 'Creating order admin...' });
+    setMessage({ ok: true, text: at('admin.panelAdmins.creating', 'Creating order admin...', 'Створення адміністратора замовлень...') });
     try {
       await addPanelOrderAdmin(payload);
       form.reset();
-      setMessage({ ok: true, text: 'Order admin created.' });
+      setMessage({ ok: true, text: at('admin.panelAdmins.created', 'Order admin created.', 'Адміністратора замовлень створено.') });
       load();
     } catch (err) {
-      const text = err instanceof Error ? err.message : 'Failed to create order admin.';
+      const text = err instanceof Error ? err.message : at('admin.panelAdmins.errors.create', 'Failed to create order admin.', 'Не вдалося створити адміністратора замовлень.');
       setMessage({ ok: false, text });
     } finally {
       setSaving(false);
@@ -93,15 +96,15 @@ function PanelAdmins() {
 
   const onDelete = async (admin: AdminPanelAdmin) => {
     const label = admin.email || admin.user_uid;
-    if (!window.confirm(`Remove order admin access for ${label}?`)) return;
+    if (!window.confirm(at('admin.panelAdmins.deleteConfirm', `Remove order admin access for ${label}?`, `Прибрати доступ адміністратора замовлень для ${label}?`, { label }))) return;
 
-    setMessage({ ok: true, text: 'Removing order admin...' });
+    setMessage({ ok: true, text: at('admin.panelAdmins.removing', 'Removing order admin...', 'Видалення адміністратора замовлень...') });
     try {
       await deletePanelAdmin(admin.user_uid);
       setAdmins((prev) => prev.filter((item) => item.user_uid !== admin.user_uid));
-      setMessage({ ok: true, text: 'Order admin removed.' });
+      setMessage({ ok: true, text: at('admin.panelAdmins.removed', 'Order admin removed.', 'Адміністратора замовлень видалено.') });
     } catch (err) {
-      const text = err instanceof Error ? err.message : 'Failed to remove order admin.';
+      const text = err instanceof Error ? err.message : at('admin.panelAdmins.errors.remove', 'Failed to remove order admin.', 'Не вдалося прибрати адміністратора замовлень.');
       setMessage({ ok: false, text });
     }
   };
@@ -111,43 +114,47 @@ function PanelAdmins() {
       <V2Header />
       <div className="admin-container">
         <AdminPageHeader
-          breadcrumbs={[{ label: 'Admin' }, { label: 'Panel Admins' }]}
-          title="Panel Admins"
+          breadcrumbs={[{ label: at('admin.nav.admin', 'Admin', 'Адмін') }, { label: at('admin.panelAdmins.title', 'Panel Admins', 'Адміністратори панелі') }]}
+          title={at('admin.panelAdmins.title', 'Panel Admins', 'Адміністратори панелі')}
           actions={
             <>
               <Link to="/admin/orders" className="admin-page-header-link">
                 <i className="fa-solid fa-receipt" />
-                View Orders
+                {at('admin.nav.viewOrders', 'View Orders', 'Переглянути замовлення')}
               </Link>
               <Link to="/admin/products" className="admin-page-header-link">
                 <i className="fa-solid fa-boxes-stacked" />
-                Manage Products
+                {at('admin.nav.manageProducts', 'Manage Products', 'Керувати продуктами')}
               </Link>
               <Link to="/admin/promos" className="admin-page-header-link">
                 <i className="fa-solid fa-ticket" />
-                Promos
+                {at('admin.nav.promos', 'Promos', 'Промокоди')}
+              </Link>
+              <Link to="/admin/partnerships" className="admin-page-header-link">
+                <i className="fa-solid fa-handshake" />
+                {at('admin.nav.partnerships', 'Partnerships', 'Партнерства')}
               </Link>
             </>
           }
         />
 
         <section className="admin-panel-card">
-          <h2 className="admin-panel-title">Create Order Admin</h2>
+          <h2 className="admin-panel-title">{at('admin.panelAdmins.createTitle', 'Create Order Admin', 'Створити адміністратора замовлень')}</h2>
           <form className="admin-panel-form" onSubmit={onSubmit}>
             <input name="email" type="email" className="admin-control-input" placeholder="admin@example.com" disabled={saving} />
-            <input name="name" className="admin-control-input" placeholder="Admin Name" disabled={saving} />
-            <input name="password" type="password" className="admin-control-input" placeholder="Temporary password" disabled={saving} />
-            <input name="confirm_password" type="password" className="admin-control-input" placeholder="Confirm password" disabled={saving} />
+            <input name="name" className="admin-control-input" placeholder={at('admin.common.name', 'Name', 'Ім\'я')} disabled={saving} />
+            <input name="password" type="password" className="admin-control-input" placeholder={at('admin.panelAdmins.temporaryPassword', 'Temporary password', 'Тимчасовий пароль')} disabled={saving} />
+            <input name="confirm_password" type="password" className="admin-control-input" placeholder={at('admin.panelAdmins.confirmPassword', 'Confirm password', 'Підтвердити пароль')} disabled={saving} />
             <button type="submit" className="admin-save-btn" disabled={saving}>
-              {saving ? 'Creating...' : 'Create'}
+              {saving ? at('admin.common.creating', 'Creating...', 'Створення...') : at('admin.common.create', 'Create', 'Створити')}
             </button>
           </form>
           {message && <p className={message.ok ? 'admin-panel-message-ok' : 'admin-panel-message-error'}>{message.text}</p>}
         </section>
 
-        {loading && <div className="admin-empty">Loading panel admins...</div>}
+        {loading && <div className="admin-empty">{at('admin.panelAdmins.loading', 'Loading panel admins...', 'Завантаження адміністраторів панелі...')}</div>}
 
-        {!loading && admins.length === 0 && <div className="admin-empty">No order admins yet.</div>}
+        {!loading && admins.length === 0 && <div className="admin-empty">{at('admin.panelAdmins.empty', 'No order admins yet.', 'Адміністраторів замовлень ще немає.')}</div>}
 
         {!loading && admins.length > 0 && (
           <div className="admin-panel-list">
@@ -155,15 +162,15 @@ function PanelAdmins() {
               <article key={admin.user_uid} className="admin-panel-row">
                 <div className="admin-panel-row-main">
                   <strong>{admin.email || '—'}</strong>
-                  <span>{admin.name || 'No name'}</span>
-                  <small>Role: {admin.role}</small>
+                  <span>{admin.name || at('admin.panelAdmins.noName', 'No name', 'Без імені')}</span>
+                  <small>{at('admin.panelAdmins.role', 'Role', 'Роль')}: {admin.role}</small>
                 </div>
                 <div className="admin-panel-row-meta">
-                  <span>Created: {formatDate(admin.created_at)}</span>
-                  <span>By: {admin.created_by_email || '—'}</span>
+                  <span>{at('admin.common.created', 'Created', 'Створено')}: {formatDate(admin.created_at)}</span>
+                  <span>{at('admin.common.by', 'By', 'Ким')}: {admin.created_by_email || '—'}</span>
                 </div>
                 <button type="button" className="admin-panel-delete-btn" onClick={() => onDelete(admin)}>
-                  Remove
+                  {at('admin.common.remove', 'Remove', 'Прибрати')}
                 </button>
               </article>
             ))}

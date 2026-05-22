@@ -1,5 +1,6 @@
 import { SERV_ROOT } from '../consts';
 import { FetchHttpError, fetch as authFetch } from './core';
+import { normalizePartnership } from './partnership';
 import {
   AdminPromo,
   CreatePromoPayload,
@@ -59,10 +60,11 @@ const parseJsonOrThrow = async (res: Response, endpointLabel: string): Promise<u
 };
 
 // Ne: Admin promo response'unu frontend modeline cevirir.
-// Nasil: UID/code/aktiflik/tarih/limit alanlarini tiplerine gore normalize eder.
+// Nasil: UID/code/aktiflik/tarih/limit ve varsa partnership alanlarini tiplerine gore normalize eder.
 // Neden: CRUD ekranlari backend veri formatindaki string-number farklarindan etkilenmesin.
 const normalizePromo = (value: unknown): AdminPromo => {
   const raw = asRecord(value);
+  const partnership = raw.partnership ? normalizePartnership(raw.partnership) : null;
   return {
     uid: typeof raw.uid === 'string' ? raw.uid : '',
     code: typeof raw.code === 'string' ? raw.code : '',
@@ -72,6 +74,8 @@ const normalizePromo = (value: unknown): AdminPromo => {
     valid_until: parseOptionalString(raw.valid_until),
     usage_limit_total: parseOptionalNumber(raw.usage_limit_total),
     usage_count: parseNumber(raw.usage_count),
+    partnership_uid: parseOptionalString(raw.partnership_uid) || partnership?.uid || null,
+    partnership,
     is_active: raw.is_active === true,
     created_at: typeof raw.created_at === 'string' ? raw.created_at : undefined,
     updated_at: typeof raw.updated_at === 'string' ? raw.updated_at : undefined,
@@ -79,10 +83,11 @@ const normalizePromo = (value: unknown): AdminPromo => {
 };
 
 // Ne: Promo report satirini frontend'in bekledigi numeric modele cevirir.
-// Nasil: Toplam alanlarini number, tarih alanlarini nullable string olarak normalize eder.
+// Nasil: Toplam alanlarini number, tarih alanlarini nullable string, partnership alanini normalize object olarak okur.
 // Neden: Rapor kartlari hesaplama yapmadan guvenli formatlama yapabilsin.
 const normalizeReportRow = (value: unknown): PromoReportRow => {
   const raw = asRecord(value);
+  const partnership = raw.partnership ? normalizePartnership(raw.partnership) : null;
   return {
     promo_code_uid: typeof raw.promo_code_uid === 'string' ? raw.promo_code_uid : '',
     promo_code: typeof raw.promo_code === 'string' ? raw.promo_code : '',
@@ -90,6 +95,8 @@ const normalizeReportRow = (value: unknown): PromoReportRow => {
     gross_total: parseNumber(raw.gross_total),
     discount_total: parseNumber(raw.discount_total),
     net_total: parseNumber(raw.net_total),
+    partnership_uid: parseOptionalString(raw.partnership_uid) || partnership?.uid || null,
+    partnership,
     first_used_at: parseOptionalString(raw.first_used_at),
     last_used_at: parseOptionalString(raw.last_used_at),
   };

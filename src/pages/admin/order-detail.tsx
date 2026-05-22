@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { fetch as authFetch } from '../../client/core';
 import { getAdminRole } from '../../client/admin';
 import { SERV_ROOT } from '../../consts';
+import { adminText } from '../../utils/admin_i18n';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
 import { t } from '../../packages/i18n';
@@ -80,6 +81,23 @@ interface OrderDetail {
 
 const STATUS_OPTIONS = ['purchased', 'client-action', 'admin-action', 'shipped', 'fulfilled', 'cancelled'];
 const CORE_PACKAGE_PRODUCT_IDS = ['standard', 'plus', 'premium'];
+const at = adminText;
+
+// Ne: Order item status value'sunu admin arayuzunde okunur label'a cevirir.
+// Nasil: Select option value'su backend sabiti olarak kalir, gorunen metin adminText ile EN/UK olur.
+// Neden: PATCH payload'i bozulmadan status secenekleri Ukraynaca arayuzde yerellesin.
+function statusLabel(status: string) {
+  const labels: Record<string, [string, string]> = {
+    purchased: ['Purchased', 'Придбано'],
+    'client-action': ['Client Action', 'Дія клієнта'],
+    'admin-action': ['Admin Action', 'Дія адміністратора'],
+    shipped: ['Shipped', 'Відправлено'],
+    fulfilled: ['Fulfilled', 'Виконано'],
+    cancelled: ['Cancelled', 'Скасовано'],
+  };
+  const [en, uk] = labels[status] || [status || '—', status || '—'];
+  return at(`admin.status.${status || 'unknown'}`, en, uk);
+}
 
 interface OrderAccountMetricsProps {
   account: OrderAccount;
@@ -102,22 +120,22 @@ function formatPaymentAmount(value: string) {
 function PaymentSummaryCard({ summary }: PaymentSummaryCardProps) {
   return (
     <div className="admin-payment-summary">
-      <div className="admin-order-account-title">Payment Summary</div>
+      <div className="admin-order-account-title">{at('admin.orderDetail.paymentSummary', 'Payment Summary', 'Підсумок оплати')}</div>
       <div className="admin-order-account-grid">
         <div className="admin-order-account-metric">
-          <span className="admin-order-account-label">Gross Total</span>
+          <span className="admin-order-account-label">{at('admin.partnerships.metrics.grossTotal', 'Gross Total', 'Валовий підсумок')}</span>
           <span className="admin-order-account-value">{formatPaymentAmount(summary.gross_total)}</span>
         </div>
         <div className="admin-order-account-metric">
-          <span className="admin-order-account-label">Promo Code</span>
+          <span className="admin-order-account-label">{at('admin.orders.promoCode', 'Promo Code', 'Промокод')}</span>
           <span className="admin-order-account-value">{summary.promo_code_text_snapshot || '-'}</span>
         </div>
         <div className="admin-order-account-metric">
-          <span className="admin-order-account-label">Discount</span>
+          <span className="admin-order-account-label">{at('admin.promoReport.discount', 'Discount', 'Знижка')}</span>
           <span className="admin-order-account-value">{formatPaymentAmount(summary.discount_amount)}</span>
         </div>
         <div className="admin-order-account-metric">
-          <span className="admin-order-account-label">Net Paid</span>
+          <span className="admin-order-account-label">{at('admin.orderDetail.netPaid', 'Net Paid', 'Сплачено')}</span>
           <span className="admin-order-account-value">{formatPaymentAmount(summary.net_total)}</span>
         </div>
       </div>
@@ -129,7 +147,7 @@ function PaymentSummaryCard({ summary }: PaymentSummaryCardProps) {
 // Nasil: Guest limit, toplam storage ve expiration tarihini backend order_account alanindan formatlayarak kart/pill olarak render eder.
 // Neden: Bu bilgiler finansal degil; super admin olmayan order admin de siparisin event hesabini operasyonel olarak gorebilsin.
 function OrderAccountMetrics({ account }: OrderAccountMetricsProps) {
-  const guestLimit = account.guest_limit === -1 ? 'Unlimited' : String(account.guest_limit);
+  const guestLimit = account.guest_limit === -1 ? at('admin.orderDetail.unlimited', 'Unlimited', 'Безлімітно') : String(account.guest_limit);
   const totalGuests = `${account.total_guest ?? 0} / ${guestLimit}`;
   const totalSize = typeof account.total_size_mb === 'number'
     ? `${Number(account.total_size_mb.toFixed(2)).toLocaleString('en-GB', { maximumFractionDigits: 2 })} MB`
@@ -140,18 +158,18 @@ function OrderAccountMetrics({ account }: OrderAccountMetricsProps) {
 
   return (
     <div className="admin-order-account">
-      <div className="admin-order-account-title">Order Account</div>
+      <div className="admin-order-account-title">{at('admin.orderDetail.orderAccount', 'Order Account', 'Обліковий запис замовлення')}</div>
       <div className="admin-order-account-grid">
         <div className="admin-order-account-metric">
-          <span className="admin-order-account-label">Total Guest</span>
+          <span className="admin-order-account-label">{at('admin.orderDetail.totalGuest', 'Total Guest', 'Усього гостей')}</span>
           <span className="admin-order-account-value">{totalGuests}</span>
         </div>
         <div className="admin-order-account-metric">
-          <span className="admin-order-account-label">Total Size</span>
+          <span className="admin-order-account-label">{at('admin.orderDetail.totalSize', 'Total Size', 'Загальний розмір')}</span>
           <span className="admin-order-account-value">{totalSize}</span>
         </div>
         <div className="admin-order-account-metric">
-          <span className="admin-order-account-label">Storage Expiration</span>
+          <span className="admin-order-account-label">{at('admin.orderDetail.storageExpiration', 'Storage Expiration', 'Закінчення зберігання')}</span>
           <span className="admin-order-account-value">{expiration}</span>
         </div>
       </div>
@@ -218,7 +236,7 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
             target="_blank"
             rel="noopener noreferrer"
           >
-            <i className="fa-solid fa-print" /> Print label
+            <i className="fa-solid fa-print" /> {at('admin.orderDetail.printLabel', 'Print label', 'Друк етикетки')}
           </a>
         )}
       </div>
@@ -254,7 +272,7 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
       <div className="admin-item-info">
         <div className="admin-item-name">{productName}</div>
         <div className="admin-item-meta">
-          <span>qty: {item.quantity}</span>
+          <span>{at('admin.orderDetail.qty', 'qty', 'к-сть')}: {item.quantity}</span>
           {showFinancials && <span>₴{parseFloat(item.product.price || '0').toFixed(2)}</span>}
           <span className={`admin-item-fulfillment-badge ${item.product.fullfillment_type}`}>
             {item.product.fullfillment_type}
@@ -263,10 +281,10 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
 
         {hasBuyerConfig && (
           <div className="admin-item-buyer-config">
-            <div className="admin-item-buyer-config-title">Buyer Configuration</div>
+            <div className="admin-item-buyer-config-title">{at('admin.orderDetail.buyerConfiguration', 'Buyer Configuration', 'Конфігурація покупця')}</div>
             {selectedDesign && (
               <div className="admin-item-buyer-config-row">
-                <span className="admin-item-buyer-config-key">Design: </span>
+                <span className="admin-item-buyer-config-key">{at('admin.orderDetail.design', 'Design', 'Дизайн')}: </span>
                 {selectedDesign.label}
               </div>
             )}
@@ -294,10 +312,10 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
         {canEditItems ? (
           <>
             <div className="admin-control-group">
-              <label className="admin-control-label">Status</label>
+              <label className="admin-control-label">{at('admin.orderDetail.status', 'Status', 'Статус')}</label>
               <select className="admin-control-select" value={status} onChange={e => setStatus(e.target.value)}>
                 {STATUS_OPTIONS.map(s => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>{statusLabel(s)}</option>
                 ))}
               </select>
             </div>
@@ -305,7 +323,7 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
             {showTracking && (
               <>
                 <div className="admin-control-group">
-                  <label className="admin-control-label">Carrier</label>
+                  <label className="admin-control-label">{at('admin.orderDetail.carrier', 'Carrier', 'Перевізник')}</label>
                   <input
                     className="admin-control-input"
                     value={carrier}
@@ -314,7 +332,7 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
                   />
                 </div>
                 <div className="admin-control-group">
-                  <label className="admin-control-label">Tracking Number</label>
+                  <label className="admin-control-label">{at('admin.orderDetail.trackingNumber', 'Tracking Number', 'Номер відстеження')}</label>
                   <input
                     className="admin-control-input"
                     value={tracking}
@@ -327,46 +345,46 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
             )}
 
             <div className="admin-control-group">
-              <label className="admin-control-label">Admin Note</label>
+              <label className="admin-control-label">{at('admin.orderDetail.adminNote', 'Admin Note', 'Нотатка адміна')}</label>
               <textarea
                 className="admin-control-textarea"
                 value={adminNote}
                 onChange={e => setAdminNote(e.target.value)}
-                placeholder="Internal notes..."
+                placeholder={at('admin.orderDetail.internalNotes', 'Internal notes...', 'Внутрішні нотатки...')}
               />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <button className="admin-save-btn" onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? at('admin.common.saving', 'Saving...', 'Збереження...') : at('admin.common.save', 'Save', 'Зберегти')}
               </button>
-              {saved && <span className="admin-save-success">✓ Saved</span>}
+              {saved && <span className="admin-save-success">✓ {at('admin.orderDetail.saved', 'Saved', 'Збережено')}</span>}
             </div>
           </>
         ) : (
           <>
             <div className="admin-readonly-group">
-              <span className="admin-control-label">Status</span>
-              <span className="admin-readonly-value">{item.status || '—'}</span>
+              <span className="admin-control-label">{at('admin.orderDetail.status', 'Status', 'Статус')}</span>
+              <span className="admin-readonly-value">{statusLabel(item.status)}</span>
             </div>
             <div className="admin-readonly-group">
-              <span className="admin-control-label">Carrier</span>
+              <span className="admin-control-label">{at('admin.orderDetail.carrier', 'Carrier', 'Перевізник')}</span>
               <span className="admin-readonly-value">{item.carrier || '—'}</span>
             </div>
             <div className="admin-readonly-group">
-              <span className="admin-control-label">Tracking Number</span>
+              <span className="admin-control-label">{at('admin.orderDetail.trackingNumber', 'Tracking Number', 'Номер відстеження')}</span>
               <span className="admin-readonly-value">{item.tracking_number || '—'}</span>
               {renderTrackingLinks(item.carrier, item.tracking_number)}
             </div>
             {item.note && (
               <div className="admin-readonly-group">
-                <span className="admin-control-label">Note</span>
+                <span className="admin-control-label">{at('admin.orderDetail.note', 'Note', 'Нотатка')}</span>
                 <span className="admin-readonly-value">{item.note}</span>
               </div>
             )}
             {item.admin_note && (
               <div className="admin-readonly-group">
-                <span className="admin-control-label">Admin Note</span>
+                <span className="admin-control-label">{at('admin.orderDetail.adminNote', 'Admin Note', 'Нотатка адміна')}</span>
                 <span className="admin-readonly-value">{item.admin_note}</span>
               </div>
             )}
@@ -415,38 +433,38 @@ function AdminOrderDetail() {
       <V2Header />
       <div className="admin-container">
         <AdminPageHeader
-          breadcrumbs={[{ label: 'Orders', to: '/admin/orders' }, { label: `Order #${uid?.slice(0, 8)}` }]}
-          title={`Order #${uid?.slice(0, 8)}`}
+          breadcrumbs={[{ label: at('admin.orders.title', 'Orders', 'Замовлення'), to: '/admin/orders' }, { label: `${at('admin.orderDetail.order', 'Order', 'Замовлення')} #${uid?.slice(0, 8)}` }]}
+          title={`${at('admin.orderDetail.order', 'Order', 'Замовлення')} #${uid?.slice(0, 8)}`}
         />
 
-        {loading && <div className="admin-empty">Loading...</div>}
+        {loading && <div className="admin-empty">{at('admin.common.loading', 'Loading...', 'Завантаження...')}</div>}
 
-        {!loading && !order && <div className="admin-empty">Order not found.</div>}
+        {!loading && !order && <div className="admin-empty">{at('admin.orderDetail.notFound', 'Order not found.', 'Замовлення не знайдено.')}</div>}
 
         {order && (
           <>
             <div className="admin-order-meta">
               <div className="admin-order-meta-item">
-                <span className="admin-order-meta-label">Buyer Email</span>
+                <span className="admin-order-meta-label">{at('admin.orderDetail.buyerEmail', 'Buyer Email', 'Email покупця')}</span>
                 <span className="admin-order-meta-value">{order.buyer_email || '—'}</span>
               </div>
               {order.buyer_name && (
                 <div className="admin-order-meta-item">
-                  <span className="admin-order-meta-label">Name</span>
+                  <span className="admin-order-meta-label">{at('admin.common.name', 'Name', 'Ім\'я')}</span>
                   <span className="admin-order-meta-value">{order.buyer_name}</span>
                 </div>
               )}
               <div className="admin-order-meta-item">
-                <span className="admin-order-meta-label">Date</span>
+                <span className="admin-order-meta-label">{at('admin.orderDetail.date', 'Date', 'Дата')}</span>
                 <span className="admin-order-meta-value">{formatDate(order.created_at)}</span>
               </div>
               <div className="admin-order-meta-item">
-                <span className="admin-order-meta-label">Provider</span>
+                <span className="admin-order-meta-label">{at('admin.orderDetail.provider', 'Provider', 'Провайдер')}</span>
                 <span className="admin-order-meta-value">{order.provider}</span>
               </div>
               {order.shipping_address && (
                 <div className="admin-order-meta-item">
-                  <span className="admin-order-meta-label">Shipping Address</span>
+                  <span className="admin-order-meta-label">{at('admin.orderDetail.shippingAddress', 'Shipping Address', 'Адреса доставки')}</span>
                   <span className="admin-order-meta-value">
                     {order.shipping_address.full_name} · {order.shipping_address.phone}<br />
                     {order.shipping_address.city_name} — {order.shipping_address.warehouse_name}

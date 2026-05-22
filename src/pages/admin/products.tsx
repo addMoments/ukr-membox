@@ -15,12 +15,14 @@ import {
 import { AdminProduct, UpdateAdminProductPayload } from '../../types/admin-products';
 import { t } from '../../packages/i18n';
 import { FEATURE_VOICE } from '../../utils/features';
+import { adminText } from '../../utils/admin_i18n';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
 import '../../v2-styles/AdminPageHeader.css';
 import '../../v2-styles/AdminProducts.css';
 
 const PREMIUM_PACKAGE_ID = 'premium';
+const at = adminText;
 
 const isVoiceIncluded = (product: AdminProduct) => {
   return product.voice_included === true
@@ -49,7 +51,7 @@ function AdminProducts() {
           setDenied(true);
           return;
         }
-        setErrorMessage(msg || 'Failed to load products.');
+        setErrorMessage(msg || at('admin.products.errors.load', 'Failed to load products.', 'Не вдалося завантажити продукти.'));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -93,7 +95,7 @@ function AdminProducts() {
     const displayDescriptionUk = (formData.get('display_description_uk') || '').toString().trim();
 
     if (price === null || price < 0) {
-      errors.push('Price must be greater than or equal to 0.');
+      errors.push(at('admin.products.errors.priceMin', 'Price must be greater than or equal to 0.', 'Ціна має бути більшою або дорівнювати 0.'));
     }
 
     const basePayload: UpdateAdminProductPayload = {
@@ -117,10 +119,10 @@ function AdminProducts() {
     const voiceIncluded = formData.get('voice_included') === 'on';
     const sponsoredIncluded = formData.get('sponsored_included') === 'on';
 
-    if (guestCount === null || guestCount < -1) errors.push('Guest count must be greater than or equal to -1.');
-    if (mediaCount === null || mediaCount < -1) errors.push('Media count must be greater than or equal to -1.');
-    if (activationPeriod === null || activationPeriod <= 0) errors.push('Activation period must be greater than 0.');
-    if (storagePeriod === null || storagePeriod <= 0) errors.push('Storage period must be greater than 0.');
+    if (guestCount === null || guestCount < -1) errors.push(at('admin.products.errors.guestMin', 'Guest count must be greater than or equal to -1.', 'Кількість гостей має бути більшою або дорівнювати -1.'));
+    if (mediaCount === null || mediaCount < -1) errors.push(at('admin.products.errors.mediaMin', 'Media count must be greater than or equal to -1.', 'Кількість фото/відео має бути більшою або дорівнювати -1.'));
+    if (activationPeriod === null || activationPeriod <= 0) errors.push(at('admin.products.errors.activationPositive', 'Activation period must be greater than 0.', 'Період активації має бути більше 0.'));
+    if (storagePeriod === null || storagePeriod <= 0) errors.push(at('admin.products.errors.storagePositive', 'Storage period must be greater than 0.', 'Період зберігання має бути більше 0.'));
 
     return {
       payload: errors.length
@@ -151,18 +153,18 @@ function AdminProducts() {
     const { payload, errors } = buildPayload(formData, product);
 
     if (errors.length || !payload) {
-      setResultByUid((prev) => ({ ...prev, [product.uid]: { ok: false, message: errors[0] || 'Validation failed.' } }));
+      setResultByUid((prev) => ({ ...prev, [product.uid]: { ok: false, message: errors[0] || at('admin.products.errors.validation', 'Validation failed.', 'Перевірка не пройдена.') } }));
       return;
     }
 
     setSavingByUid((prev) => ({ ...prev, [product.uid]: true }));
-    setResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: 'Saving...' } }));
+    setResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: at('admin.common.saving', 'Saving...', 'Збереження...') } }));
     try {
       const updated = await updateAdminProduct(product.uid, payload);
       setProducts((prev) => prev.map((x) => (x.uid === product.uid ? updated : x)));
-      setResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: 'Saved successfully.' } }));
+      setResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: at('admin.products.saved', 'Saved successfully.', 'Успішно збережено.') } }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to save product.';
+      const message = err instanceof Error ? err.message : at('admin.products.errors.save', 'Failed to save product.', 'Не вдалося зберегти продукт.');
       setResultByUid((prev) => ({ ...prev, [product.uid]: { ok: false, message } }));
     } finally {
       setSavingByUid((prev) => ({ ...prev, [product.uid]: false }));
@@ -189,7 +191,7 @@ function AdminProducts() {
     }
 
     setImageUploadingByUid((prev) => ({ ...prev, [product.uid]: true }));
-    setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: 'Uploading...' } }));
+    setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: at('admin.products.uploading', 'Uploading...', 'Завантаження...') } }));
     try {
       const presign = await getAddonUploadUrl({
         product_uid: product.uid,
@@ -202,9 +204,9 @@ function AdminProducts() {
         ? await setAddonMobileImage(product.uid, presign.public_url)
         : await setAddonImage(product.uid, presign.public_url);
       setProducts((prev) => prev.map((x) => (x.uid === product.uid ? updated : x)));
-      setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? 'Mobile image updated.' : 'Image updated.' } }));
+      setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? at('admin.products.mobileImageUpdated', 'Mobile image updated.', 'Мобільне зображення оновлено.') : at('admin.products.imageUpdated', 'Image updated.', 'Зображення оновлено.') } }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Image upload failed.';
+      const message = err instanceof Error ? err.message : at('admin.products.errors.imageUpload', 'Image upload failed.', 'Не вдалося завантажити зображення.');
       setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: false, message } }));
     } finally {
       setImageUploadingByUid((prev) => ({ ...prev, [product.uid]: false }));
@@ -216,15 +218,15 @@ function AdminProducts() {
   // Neden: Mobil gorsel temizlenince public tarafta desktop image fallback'i calissin, desktop remove davranisi ise aynen korunsun.
   const onAddonImageRemove = async (product: AdminProduct, target: 'desktop' | 'mobile' = 'desktop') => {
     setImageUploadingByUid((prev) => ({ ...prev, [product.uid]: true }));
-    setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? 'Removing mobile image...' : 'Removing...' } }));
+    setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? at('admin.products.removingMobileImage', 'Removing mobile image...', 'Видалення мобільного зображення...') : at('admin.common.remove', 'Remove', 'Прибрати') + '...' } }));
     try {
       const updated = target === 'mobile'
         ? await removeAddonMobileImage(product.uid)
         : await removeAddonImage(product.uid);
       setProducts((prev) => prev.map((x) => (x.uid === product.uid ? updated : x)));
-      setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? 'Mobile image removed.' : 'Image removed.' } }));
+      setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? at('admin.products.mobileImageRemoved', 'Mobile image removed.', 'Мобільне зображення видалено.') : at('admin.products.imageRemoved', 'Image removed.', 'Зображення видалено.') } }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to remove image.';
+      const message = err instanceof Error ? err.message : at('admin.products.errors.removeImage', 'Failed to remove image.', 'Не вдалося видалити зображення.');
       setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: false, message } }));
     } finally {
       setImageUploadingByUid((prev) => ({ ...prev, [product.uid]: false }));
@@ -240,7 +242,7 @@ function AdminProducts() {
 
     setProducts((prev) => prev.map((x) => (x.uid === product.uid ? { ...x, is_enabled: nextEnabled } : x)));
     setEnabledTogglingByUid((prev) => ({ ...prev, [product.uid]: true }));
-    setEnabledResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: nextEnabled ? 'Enabling...' : 'Disabling...' } }));
+    setEnabledResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: nextEnabled ? at('admin.products.enabling', 'Enabling...', 'Активація...') : at('admin.products.disabling', 'Disabling...', 'Деактивація...') } }));
 
     try {
       const updated = await setAddonEnabled(product.uid, nextEnabled);
@@ -249,10 +251,10 @@ function AdminProducts() {
         const backendEnabled = typeof updated.is_enabled === 'boolean' ? updated.is_enabled : nextEnabled;
         return { ...updated, is_enabled: backendEnabled };
       }));
-      setEnabledResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: nextEnabled ? 'Enabled.' : 'Disabled.' } }));
+      setEnabledResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: nextEnabled ? at('admin.products.enabled', 'Enabled.', 'Активовано.') : at('admin.products.disabled', 'Disabled.', 'Деактивовано.') } }));
     } catch (err) {
       setProducts((prev) => prev.map((x) => (x.uid === product.uid ? { ...x, is_enabled: previousEnabled } : x)));
-      const message = err instanceof Error ? err.message : 'Failed to update status.';
+      const message = err instanceof Error ? err.message : at('admin.products.errors.status', 'Failed to update status.', 'Не вдалося оновити статус.');
       setEnabledResultByUid((prev) => ({ ...prev, [product.uid]: { ok: false, message } }));
     } finally {
       setEnabledTogglingByUid((prev) => ({ ...prev, [product.uid]: false }));
@@ -269,7 +271,7 @@ function AdminProducts() {
       <div className="admin-addon-enabled-block">
         <div className="admin-addon-enabled-row">
           <span className={`admin-addon-status-pill${product.is_enabled ? ' admin-addon-status-pill-on' : ' admin-addon-status-pill-off'}`}>
-            {product.is_enabled ? 'Active' : 'Disabled'}
+            {product.is_enabled ? at('admin.common.active', 'Active', 'Активний') : at('admin.products.disabledShort', 'Disabled', 'Вимкнено')}
           </span>
           <label className={`admin-addon-toggle${toggling ? ' admin-addon-toggle-disabled' : ''}`}>
             <input
@@ -287,7 +289,7 @@ function AdminProducts() {
           </span>
         )}
         <p className="admin-product-field-hint">
-          When disabled, the add-on is hidden from public Services and Prices and Checkout.
+          {at('admin.products.disabledHint', 'When disabled, the add-on is hidden from public Services and Prices and Checkout.', 'Коли вимкнено, додаток приховано з публічних Послуг і цін та Checkout.')}
         </p>
       </div>
     );
@@ -306,11 +308,11 @@ function AdminProducts() {
           {currentImage ? (
             <img src={currentImage} alt={`${product.id} ${target}`} className="admin-addon-image-preview" />
           ) : (
-            <div className="admin-addon-image-empty">{target === 'mobile' ? 'No mobile image' : 'No image'}</div>
+            <div className="admin-addon-image-empty">{target === 'mobile' ? at('admin.products.noMobileImage', 'No mobile image', 'Немає мобільного зображення') : at('admin.products.noImage', 'No image', 'Немає зображення')}</div>
           )}
           <div className="admin-addon-image-actions">
             <label className={`admin-addon-image-btn${uploading ? ' admin-addon-image-btn-disabled' : ''}`}>
-              {uploading ? 'Uploading...' : currentImage ? 'Replace image' : 'Choose image'}
+              {uploading ? at('admin.products.uploading', 'Uploading...', 'Завантаження...') : currentImage ? at('admin.products.replaceImage', 'Replace image', 'Замінити зображення') : at('admin.products.chooseImage', 'Choose image', 'Обрати зображення')}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -330,7 +332,7 @@ function AdminProducts() {
                 disabled={uploading}
                 onClick={() => onAddonImageRemove(product, target)}
               >
-                Remove
+                {at('admin.common.remove', 'Remove', 'Прибрати')}
               </button>
             )}
           </div>
@@ -340,15 +342,15 @@ function AdminProducts() {
 
     return (
       <div className="admin-addon-image-block">
-        {renderImageSlot('desktop', 'Add-On Image', product.options.image)}
-        {renderImageSlot('mobile', 'Mobile Image', product.options.mobile_image)}
+        {renderImageSlot('desktop', at('admin.products.addonImage', 'Add-On Image', 'Зображення додатка'), product.options.image)}
+        {renderImageSlot('mobile', at('admin.products.mobileImage', 'Mobile Image', 'Мобільне зображення'), product.options.mobile_image)}
         {result?.message && (
           <span className={result.ok ? 'admin-product-save-ok' : 'admin-product-save-error'}>
             {result.message}
           </span>
         )}
         <p className="admin-product-field-hint">
-          JPG, PNG or WebP. Max 5MB. Mobile image falls back to Add-On Image when empty. Saved automatically when uploaded.
+          {at('admin.products.imageHint', 'JPG, PNG or WebP. Max 5MB. Mobile image falls back to Add-On Image when empty. Saved automatically when uploaded.', 'JPG, PNG або WebP. Максимум 5MB. Якщо мобільне зображення порожнє, використовується зображення додатка. Зберігається автоматично після завантаження.')}
         </p>
       </div>
     );
@@ -358,7 +360,7 @@ function AdminProducts() {
     <form className="admin-product-form" onSubmit={(e) => onSubmitProduct(e, product)}>
       <div className="admin-product-card-top">
         <div>
-          <span className="admin-product-kind-badge">Core package</span>
+          <span className="admin-product-kind-badge">{at('admin.products.corePackage', 'Core package', 'Основний пакет')}</span>
           <p className="admin-product-name">{renderName(product)}</p>
           {!!renderDescription(product) && <p className="admin-product-desc">{renderDescription(product)}</p>}
           <p className="admin-product-tech-id">ID: {product.id}</p>
@@ -368,50 +370,50 @@ function AdminProducts() {
 
       <div className="admin-product-fields">
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Package Name (EN)</span>
+          <span className="admin-product-field-label">{at('admin.products.packageNameEn', 'Package Name (EN)', 'Назва пакета (EN)')}</span>
           <input name="display_name_en" className="admin-product-input" defaultValue={product.display_name_en || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Package Name (UK)</span>
+          <span className="admin-product-field-label">{at('admin.products.packageNameUk', 'Package Name (UK)', 'Назва пакета (UK)')}</span>
           <input name="display_name_uk" className="admin-product-input" defaultValue={product.display_name_uk || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Package Description (EN)</span>
+          <span className="admin-product-field-label">{at('admin.products.packageDescriptionEn', 'Package Description (EN)', 'Опис пакета (EN)')}</span>
           <textarea name="display_description_en" className="admin-product-input admin-product-textarea" defaultValue={product.display_description_en || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Package Description (UK)</span>
+          <span className="admin-product-field-label">{at('admin.products.packageDescriptionUk', 'Package Description (UK)', 'Опис пакета (UK)')}</span>
           <textarea name="display_description_uk" className="admin-product-input admin-product-textarea" defaultValue={product.display_description_uk || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Package Bullets (EN, one line per item)</span>
+          <span className="admin-product-field-label">{at('admin.products.packageBulletsEn', 'Package Bullets (EN, one line per item)', 'Пункти пакета (EN, один пункт на рядок)')}</span>
           <textarea name="display_bullets_en" className="admin-product-input admin-product-textarea" defaultValue={product.display_bullets_en || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Package Bullets (UK, one line per item)</span>
+          <span className="admin-product-field-label">{at('admin.products.packageBulletsUk', 'Package Bullets (UK, one line per item)', 'Пункти пакета (UK, один пункт на рядок)')}</span>
           <textarea name="display_bullets_uk" className="admin-product-input admin-product-textarea" defaultValue={product.display_bullets_uk || ''} />
         </label>
         <p className="admin-product-field-hint">
-          Enter one bullet item per line. These lines are shown with green check marks on Services and Prices.
+          {at('admin.products.bulletsHint', 'Enter one bullet item per line. These lines are shown with green check marks on Services and Prices.', 'Вводьте один пункт на рядок. Ці рядки показуються із зеленими позначками в Послугах і цінах.')}
         </p>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Package Price</span>
+          <span className="admin-product-field-label">{at('admin.products.packagePrice', 'Package Price', 'Ціна пакета')}</span>
           <input name="price" type="number" min={0} step="0.01" className="admin-product-input" defaultValue={product.price} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Number of Guests</span>
+          <span className="admin-product-field-label">{at('admin.products.numberOfGuests', 'Number of Guests', 'Кількість гостей')}</span>
           <input name="guest_count" type="number" min={-1} step="1" className="admin-product-input" defaultValue={product.options.guest_count} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Number of Pictures / Videos</span>
+          <span className="admin-product-field-label">{at('admin.products.numberOfMedia', 'Number of Pictures / Videos', 'Кількість фото / відео')}</span>
           <input name="media_count" type="number" min={-1} step="1" className="admin-product-input" defaultValue={product.options.media_count} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Activation Period</span>
+          <span className="admin-product-field-label">{at('admin.products.activationPeriod', 'Activation Period', 'Період активації')}</span>
           <input name="activation_period_days" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.activation_days} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Storage Period</span>
+          <span className="admin-product-field-label">{at('admin.products.storagePeriod', 'Storage Period', 'Період зберігання')}</span>
           <input name="storage_period_days" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.storage_days} />
         </label>
       </div>
@@ -425,7 +427,7 @@ function AdminProducts() {
           type="checkbox"
           defaultChecked={isVoiceIncluded(product)}
         />
-        <span>Voice message included</span>
+        <span>{at('admin.products.voiceIncluded', 'Voice message included', 'Голосове повідомлення включено')}</span>
       </label>
 
       {product.id === PREMIUM_PACKAGE_ID && (
@@ -435,13 +437,13 @@ function AdminProducts() {
             type="checkbox"
             defaultChecked={product.sponsored_included === true}
           />
-          <span>Sponsored included</span>
+          <span>{at('admin.products.sponsoredIncluded', 'Sponsored included', 'Sponsored включено')}</span>
         </label>
       )}
 
       <div className="admin-product-form-footer">
         <button type="submit" className="admin-product-save-btn" disabled={Boolean(savingByUid[product.uid])}>
-          {savingByUid[product.uid] ? 'Saving...' : 'Save'}
+          {savingByUid[product.uid] ? at('admin.common.saving', 'Saving...', 'Збереження...') : at('admin.common.save', 'Save', 'Зберегти')}
         </button>
         {renderResult(product.uid)}
       </div>
@@ -452,7 +454,7 @@ function AdminProducts() {
     <form className="admin-product-form" onSubmit={(e) => onSubmitProduct(e, product)}>
       <div className="admin-product-card-top">
         <div>
-          <span className="admin-product-kind-badge admin-product-kind-badge-addon">Add-on</span>
+          <span className="admin-product-kind-badge admin-product-kind-badge-addon">{at('admin.products.addon', 'Add-on', 'Додаток')}</span>
           <p className="admin-product-name">{renderName(product)}</p>
           {!!renderDescription(product) && <p className="admin-product-desc">{renderDescription(product)}</p>}
           <p className="admin-product-tech-id">ID: {product.id}</p>
@@ -466,30 +468,30 @@ function AdminProducts() {
 
       <div className="admin-product-fields">
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Add-On Package Name (EN)</span>
+          <span className="admin-product-field-label">{at('admin.products.addonNameEn', 'Add-On Package Name (EN)', 'Назва додатка (EN)')}</span>
           <input name="display_name_en" className="admin-product-input" defaultValue={product.display_name_en || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Add-On Package Name (UK)</span>
+          <span className="admin-product-field-label">{at('admin.products.addonNameUk', 'Add-On Package Name (UK)', 'Назва додатка (UK)')}</span>
           <input name="display_name_uk" className="admin-product-input" defaultValue={product.display_name_uk || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Add-On Description (EN)</span>
+          <span className="admin-product-field-label">{at('admin.products.addonDescriptionEn', 'Add-On Description (EN)', 'Опис додатка (EN)')}</span>
           <textarea name="display_description_en" className="admin-product-input admin-product-textarea" defaultValue={product.display_description_en || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Add-On Description (UK)</span>
+          <span className="admin-product-field-label">{at('admin.products.addonDescriptionUk', 'Add-On Description (UK)', 'Опис додатка (UK)')}</span>
           <textarea name="display_description_uk" className="admin-product-input admin-product-textarea" defaultValue={product.display_description_uk || ''} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">Add-On Package Price</span>
+          <span className="admin-product-field-label">{at('admin.products.addonPrice', 'Add-On Package Price', 'Ціна додатка')}</span>
           <input name="price" type="number" min={0} step="0.01" className="admin-product-input" defaultValue={product.price} />
         </label>
       </div>
 
       <div className="admin-product-form-footer">
         <button type="submit" className="admin-product-save-btn" disabled={Boolean(savingByUid[product.uid])}>
-          {savingByUid[product.uid] ? 'Saving...' : 'Save'}
+          {savingByUid[product.uid] ? at('admin.common.saving', 'Saving...', 'Збереження...') : at('admin.common.save', 'Save', 'Зберегти')}
         </button>
         {renderResult(product.uid)}
       </div>
@@ -501,28 +503,32 @@ function AdminProducts() {
       <V2Header />
       <div className="admin-container">
         <AdminPageHeader
-          breadcrumbs={[{ label: 'Admin' }, { label: 'Products' }]}
-          title="Products"
+          breadcrumbs={[{ label: at('admin.nav.admin', 'Admin', 'Адмін') }, { label: at('admin.nav.products', 'Products', 'Продукти') }]}
+          title={at('admin.nav.products', 'Products', 'Продукти')}
           actions={
             <>
               <Link to="/admin/orders" className="admin-page-header-link">
                 <i className="fa-solid fa-receipt" />
-                View Orders
+                {at('admin.nav.viewOrders', 'View Orders', 'Переглянути замовлення')}
               </Link>
               <Link to="/admin/panel-admins" className="admin-page-header-link">
                 <i className="fa-solid fa-user-shield" />
-                Panel Admins
+                {at('admin.nav.panelAdmins', 'Panel Admins', 'Адміністратори панелі')}
               </Link>
               <Link to="/admin/promos" className="admin-page-header-link">
                 <i className="fa-solid fa-ticket" />
-                Promos
+                {at('admin.nav.promos', 'Promos', 'Промокоди')}
+              </Link>
+              <Link to="/admin/partnerships" className="admin-page-header-link">
+                <i className="fa-solid fa-handshake" />
+                {at('admin.nav.partnerships', 'Partnerships', 'Партнерства')}
               </Link>
             </>
           }
         />
 
-        {loading && <div className="admin-empty">Loading products...</div>}
-        {!loading && denied && <div className="admin-empty">Access denied. You are not a super-admin.</div>}
+        {loading && <div className="admin-empty">{at('admin.products.loading', 'Loading products...', 'Завантаження продуктів...')}</div>}
+        {!loading && denied && <div className="admin-empty">{at('admin.orders.accessDenied', 'Access denied. You are not a super-admin.', 'Доступ заборонено. Ви не супер-адміністратор.')}</div>}
         {!loading && !denied && !!errorMessage && <div className="admin-empty">{errorMessage}</div>}
 
         {!loading && !denied && !errorMessage && (
@@ -530,8 +536,8 @@ function AdminProducts() {
             <section className="admin-products-panel">
               <div className="admin-products-panel-head">
                 <div>
-                  <h2>Core Packages</h2>
-                  <p>Main plans with limits, periods and voice option.</p>
+                  <h2>{at('admin.products.corePackages', 'Core Packages', 'Основні пакети')}</h2>
+                  <p>{at('admin.products.corePackagesDesc', 'Main plans with limits, periods and voice option.', 'Основні плани з лімітами, періодами та опцією голосу.')}</p>
                 </div>
                 <span className="admin-products-panel-count">{packageProducts.length}</span>
               </div>
@@ -545,8 +551,8 @@ function AdminProducts() {
             <section className="admin-products-panel">
               <div className="admin-products-panel-head">
                 <div> 
-                  <h2>Add-ons</h2> 
-                  <p>Optional products shown after core package selection.</p>
+                  <h2>{at('admin.products.addons', 'Add-ons', 'Додатки')}</h2> 
+                  <p>{at('admin.products.addonsDesc', 'Optional products shown after core package selection.', 'Додаткові продукти, що показуються після вибору основного пакета.')}</p>
                 </div>
                 <span className="admin-products-panel-count">{addOnProducts.length}</span>
               </div>

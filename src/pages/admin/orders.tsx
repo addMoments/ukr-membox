@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { fetch as authFetch } from '../../client/core';
 import { getAdminRole } from '../../client/admin';
 import { SERV_ROOT } from '../../consts';
+import { adminText } from '../../utils/admin_i18n';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
 import '../../v2-styles/AdminPageHeader.css';
@@ -29,12 +30,30 @@ interface OrderFilters {
   to: string;
 }
 
+const at = adminText;
+
 // Ne: Siparis durumunu badge CSS class'ina cevirir.
 // Nasil: Bilinen status degerlerini aynen kullanir, bilinmeyenleri default'a dusurur.
 // Neden: Backend yeni veya bos status dondurse bile UI kirilmasin.
 function statusClass(status: string) {
   const known = ['purchased', 'client-action', 'admin-action', 'shipped', 'fulfilled', 'cancelled'];
   return known.includes(status) ? status : 'default';
+}
+
+// Ne: Backend status sabitini admin ekraninda okunur dile cevirir.
+// Nasil: Value ayni kalir; sadece badge text'i adminText ile EN/UK label'a doner.
+// Neden: Filtre/renk mantigi bozulmadan order status'leri Ukraynaca arayuzde Ukraynaca gorunsun.
+function statusLabel(status: string) {
+  const labels: Record<string, [string, string]> = {
+    purchased: ['Purchased', 'Придбано'],
+    'client-action': ['Client Action', 'Дія клієнта'],
+    'admin-action': ['Admin Action', 'Дія адміністратора'],
+    shipped: ['Shipped', 'Відправлено'],
+    fulfilled: ['Fulfilled', 'Виконано'],
+    cancelled: ['Cancelled', 'Скасовано'],
+  };
+  const [en, uk] = labels[status] || [status || '—', status || '—'];
+  return at(`admin.status.${status || 'unknown'}`, en, uk);
 }
 
 // Ne: Admin siparis listesini rol bilgisine gore render eder.
@@ -122,8 +141,8 @@ function AdminOrders() {
 
     return (
       <span className="admin-order-card-promo">
-        Promo {order.promo_code_text_snapshot} applied · was ₴{grossTotal.toFixed(2)}
-        {discountAmount > 0 ? ` · discount ₴${discountAmount.toFixed(2)}` : ''}
+        {at('admin.orders.promoApplied', `Promo ${order.promo_code_text_snapshot} applied · was ₴${grossTotal.toFixed(2)}`, `Застосовано промокод ${order.promo_code_text_snapshot} · було ₴${grossTotal.toFixed(2)}`, { code: order.promo_code_text_snapshot || '-', gross: grossTotal.toFixed(2) })}
+        {discountAmount > 0 ? ` · ${at('admin.orders.promoDiscount', `discount ₴${discountAmount.toFixed(2)}`, `знижка ₴${discountAmount.toFixed(2)}`, { discount: discountAmount.toFixed(2) })}` : ''}
       </span>
     );
   };
@@ -151,22 +170,26 @@ function AdminOrders() {
       <V2Header />
       <div className="admin-container" data-has-order-filters={hasActiveFilters ? 'true' : 'false'}>
         <AdminPageHeader
-          breadcrumbs={[{ label: 'Admin' }, { label: 'Orders' }]}
-          title="Orders"
+          breadcrumbs={[{ label: at('admin.nav.admin', 'Admin', 'Адмін') }, { label: at('admin.orders.title', 'Orders', 'Замовлення') }]}
+          title={at('admin.orders.title', 'Orders', 'Замовлення')}
           actions={
             isSuperAdmin ? (
               <>
                 <Link to="/admin/products" className="admin-page-header-link">
                   <i className="fa-solid fa-boxes-stacked" />
-                  Manage Products
+                  {at('admin.nav.manageProducts', 'Manage Products', 'Керувати продуктами')}
                 </Link>
                 <Link to="/admin/panel-admins" className="admin-page-header-link">
                   <i className="fa-solid fa-user-shield" />
-                  Panel Admins
+                  {at('admin.nav.panelAdmins', 'Panel Admins', 'Адміністратори панелі')}
                 </Link>
                 <Link to="/admin/promos" className="admin-page-header-link">
                   <i className="fa-solid fa-ticket" />
-                  Promos
+                  {at('admin.nav.promos', 'Promos', 'Промокоди')}
+                </Link>
+                <Link to="/admin/partnerships" className="admin-page-header-link">
+                  <i className="fa-solid fa-handshake" />
+                  {at('admin.nav.partnerships', 'Partnerships', 'Партнерства')}
                 </Link>
               </>
             ) : null
@@ -175,43 +198,43 @@ function AdminOrders() {
 
         {isSuperAdmin && (
           <section className="admin-panel-card admin-order-filter-card">
-            <h2 className="admin-panel-title">Filter Orders</h2>
+            <h2 className="admin-panel-title">{at('admin.orders.filterTitle', 'Filter Orders', 'Фільтр замовлень')}</h2>
             <form className="admin-panel-form" onSubmit={applyFilters} key={`${filters.promoCode}-${filters.from}-${filters.to}`}>
               <div className="admin-control-group">
-                <label className="admin-control-label">Promo Code</label>
+                <label className="admin-control-label">{at('admin.orders.promoCode', 'Promo Code', 'Промокод')}</label>
                 <input name="promo_code" className="admin-control-input" placeholder="SUMMER10" defaultValue={filters.promoCode} />
               </div>
               <div className="admin-control-group">
-                <label className="admin-control-label">From</label>
+                <label className="admin-control-label">{at('admin.common.from', 'From', 'Від')}</label>
                 <input name="from" type="datetime-local" className="admin-control-input" defaultValue={filters.from} />
               </div>
               <div className="admin-control-group">
-                <label className="admin-control-label">To</label>
+                <label className="admin-control-label">{at('admin.common.to', 'To', 'До')}</label>
                 <input name="to" type="datetime-local" className="admin-control-input" defaultValue={filters.to} />
               </div>
-              <button type="submit" className="admin-save-btn">Apply</button>
+              <button type="submit" className="admin-save-btn">{at('admin.common.apply', 'Apply', 'Застосувати')}</button>
               {hasActiveFilters && (
                 <button type="button" className="admin-order-filter-clear" onClick={clearFilters}>
-                  Clear
+                  {at('admin.common.clear', 'Clear', 'Очистити')}
                 </button>
               )}
             </form>
           </section>
         )}
 
-        {loading && <div className="admin-empty">Loading...</div>}
+        {loading && <div className="admin-empty">{at('admin.orders.loading', 'Loading...', 'Завантаження...')}</div>}
 
         {denied && (
-          <div className="admin-empty">Access denied. You are not a super-admin.</div>
+          <div className="admin-empty">{at('admin.orders.accessDenied', 'Access denied. You are not a super-admin.', 'Доступ заборонено. Ви не супер-адміністратор.')}</div>
         )}
 
         {!loading && !denied && orders.length === 0 && (
-          <div className="admin-empty">No orders yet.</div>
+          <div className="admin-empty">{at('admin.orders.empty', 'No orders yet.', 'Замовлень ще немає.')}</div>
         )}
 
         {!loading && !denied && orders.length > 0 && filteredOrders.length === 0 && (
           <div className="admin-empty">
-            {hasActiveFilters ? 'No orders found for these filters.' : 'No orders yet.'}
+            {hasActiveFilters ? at('admin.orders.noFilteredResults', 'No orders found for these filters.', 'За цими фільтрами замовлень не знайдено.') : at('admin.orders.empty', 'No orders yet.', 'Замовлень ще немає.')}
           </div>
         )}
 
@@ -225,12 +248,14 @@ function AdminOrders() {
                     {order.buyer_name && <span className="admin-order-card-name">{order.buyer_name}</span>}
                   </div>
                   <span className={`admin-status-badge ${statusClass(order.worst_status)}`}>
-                    {order.worst_status || '—'}
+                    {statusLabel(order.worst_status)}
                   </span>
                 </div>
                 <div className="admin-order-card-bottom">
                   <span className="admin-order-card-meta">{formatDate(order.created_at)}</span>
-                  <span className="admin-order-card-meta">{order.items_count} item{order.items_count !== '1' ? 's' : ''}</span>
+                  <span className="admin-order-card-meta">
+                    {order.items_count} {order.items_count === '1' ? at('admin.orderDetail.item', 'item', 'позиція') : at('admin.orderDetail.items', 'items', 'позицій')}
+                  </span>
                   {isSuperAdmin && (
                     <span className="admin-order-card-total">₴{parseFloat(resolveOrderTotal(order)).toFixed(2)}</span>
                   )}
