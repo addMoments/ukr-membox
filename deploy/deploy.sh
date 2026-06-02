@@ -1,4 +1,4 @@
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source $SCRIPT_DIR/.env
 
 
