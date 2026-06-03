@@ -5,9 +5,19 @@ import { sendToMsg } from '../types/mesage-screen';
 import V2Header from '../v2-components/V2Header';
 import V2Footer from '../v2-components/V2Footer';
 import { clearCartState } from '../client/cart';
+import { markMetaEventOnce, trackMetaPurchase } from '../client/meta-pixel';
 
 const POLL_INTERVAL_MS = 2500;
 const MAX_POLLS = 24; // ~60 seconds total
+
+// Ne: Backend purchase status cevabindan Meta'ya gonderilecek net odeme tutarini okur.
+// Nasil: net_total alanini number veya numeric string olarak kabul eder, gecersizse null dondurur.
+// Neden: Purchase event'inde tahmini cart toplamı yerine gercek odenen tutar kullanilsin.
+function readPurchaseValue(data: { net_total?: unknown }) {
+  const rawValue = data.net_total;
+  const parsedValue = typeof rawValue === 'number' ? rawValue : Number(rawValue);
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+}
 
 export default function CheckoutPending() {
   const { encPackedUID } = useParams<{ encPackedUID: string }>();
@@ -71,6 +81,16 @@ export default function CheckoutPending() {
 
         if (data.status === 'success') {
           if (timerRef.current) clearInterval(timerRef.current);
+          const purchaseValue = readPurchaseValue(data);
+          if (purchaseValue !== null && markMetaEventOnce(`meta_purchase_tracked_${encPackedUID}`)) {
+            // Ne: Odeme backend tarafindan success dogrulandiginda Meta Purchase event'i yollar.
+            // Nasil: Status response'taki net_total degeri UAH currency ile Meta payload'ina aktarilir.
+            // Neden: Baslatilan odeme degil, gercek basarili satin alma revenue olarak sayilsin.
+            trackMetaPurchase({
+              value: purchaseValue,
+              currency: 'UAH',
+            });
+          }
           await clearCartState();
           sendToMsg({
             title: 'Payment Successful!',

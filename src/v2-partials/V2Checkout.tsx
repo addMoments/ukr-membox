@@ -15,6 +15,7 @@ import { get_key } from '../utils/persistence';
 import { Product } from '../types/products';
 import { getPromoErrorMessage, validatePromoCode } from '../client/promo';
 import { PromoValidationResponse } from '../types/promo';
+import { markMetaEventOnce, trackMetaAddToCart } from '../client/meta-pixel';
 
 interface ShippingAddress {
   full_name: string;
@@ -68,10 +69,22 @@ type BuyerConfigsState = Record<string, Record<string, string>>;
 
 const SINGLE_QUANTITY_ADDON_IDS = new Set(['audioGuestbook', 'audiobook', 'advertorial', 'sponsored']);
 
+// Ne: Cart item listesinden Meta AddToCart icin tekrar kullanilabilir signature uretir.
+// Nasil: Quantity'si pozitif urunleri product_uid:quantity formatinda siralayip pipe ile birlestirir.
+// Neden: Ayni cart checkout refresh'lerinde ikinci kez AddToCart sayilmasin.
+function buildMetaCartSignature(cartItems: ReadonlyArray<{ product_uid: string; quantity: number }>) {
+  return cartItems
+    .filter(item => item.quantity > 0)
+    .map(item => `${item.product_uid}:${item.quantity}`)
+    .sort()
+    .join('|');
+}
+
 function V2Checkout() {
   const cart = useSnapshot(cartState);
   const currentLang = String(t('lang_code') || 'en');
   const checkoutSummaryRef = useRef<HTMLDivElement | null>(null);
+  const addToCartTrackedRef = useRef(false);
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [buyerConfigs, setBuyerConfigs] = useState<BuyerConfigsState>({});
@@ -96,6 +109,23 @@ function V2Checkout() {
       }
     });
   }, [cart.cartItems, cart.init]);
+
+  useEffect(() => {
+    if (!cart.init || addToCartTrackedRef.current) return;
+    const cartSignature = buildMetaCartSignature(cart.cartItems);
+    if (!cartSignature) return;
+
+    addToCartTrackedRef.current = true;
+    if (!markMetaEventOnce(`meta_add_to_cart_tracked_${cartSignature}`)) return;
+
+    // Ne: Checkout'a dolu cart ile gelindiginde Meta AddToCart event'i yollar.
+    // Nasil: Cart signature guard'i gecerse toplam tutar ve UAH currency ile event tetiklenir.
+    // Neden: Kullanici checkout asamasina ilerlediginde sepet aksiyonu olculsun ama refresh cift saymasin.
+    trackMetaAddToCart({
+      value: cart.total,
+      currency: 'UAH',
+    });
+  }, [cart.cartItems, cart.init, cart.total]);
 
   useEffect(() => {
     if (!appliedPromo) return;

@@ -6,10 +6,15 @@ import V2Toast from './v2-components/V2Toast';
 import RequireAuth from './v2-components/RequireAuth';
 import AdminRouteGuard from './v2-components/AdminRouteGuard';
 import { is_live } from './consts';
+import { trackMetaPageView } from './client/meta-pixel';
 
 function RouteChangeEmitter() {
   const location = useLocation();
   useEffect(() => {
+    // Ne: React route degisimlerinde Meta Pixel PageView event'i yollar.
+    // Nasil: Location pathname degistikce helper uzerinden Pixel init ve PageView tetiklenir.
+    // Neden: SPA navigasyonlari tam sayfa reload yapmadigi icin Meta raporlarinda sayfa gecisleri eksik kalmasin.
+    trackMetaPageView();
     window.dispatchEvent(new Event('routechange'));
   }, [location.pathname]);
   return null;

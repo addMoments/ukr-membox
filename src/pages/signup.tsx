@@ -9,6 +9,7 @@ import V2SignInForm from '../v2-partials/V2SignInForm';
 import { FormState } from '../utils/form_event_parse';
 import '../v2-styles/AuthForm.css';
 import { t } from '../packages/i18n';
+import { markMetaEventOnce, trackMetaCompleteRegistration } from '../client/meta-pixel';
 
 function SignUp() {
   const { token } = useParams<{ token?: string }>();
@@ -44,6 +45,15 @@ function SignUp() {
         confirm_password: formData.confirmPassword,
         agreed: formData.agreed,
       });
+
+      // Ne: Basarili token kaydindan sonra Meta CompleteRegistration event'i yollar.
+      // Nasil: Token bazli session guard gecerse signup_with_token etiketiyle event tetiklenir.
+      // Neden: Submit tiklamasi degil, gercek tamamlanan kayit donusumu olculsun.
+      if (markMetaEventOnce(`meta_registration_tracked_${token}`)) {
+        trackMetaCompleteRegistration({
+          content_name: 'signup_with_token',
+        });
+      }
     } catch (error) {
       console.error('Sign up error:', error);
       alert(error instanceof Error ? error.message : t('auth.signUpFailed'));
