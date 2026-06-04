@@ -3,11 +3,48 @@ import V2Footer from '../v2-components/V2Footer';
 import V2EventNew from '../v2-partials/V2EventNew';
 import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import i18n from '../packages/i18n';
+
+const seoByLanguage = {
+  en: {
+    title: 'Pricing - AddMoments | Choose a plan for your event',
+    description:
+      'Check out AddMoments pricing for weddings, birthdays, and corporate events. Collect photos from guests via a QR code—fast, convenient, and affordable.',
+  },
+  uk: {
+    title: 'Тарифи та Ціни - AddMoments | Оберіть план для вашої події',
+    description:
+      'Перегляньте тарифи AddMoments для весілля, днів народження та корпоративних заходів. Збирайте фото від гостей через QR-код — швидко, зручно та доступно.',
+  },
+} as const;
+
+function ensureMetaTag(attribute: 'name' | 'property', value: string) {
+  const selector = `meta[${attribute}="${value}"]`;
+  let tag = document.head.querySelector<HTMLMetaElement>(selector);
+
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute(attribute, value);
+    document.head.appendChild(tag);
+  }
+
+  return tag;
+}
+
+function updateSeoTags(language: keyof typeof seoByLanguage) {
+  const seo = seoByLanguage[language] ?? seoByLanguage.en;
+
+  document.title = seo.title;
+  ensureMetaTag('name', 'description').setAttribute('content', seo.description);
+  ensureMetaTag('property', 'og:title').setAttribute('content', seo.title);
+  ensureMetaTag('property', 'og:description').setAttribute('content', seo.description);
+}
 
 function EventNew() {
   const [searchParams] = useSearchParams();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [authResolved, setAuthResolved] = useState<boolean>(false);
+  const currentLanguage = (i18n.language || 'en') as keyof typeof seoByLanguage;
   const isGetStartedEntry = searchParams.get('entry') === 'get-started';
   const shouldShowSignInSection = isGetStartedEntry && authResolved && !isLoggedIn;
 
@@ -77,6 +114,10 @@ function EventNew() {
       observer.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    updateSeoTags(currentLanguage);
+  }, [currentLanguage]);
 
   return (
     <>
