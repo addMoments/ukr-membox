@@ -99,7 +99,7 @@ function V2SignInForm({ onSubmit, compact = false, prefillEmail, emailReadOnly }
             {!compact && (
               <div className="v2-auth-link-section">
                 {t('auth.newHere')}
-                <Link to="/events/services-and-prices" className="v2-auth-link">
+                <Link to="/events/services-and-prices/" className="v2-auth-link">
                   {t('auth.createAnAccount')}
                 </Link>
               </div>

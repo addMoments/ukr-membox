@@ -108,12 +108,14 @@ function App() {
           <Route path="/event/:uid/poster" element={<RequireAuth><EventPoster /></RequireAuth>} />
 
           <Route path="/events/services-and-prices" element={<EventNew />} />
+          <Route path="/events/services-and-prices/" element={<EventNew />} />
           <Route path="/checkout" element={<EventCheckout />} />
           <Route path="/checkout/pending/:encPackedUID" element={<CheckoutPending />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/payment/:token" element={<></>} />
 
           <Route path="/signin" element={<SignIn />} />
+          <Route path="/signin/" element={<SignIn />} />
           <Route path="/signout" element={<SignOut />} />
           <Route path="/recover" element={<Recover />} />        
           <Route path="/guest/:uid" element={<Participant />} />

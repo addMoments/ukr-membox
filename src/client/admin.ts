@@ -53,7 +53,7 @@ function isAdminRedirectPath(path: string): boolean {
 // Nasil: Aktif eventi varsa /events'e, yoksa normal kullanici satin alma akisi olan services/prices'a dondurur.
 // Neden: has_active_event admin yetkisi degildir; sadece normal event sahibi akisini belirler.
 function resolveNonAdminFallbackPath(role: AdminRole): string {
-  return role.has_active_event ? '/events' : '/events/services-and-prices';
+  return role.has_active_event ? '/events' : '/events/services-and-prices/';
 }
 
 // Ne: Login sonrasi gidilecek hedefi admin rol bilgisine gore secer.

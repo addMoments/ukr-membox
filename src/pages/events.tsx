@@ -30,7 +30,7 @@ const Events = () => {
       const visibleEvents = Array.isArray(evts) ? evts.filter((evt) => !evt.deleted_at) : [];
 
       if (visibleEvents.length === 0) {
-        navigate('/events/services-and-prices');
+        navigate('/events/services-and-prices/');
         return;
       }
 

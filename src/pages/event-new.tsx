@@ -4,6 +4,7 @@ import V2EventNew from '../v2-partials/V2EventNew';
 import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import i18n from '../packages/i18n';
+import { ensureCanonicalLink, ensureMetaTag } from '../utils/seo';
 
 const seoByLanguage = {
   en: {
@@ -18,26 +19,18 @@ const seoByLanguage = {
   },
 } as const;
 
-function ensureMetaTag(attribute: 'name' | 'property', value: string) {
-  const selector = `meta[${attribute}="${value}"]`;
-  let tag = document.head.querySelector<HTMLMetaElement>(selector);
-
-  if (!tag) {
-    tag = document.createElement('meta');
-    tag.setAttribute(attribute, value);
-    document.head.appendChild(tag);
-  }
-
-  return tag;
-}
+const canonicalPath = '/events/services-and-prices/';
 
 function updateSeoTags(language: keyof typeof seoByLanguage) {
   const seo = seoByLanguage[language] ?? seoByLanguage.en;
+  const canonicalHref = new URL(canonicalPath, window.location.origin).toString();
 
   document.title = seo.title;
   ensureMetaTag('name', 'description').setAttribute('content', seo.description);
   ensureMetaTag('property', 'og:title').setAttribute('content', seo.title);
   ensureMetaTag('property', 'og:description').setAttribute('content', seo.description);
+  ensureMetaTag('property', 'og:url').setAttribute('content', canonicalHref);
+  ensureCanonicalLink(canonicalHref);
 }
 
 function EventNew() {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import V2Header from '../v2-components/V2Header';
 import V2Footer from '../v2-components/V2Footer';
@@ -6,6 +7,7 @@ import { signInEmail } from '../client/auth';
 import { resolvePostSignInRedirect } from '../client/admin';
 import { FormState } from '../utils/form_event_parse';
 import { t } from '../packages/i18n';
+import { ensureCanonicalLink, ensureMetaTag } from '../utils/seo';
 
 // Ne: ?next= parametresini guvenli bir same-origin path'e cevirir.
 // Nasil: decodeURIComponent eder; sadece tek '/' ile baslayan, '//' veya '/\\' ile baslamayan relative path'i kabul eder.
@@ -24,9 +26,23 @@ const safeNext = (raw: string | null): string | null => {
   return decoded;
 };
 
+const canonicalPath = '/signin/';
+
 function SignIn() {
   const [searchParams] = useSearchParams();
   const next = safeNext(searchParams.get('next'));
+
+  useEffect(() => {
+    const canonicalHref = new URL(canonicalPath, window.location.origin).toString();
+    const description = 'Sign in to manage your AddMoments event pages, galleries, and settings.';
+
+    document.title = 'Sign in - AddMoments';
+    ensureMetaTag('name', 'description').setAttribute('content', description);
+    ensureMetaTag('property', 'og:title').setAttribute('content', 'Sign in - AddMoments');
+    ensureMetaTag('property', 'og:description').setAttribute('content', description);
+    ensureMetaTag('property', 'og:url').setAttribute('content', canonicalHref);
+    ensureCanonicalLink(canonicalHref);
+  }, []);
 
   // Ne: Login form submit handler.
   // Nasil: Backend goto'sunu once bloklar; basarili login sonrasi admin check ile ozel no-access durumunu yakalar, yoksa next/goto akisini surdurur.

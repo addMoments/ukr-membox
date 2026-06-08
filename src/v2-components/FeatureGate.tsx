@@ -22,7 +22,7 @@ function FeatureGate({ features, featureId, displayName, children }: FeatureGate
           <p className="feature-gate-desc">
             {t('featureGate.desc', { feature: displayName })}
           </p>
-          <Link to="/events/services-and-prices" className="feature-gate-btn">
+          <Link to="/events/services-and-prices/" className="feature-gate-btn">
             <i className="fa-solid fa-arrow-up-right-dots"></i>
             {t('featureGate.upgrade')}
           </Link>
