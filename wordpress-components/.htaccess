@@ -1,3 +1,34 @@
+# BEGIN LSCACHE
+## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteRule litespeed/debug/.*\.log$ - [F,L]
+RewriteRule \.litespeed_conf\.dat - [F,L]
+</IfModule>
+<IfModule LiteSpeed>
+CacheLookup on
+RewriteRule .* - [E=Cache-Control:no-autoflush]
+
+### marker ASYNC start ###
+RewriteCond %{REQUEST_URI} /wp-admin/admin-ajax\.php
+RewriteCond %{QUERY_STRING} action=async_litespeed
+RewriteRule .* - [E=noabort:1]
+### marker ASYNC end ###
+
+### marker DROPQS start ###
+CacheKeyModify -qs:fbclid
+CacheKeyModify -qs:gclid
+CacheKeyModify -qs:utm*
+CacheKeyModify -qs:_ga
+### marker DROPQS end ###
+
+</IfModule>
+## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
+# END LSCACHE
+# BEGIN NON_LSCACHE
+## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
+## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
+# END NON_LSCACHE
 # BEGIN Addmoments
 <IfModule mod_rewrite.c>
 RewriteEngine On
@@ -5,6 +36,16 @@ RewriteEngine On
 RewriteRule ^(ui)(?:/(.*))?$ https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/$1/$2 [R=307,L,QSA]
 # 2. Auth/API → Backend proxy
 RewriteRule ^(auth|api|l)(?:/(.*))?$ https://serv.addmoments.com.ua/$1/$2 [R=307,L,QSA]
+# 2.a Redirect `signin`, `services`, and `prices` to their trailing-slash versions (301)
+RewriteCond %{REQUEST_URI} !/$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(signin|services|prices)(/.*)?$ /$1$2/ [R=301,L]
+# 2.b Redirect specific events subpage `events/services-and-prices` to trailing-slash (301)
+RewriteCond %{REQUEST_URI} !/$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^events/services-and-prices(?:/(.*))?$ /events/services-and-prices/ [R=301,L,QSA]
 # 3. React SPA fallback (internal rewrite, no redirect)
 RewriteCond %{QUERY_STRING} !(^|&)rnf=1(&|$)
 RewriteRule ^(event|events|guest|checkout|payment|signin|recover|notice|signup|signout|reset-password)(?:/(.*))?$ /reactApp.html [L]
@@ -12,19 +53,28 @@ RewriteRule ^(event|events|guest|checkout|payment|signin|recover|notice|signup|s
 RewriteCond %{REQUEST_URI} !/$
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/(event|events|guest|checkout|payment|signin|recover|notice|signup|signout|reset-password)
+# Generic trailing-slash redirect (excludes React routes and error docs)
+RewriteCond %{REQUEST_URI} !/$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/(event|events|guest|checkout|payment|recover|notice|signup|signout|reset-password)
 RewriteCond %{REQUEST_URI} !^/404\.shtml
 RewriteRule ^(.+)$ /$1/ [R=301,L]
 </IfModule>
 # END Addmoments
 
 # BEGIN WordPress
+# The directives (lines) between "BEGIN WordPress" and "END WordPress" are
+# dynamically generated, and should only be modified via WordPress filters.
+# Any changes to the directives between these markers will be overwritten.
 <IfModule mod_rewrite.c>
 RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 RewriteBase /
 RewriteRule ^index\.php$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.php [L]
 </IfModule>
+
 # END WordPress
