@@ -382,9 +382,9 @@
             "description": "A beautifully printed welcome board featuring your event name and QR code — perfect for greeting guests at the entrance.",
             "instruction": "Please provide your delivery address. Our team will be in touch with further details. A tracking number will be sent to your email once dispatched."
         },
-        "aesel": {
+        "easel": {
             "name": "Easel",
-            "description": "A elegant wooden easel.",
+            "description": "An elegant wooden easel.",
             "instruction": "Please provide your delivery address. Our team will be in touch with further details. A tracking number will be sent to your email once dispatched."
         }
     },
