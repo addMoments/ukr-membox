@@ -91,17 +91,34 @@
       </div>
     </div>
     <div class="v2-header-mobile-menu ">
-      <div id="mobile-links"></div>
-      <div class="v2-header-mobile-lang">
-        <select id="langSelMobile" class="v2-header-mobile-lang-select">
-          <option value="en">EN</option>
-          <option value="uk">UA</option>
-        </select>
+      <div class="v2-mobile-menu-topbar">
+        <a class="v2-header-logo" href="/" data-discover="true" aria-label="Homepage">
+          <div class="v2-header-logo-icon"><img class="header-logo" src="%PUBLIC_URL%/assets/header/addmoments_logo.svg" alt="Addmoments"></div>
+        </a>
+        <div class="v2-mobile-menu-topbar-right">
+          <div class="v2-header-mobile-lang">
+            <select id="langSelMobile" class="v2-header-mobile-lang-select">
+              <option value="en">EN</option>
+              <option value="uk">UA</option>
+            </select>
+          </div>
+          <button class="v2-mobile-menu-close" aria-label="Close menu">
+            <img class="header-icon" src="%PUBLIC_URL%/assets/header/cross.svg" alt="Close">
+          </button>
+        </div>
       </div>
-      <a class="v2-header-cta signin" data-pub="1" href="/signin" data-discover="true" data-t="sign_in">Sign in</a>
-      <a class="v2-header-cta " data-pub="1" href="/events/services-and-prices?entry=get-started" data-discover="true"
-        data-t="get_started">Get started</a>
-      <a class="v2-header-cta signin" data-pub="0" href="/signout" data-discover="true" data-t="sign_out">Sign out</a>
+      <div class="v2-mobile-menu-body">
+        <div id="mobile-links"></div>
+      </div>
+      <div class="v2-mobile-menu-bottom">
+        <a class="v2-header-cta signin" data-pub="1" href="/signin" data-discover="true" data-t="sign_in">Sign in</a>
+        <a class="v2-mobile-menu-cta" data-pub="1" href="/events/services-and-prices?entry=get-started" data-discover="true" data-t="get_started">
+          <span>Get started</span>
+          <span class="v2-mobile-cta-arrow">&rarr;</span>
+        </a>
+        <a class="v2-header-cta signin" data-pub="0" href="/signout" data-discover="true" data-t="sign_out">Sign out</a>
+        <div class="v2-mobile-menu-socials"></div>
+      </div>
     </div>
   </nav>
   <!-- HEADER END -->
