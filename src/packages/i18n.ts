@@ -54,12 +54,6 @@ const change_lang = async (lang_code: string = default_lang): Promise<void> => {
     return;
   }
 
-  await i18n.changeLanguage(lang_code);
-  
-  // RTL kontrolü
-  const currentLang = lang_list.find(l => l.code === lang_code);
-  const isRtlActive = currentLang?.rtl ?? false;
-
   window.location.reload();
 };
 

@@ -7,6 +7,7 @@ import RequireAuth from './v2-components/RequireAuth';
 import AdminRouteGuard from './v2-components/AdminRouteGuard';
 import { is_live } from './consts';
 import { trackMetaPageView } from './client/meta-pixel';
+import Footer from './components/Footer';
 
 function RouteChangeEmitter() {
   const location = useLocation();
@@ -117,7 +118,7 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signin/" element={<SignIn />} />
           <Route path="/signout" element={<SignOut />} />
-          <Route path="/recover" element={<Recover />} />        
+          <Route path="/recover" element={<Recover />} />
           <Route path="/guest/:uid" element={<Participant />} />
           <Route path="/guest/:uid/uploads" element={<ParticipantUploads />} />
           <Route path="/guest/:uid/guestbook" element={<ParticipantGuestbook />} />
@@ -143,6 +144,7 @@ function App() {
         </Routes>
       </Suspense>
       <V2Toast />
+      <Footer />
     </BrowserRouter>
   );
 }

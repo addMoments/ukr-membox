@@ -1,5 +1,9 @@
 {
     "lang_code": "en",
+    "blog": "Blog",
+    "sign_in": "Sign in",
+    "get_started": "Get started",
+    "footer_description": "The easiest way to collect photos from your guests. Create a digital album for your special events without any app downloads.",
     "common": {
         "events": "Events",
         "event": "Event",
