@@ -74,11 +74,6 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
     }
   }, [cart.cartItems, cart.init, cart.products]);
 
-  if (isLoading) {
-    console.log('[V2EventNew] Rendering LoadingSpinner (isLoading:', isLoading, ')');
-    return <LoadingSpinner />;
-  }
-
   const packageOrder = ['standard', 'plus', 'premium'];
   const corePackages = cart.products
     .filter(p => !p.is_add_on && p.is_enabled)

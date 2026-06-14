@@ -105,59 +105,56 @@ function AppContent() {
       <ScrollToTop />
       <RouteChangeEmitter />
       <Suspense fallback={<LoadingSpinner />}>
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : (
-          <Routes>
-            {/* Host event detay ve alt sayfalari icin auth guard:
-                login degilse RequireAuth /signin?next=... yonlendirme yapar,
-                login olduktan sonra orijinal URL (?prompt=extend gibi query'ler dahil) aynen acilir. */}
-            <Route path="/event/:uid" element={<RequireAuth><EventDetail /></RequireAuth>} />
-            <Route path="/event/:uid/gallery" element={<RequireAuth><EventGallery /></RequireAuth>} />
-            <Route path="/event/:uid/guestbook" element={<RequireAuth><EventGuestbook /></RequireAuth>} />
-            <Route path="/event/:uid/trash" element={<RequireAuth><EventTrash /></RequireAuth>} />
-            <Route path="/event/:uid/collaborators" element={<RequireAuth><EventCollaborators /></RequireAuth>} />
-            <Route path="/event/:uid/settings" element={<RequireAuth><EventSettings /></RequireAuth>} />
-            <Route path="/event/:uid/theme" element={<RequireAuth><EventTheme /></RequireAuth>} />
-            <Route path="/event/:uid/qr" element={<RequireAuth><EventQR /></RequireAuth>} />
-            <Route path="/event/:uid/poster" element={<RequireAuth><EventPoster /></RequireAuth>} />
+        <Routes>
+          {/* Host event detay ve alt sayfalari icin auth guard:
+              login degilse RequireAuth /signin?next=... yonlendirme yapar,
+              login olduktan sonra orijinal URL (?prompt=extend gibi query'ler dahil) aynen acilir. */}
+          <Route path="/event/:uid" element={<RequireAuth><EventDetail /></RequireAuth>} />
+          <Route path="/event/:uid/gallery" element={<RequireAuth><EventGallery /></RequireAuth>} />
+          <Route path="/event/:uid/guestbook" element={<RequireAuth><EventGuestbook /></RequireAuth>} />
+          <Route path="/event/:uid/trash" element={<RequireAuth><EventTrash /></RequireAuth>} />
+          <Route path="/event/:uid/collaborators" element={<RequireAuth><EventCollaborators /></RequireAuth>} />
+          <Route path="/event/:uid/settings" element={<RequireAuth><EventSettings /></RequireAuth>} />
+          <Route path="/event/:uid/theme" element={<RequireAuth><EventTheme /></RequireAuth>} />
+          <Route path="/event/:uid/qr" element={<RequireAuth><EventQR /></RequireAuth>} />
+          <Route path="/event/:uid/poster" element={<RequireAuth><EventPoster /></RequireAuth>} />
 
-            <Route path="/events/services-and-prices" element={<EventNew />} />
-            <Route path="/events/services-and-prices/" element={<EventNew />} />
-            <Route path="/checkout" element={<EventCheckout />} />
-            <Route path="/checkout/pending/:encPackedUID" element={<CheckoutPending />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/payment/:token" element={<></>} />
+          <Route path="/events/services-and-prices" element={<EventNew />} />
+          <Route path="/events/services-and-prices/" element={<EventNew />} />
+          <Route path="/checkout" element={<EventCheckout />} />
+          <Route path="/checkout/pending/:encPackedUID" element={<CheckoutPending />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/payment/:token" element={<></>} />
 
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signin/" element={<SignIn />} />
-            <Route path="/signout" element={<SignOut />} />
-            <Route path="/recover" element={<Recover />} />
-            <Route path="/guest/:uid" element={<Participant />} />
-            <Route path="/guest/:uid/uploads" element={<ParticipantUploads />} />
-            <Route path="/guest/:uid/guestbook" element={<ParticipantGuestbook />} />
-            <Route path="/notice/*" element={<Message />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signin/" element={<SignIn />} />
+          <Route path="/signout" element={<SignOut />} />
+          <Route path="/recover" element={<Recover />} />
+          <Route path="/guest/:uid" element={<Participant />} />
+          <Route path="/guest/:uid/uploads" element={<ParticipantUploads />} />
+          <Route path="/guest/:uid/guestbook" element={<ParticipantGuestbook />} />
+          <Route path="/notice/*" element={<Message />} />
 
 
-            <Route path="/events" element={<Events />} />
+          <Route path="/events" element={<Events />} />
 
-            <Route path="/admin/orders" element={<AdminRouteGuard><AdminOrders /></AdminRouteGuard>} />
-            <Route path="/admin/orders/:uid" element={<AdminRouteGuard><AdminOrderDetail /></AdminRouteGuard>} />
-            <Route path="/admin/products" element={<AdminRouteGuard requireSuperAdmin><AdminProducts /></AdminRouteGuard>} />
-            <Route path="/admin/panel-admins" element={<AdminRouteGuard requireSuperAdmin><AdminPanelAdmins /></AdminRouteGuard>} />
-            <Route path="/admin/promos" element={<AdminRouteGuard requireSuperAdmin><AdminPromos /></AdminRouteGuard>} />
-            <Route path="/admin/promos/report" element={<AdminRouteGuard requireSuperAdmin><AdminPromoReport /></AdminRouteGuard>} />
-            <Route path="/admin/partnerships" element={<AdminRouteGuard requireSuperAdmin><AdminPartnerships /></AdminRouteGuard>} />
-            <Route path="/admin/no-access" element={<AdminNoAccess />} />
+          <Route path="/admin/orders" element={<AdminRouteGuard><AdminOrders /></AdminRouteGuard>} />
+          <Route path="/admin/orders/:uid" element={<AdminRouteGuard><AdminOrderDetail /></AdminRouteGuard>} />
+          <Route path="/admin/products" element={<AdminRouteGuard requireSuperAdmin><AdminProducts /></AdminRouteGuard>} />
+          <Route path="/admin/panel-admins" element={<AdminRouteGuard requireSuperAdmin><AdminPanelAdmins /></AdminRouteGuard>} />
+          <Route path="/admin/promos" element={<AdminRouteGuard requireSuperAdmin><AdminPromos /></AdminRouteGuard>} />
+          <Route path="/admin/promos/report" element={<AdminRouteGuard requireSuperAdmin><AdminPromoReport /></AdminRouteGuard>} />
+          <Route path="/admin/partnerships" element={<AdminRouteGuard requireSuperAdmin><AdminPartnerships /></AdminRouteGuard>} />
+          <Route path="/admin/no-access" element={<AdminNoAccess />} />
 
-            <Route path="/signup/:token" element={<SignUp />} />
+          <Route path="/signup/:token" element={<SignUp />} />
 
-            {!is_live && <Route path="/api/*" element={<ApiRoute />} />}
+          {!is_live && <Route path="/api/*" element={<ApiRoute />} />}
 
-            {is_live && <Route path="*" element={<NotFound />} />}
-          </Routes>
-        )}
+          {is_live && <Route path="*" element={<NotFound />} />}
+        </Routes>
       </Suspense>
+      {isLoading && <LoadingSpinner />}
       <V2Toast />
       {!isLoading && <Footer />}
     </BrowserRouter>
