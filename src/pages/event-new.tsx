@@ -2,9 +2,10 @@ import V2Header from '../v2-components/V2Header';
 import V2Footer from '../v2-components/V2Footer';
 import V2EventNew from '../v2-partials/V2EventNew';
 import { useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useLayoutEffect } from 'react';
 import i18n from '../packages/i18n';
 import { ensureCanonicalLink, ensureMetaTag } from '../utils/seo';
+import { useLoading } from '../contexts/LoadingContext';
 
 const seoByLanguage = {
   en: {
@@ -40,6 +41,12 @@ function EventNew() {
   const currentLanguage = (i18n.language || 'en') as keyof typeof seoByLanguage;
   const isGetStartedEntry = searchParams.get('entry') === 'get-started';
   const shouldShowSignInSection = isGetStartedEntry && authResolved && !isLoggedIn;
+  const { setLoadingTrue, setLoadingFalse } = useLoading();
+
+  // Set loading to true immediately when component mounts (before paint)
+  useLayoutEffect(() => {
+    setLoadingTrue();
+  }, [setLoadingTrue]);
 
   useEffect(() => {
     let active = true;
@@ -115,7 +122,7 @@ function EventNew() {
   return (
     <>
       <V2Header />
-      <V2EventNew showSignInSection={shouldShowSignInSection} />
+      <V2EventNew showSignInSection={shouldShowSignInSection} onLoadingComplete={setLoadingFalse} />
       <V2Footer />
     </>
   );

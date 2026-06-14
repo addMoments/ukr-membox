@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLoading } from '../contexts/LoadingContext';
 import '../v2-styles/EventNew.css';
 import { t } from '../packages/i18n';
 import { S3_ROOT } from '../consts';
@@ -10,9 +11,11 @@ import V2SignInForm from './V2SignInForm';
 import { signInEmail } from '../client/auth';
 import { resolvePostSignInRedirect } from '../client/admin';
 import { FormState } from '../utils/form_event_parse';
+import { LoadingSpinner } from '../contexts/LoadingContext';
 
 interface V2EventNewProps {
   showSignInSection?: boolean;
+  onLoadingComplete?: () => void;
 }
 
 const PREMIUM_PACKAGE_ID = 'premium';
@@ -22,9 +25,10 @@ const isSponsoredIncludedInPremium = (product?: { sponsored_included?: boolean; 
   return product?.sponsored_included === true || product?.advertorial_included === true;
 };
 
-function V2EventNew({ showSignInSection = false }: V2EventNewProps) {
+function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNewProps) {
   const cart = useSnapshot(cartState);
   const currentLang = String(t('lang_code') || 'en');
+  const { isLoading } = useLoading();
 
   const handleSignIn = async (formData: FormState) => {
     try {
@@ -41,8 +45,22 @@ function V2EventNew({ showSignInSection = false }: V2EventNewProps) {
   };
 
   useEffect(() => {
-    initCartState();
-  }, []);
+    console.log('[V2EventNew] Mounting, cart.init:', cart.init);
+    const initialize = async () => {
+      const startTime = Date.now();
+      console.log('[V2EventNew] Starting initialization');
+      await initCartState();
+      console.log('[V2EventNew] Cart initialized, setting loading to false');
+      // Ensure loader shows for at least 1 second
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 1000) {
+        await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
+      }
+      console.log('[V2EventNew] Total loading time:', Date.now() - startTime);
+      onLoadingComplete?.();
+    };
+    initialize();
+  }, [onLoadingComplete]);
 
   useEffect(() => {
     if (!cart.init) return;
@@ -56,8 +74,9 @@ function V2EventNew({ showSignInSection = false }: V2EventNewProps) {
     }
   }, [cart.cartItems, cart.init, cart.products]);
 
-  if (!cart.init) {
-    return <div className="event-new-page" />;
+  if (isLoading) {
+    console.log('[V2EventNew] Rendering LoadingSpinner (isLoading:', isLoading, ')');
+    return <LoadingSpinner />;
   }
 
   const packageOrder = ['standard', 'plus', 'premium'];
