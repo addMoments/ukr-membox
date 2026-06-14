@@ -49,13 +49,7 @@ interface LoadingSpinnerProps {
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '' }) => {
   const PUBLIC_URL = process.env.PUBLIC_URL || '';
-
-  console.log('[LoadingSpinner] Rendering with PUBLIC_URL:', PUBLIC_URL);
-  console.log('[LoadingSpinner] PUBLIC_URL trimmed:', (PUBLIC_URL || '').trim());
-
-  // Just use the PUBLIC_URL directly - it's already correct
   const imgSrc = `${PUBLIC_URL}/assets/addmoments-loader.gif`;
-  console.log('[LoadingSpinner] Image src:', imgSrc);
 
   return (
     <div className={`flex items-center justify-center ${className}`} style={{ minHeight: 'calc(100vh - 200px)', backgroundColor: 'white' }}>
@@ -64,11 +58,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '' }
           src={imgSrc}
           alt="Loading..."
           onError={(e) => {
-            console.error('Failed to load loader image:', e.currentTarget.src);
             (e.target as HTMLImageElement).style.display = 'none';
-          }}
-          onLoad={() => {
-            console.log('[LoadingSpinner] Image loaded successfully');
           }}
           style={{ maxWidth: '200px', width: '100%' }}
         />

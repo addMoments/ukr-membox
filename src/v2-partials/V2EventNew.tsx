@@ -45,18 +45,8 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
   };
 
   useEffect(() => {
-    console.log('[V2EventNew] Mounting, cart.init:', cart.init);
     const initialize = async () => {
-      const startTime = Date.now();
-      console.log('[V2EventNew] Starting initialization');
       await initCartState();
-      console.log('[V2EventNew] Cart initialized, setting loading to false');
-      // Ensure loader shows for at least 1 second
-      const elapsed = Date.now() - startTime;
-      if (elapsed < 1000) {
-        await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
-      }
-      console.log('[V2EventNew] Total loading time:', Date.now() - startTime);
       onLoadingComplete?.();
     };
     initialize();

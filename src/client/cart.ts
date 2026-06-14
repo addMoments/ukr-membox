@@ -57,8 +57,13 @@ const loadCartState = async () => {
 };
 
 const getPaywallProducts = async (): Promise<Product[]> => {
-    const res = await fetch(`${SERV_ROOT}/api/products`);
-    return res.json();
+    try {
+        const res = await fetch(`${SERV_ROOT}/api/products`);
+        if (!res.ok) return [];
+        return res.json();
+    } catch {
+        return [];
+    }
 }
 
 const deriveCalc = ()=>{
@@ -80,11 +85,14 @@ const initCartState = async () => {
     if (cartState.init) return;
     cartState.init = true;
 
-    const products = await getPaywallProducts();
-    cartState.products = products;
-    await loadCartState();
-    deriveCalc();
-    console.log(cartState, 'cartState init');
+    try {
+        const products = await getPaywallProducts();
+        cartState.products = products;
+        await loadCartState();
+        deriveCalc();
+    } catch (e) {
+        console.error('[cart] initCartState failed:', e);
+    }
 }
 
 const clearCartState = async () => {

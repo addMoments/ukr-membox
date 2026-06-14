@@ -45,8 +45,9 @@ function EventNew() {
 
   // Set loading to true immediately when component mounts (before paint)
   useLayoutEffect(() => {
+    console.log('[EventNew] Setting loading to true');
     setLoadingTrue();
-  }, [setLoadingTrue]);
+  }, []); // Empty deps - run only once
 
   useEffect(() => {
     let active = true;
