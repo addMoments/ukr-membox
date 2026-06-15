@@ -48,9 +48,6 @@ interface LoadingSpinnerProps {
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '' }) => {
-  const PUBLIC_URL = process.env.PUBLIC_URL || '';
-  const imgSrc = `${PUBLIC_URL}/assets/addmoments-loader.gif`;
-
   return (
     <div
       className={`flex items-center justify-center ${className}`}
@@ -67,16 +64,25 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '' }
       }}
     >
       <div style={{ textAlign: 'center' }}>
-        <img
-          src={imgSrc}
-          alt="Loading..."
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
+        <div
+          style={{
+            width: '50px',
+            height: '50px',
+            margin: '0 auto',
+            border: '4px solid #f3f3f3',
+            borderTop: '4px solid #007bff',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
           }}
-          style={{ maxWidth: '200px', width: '100%' }}
         />
         <p style={{ color: '#333', marginTop: '20px' }}>Loading...</p>
       </div>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
