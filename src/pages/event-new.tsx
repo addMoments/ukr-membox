@@ -38,6 +38,7 @@ function EventNew() {
   const [searchParams] = useSearchParams();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [authResolved, setAuthResolved] = useState<boolean>(false);
+  const [componentReady, setComponentReady] = useState<boolean>(false);
   const currentLanguage = (i18n.language || 'en') as keyof typeof seoByLanguage;
   const isGetStartedEntry = searchParams.get('entry') === 'get-started';
   const shouldShowSignInSection = isGetStartedEntry && authResolved && !isLoggedIn;
@@ -116,6 +117,24 @@ function EventNew() {
     };
   }, []);
 
+  // Hide loader when both auth is resolved AND component (cart) is ready
+  useEffect(() => {
+    if (authResolved && componentReady) {
+      // Both auth check and cart init are complete - safe to hide loader
+      // If shouldShowSignInSection is true, the form will be visible
+      if (shouldShowSignInSection) {
+        // Form is shown - wait a moment for it to render before hiding loader
+        const timer = setTimeout(() => {
+          setLoadingFalse();
+        }, 150);
+        return () => clearTimeout(timer);
+      } else {
+        // No form to show, hide loader immediately
+        setLoadingFalse();
+      }
+    }
+  }, [authResolved, componentReady, shouldShowSignInSection, setLoadingFalse]);
+
   useEffect(() => {
     updateSeoTags(currentLanguage);
   }, [currentLanguage]);
@@ -123,7 +142,7 @@ function EventNew() {
   return (
     <>
       <V2Header />
-      <V2EventNew showSignInSection={shouldShowSignInSection} onLoadingComplete={setLoadingFalse} />
+      <V2EventNew showSignInSection={shouldShowSignInSection} onLoadingComplete={() => setComponentReady(true)} />
       <V2Footer />
     </>
   );

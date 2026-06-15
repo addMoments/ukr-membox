@@ -52,7 +52,20 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '' }
   const imgSrc = `${PUBLIC_URL}/assets/addmoments-loader.gif`;
 
   return (
-    <div className={`flex items-center justify-center ${className}`} style={{ minHeight: 'calc(100vh - 200px)', backgroundColor: 'white' }}>
+    <div
+      className={`flex items-center justify-center ${className}`}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        zIndex: 9999,
+      }}
+    >
       <div style={{ textAlign: 'center' }}>
         <img
           src={imgSrc}

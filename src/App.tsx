@@ -154,9 +154,9 @@ function AppContent() {
           {is_live && <Route path="*" element={<NotFound />} />}
         </Routes>
       </Suspense>
-      {isLoading && <LoadingSpinner />}
       <V2Toast />
-      {!isLoading && <Footer />}
+      <Footer />
+      {isLoading && <LoadingSpinner />}
     </BrowserRouter>
   );
 }
