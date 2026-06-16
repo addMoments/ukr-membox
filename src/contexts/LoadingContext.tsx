@@ -75,7 +75,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '' }
             animation: 'spin 1s linear infinite',
           }}
         />
-        <p style={{ color: '#333', marginTop: '20px' }}>Loading...</p>
+        <p style={{ color: '#333', marginTop: '20px' }}>Making Moments...</p>
       </div>
       <style>{`
         @keyframes spin {
