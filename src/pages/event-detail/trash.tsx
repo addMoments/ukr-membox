@@ -8,9 +8,10 @@ import PhotoViewerModal, { photoViewerState } from '../../partials/PhotoViewerMo
 import { UploadEntry as UploadType } from '../../types/uploads';
 import { ParticipantInfo } from '../../types/participant-info';
 import { pgREST } from '../../client/postgrest';
-import { unpackUUID } from '../../packages/uuid';
-import { S3_ROOT } from '../../consts';
+import { unpackUUID, packUUID } from '../../packages/uuid';
+import { S3_ROOT, SERV_ROOT } from '../../consts';
 import { t } from '../../packages/i18n';
+import { getAuthToken } from '../../client/core';
 import '../../v2-styles/Gallery.css';
 
 function EventTrash() {
@@ -18,6 +19,12 @@ function EventTrash() {
   const [uploads, setUploads] = useState<UploadType[]>([]);
   const [participants, setParticipants] = useState<ParticipantInfo[]>([]);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     if (!packedUid) return;
@@ -51,8 +58,42 @@ function EventTrash() {
     });
   };
 
-  const handleDeletePermanently = (uploadUid: string) => {
-    // TODO: Implement permanent delete functionality
+  const handleDeletePermanently = async (uploadUid: string) => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(t('trash.deleteConfirm'));
+    if (!confirmed) return;
+
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        showToast(t('errors.forbidden'));
+        return;
+      }
+
+      const packedUploadUid = packUUID(uploadUid);
+      const response = await fetch(`${SERV_ROOT}/auth/upload/${packedUploadUid}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Delete failed');
+      }
+
+      // Update local state
+      setUploads(prev => prev.filter(u => u.uid !== uploadUid));
+      photoViewerState.open = false;
+
+      // Show success toast
+      showToast(t('trash.deleteSuccess'));
+    } catch (error) {
+      console.error('Delete failed:', error);
+      showToast(t('trash.deleteError'));
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -141,6 +182,14 @@ function EventTrash() {
               </div>
               <h3 className="gallery-empty-title">{t('trash.emptyTitle')}</h3>
               <p className="gallery-empty-text">{t('trash.emptyText')}</p>
+            </div>
+          )}
+
+          {/* Toast Notification */}
+          {toast && (
+            <div className="gallery-toast">
+              <i className="fa-solid fa-check-circle" />
+              {toast}
             </div>
           )}
         </>

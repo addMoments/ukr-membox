@@ -238,7 +238,10 @@
         "breadcrumb": "Trash",
         "loadMore": "Load More",
         "emptyTitle": "Trash is empty",
-        "emptyText": "Items you delete will appear here for 30 days before being permanently removed."
+        "emptyText": "Items you delete will appear here for 30 days before being permanently removed.",
+        "deleteConfirm": "Are you sure you want to permanently delete this item?",
+        "deleteSuccess": "Item permanently deleted",
+        "deleteError": "Failed to delete item"
     },
     "guestbook": {
         "title": "Guestbook",
