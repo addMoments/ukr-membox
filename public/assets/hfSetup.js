@@ -292,7 +292,7 @@
     };
 
     const appendHeaderLink = (key, href, section, includeDesktop = true, includeMobile = true)=>{
-      const text = key === "faq" ? "FaQ" : t(key);
+      const text = t(key);
       const mobile = qs(`#mobile-links`);
       if (includeDesktop){
         const ref = qs(`.v2-header-section.${section}`);

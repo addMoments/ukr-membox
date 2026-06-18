@@ -70,7 +70,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '' }
             height: '50px',
             margin: '0 auto',
             border: '4px solid #f3f3f3',
-            borderTop: '4px solid #007bff',
+            borderTop: '4px solid #d2e823',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
           }}

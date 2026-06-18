@@ -77,7 +77,7 @@ const Footer = () => {
       links: [
         { label: isUkLang ? "Послуги та ціни" : "Services & Prices", href: toHref(withLangParam("/events/services-and-prices", lang)) },
         { label: isUkLang ? "Як це працює" : "How it works", href: isUkLang ? UK_FOOTER_LINKS.how_it_works : toHref("/how-it-works") },
-        { label: "FAQ", href: isUkLang ? UK_FOOTER_LINKS.faq : toHref("/faq") }
+        { label: t('faq'), href: isUkLang ? UK_FOOTER_LINKS.faq : toHref("/faq") }
       ]
     },
     {
