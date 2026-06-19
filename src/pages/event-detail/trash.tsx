@@ -71,7 +71,7 @@ function EventTrash() {
       }
 
       const packedUploadUid = packUUID(uploadUid);
-      const response = await fetch(`${SERV_ROOT}/auth/upload/${packedUploadUid}`, {
+      const response = await fetch(`${SERV_ROOT}/api/auth/upload/${packedUploadUid}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
