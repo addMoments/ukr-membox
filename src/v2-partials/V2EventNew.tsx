@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { useLoading } from '../contexts/LoadingContext';
 import '../v2-styles/EventNew.css';
 import { t } from '../packages/i18n';
 import { S3_ROOT } from '../consts';
@@ -11,7 +10,6 @@ import V2SignInForm from './V2SignInForm';
 import { signInEmail } from '../client/auth';
 import { resolvePostSignInRedirect } from '../client/admin';
 import { FormState } from '../utils/form_event_parse';
-import { LoadingSpinner } from '../contexts/LoadingContext';
 
 interface V2EventNewProps {
   showSignInSection?: boolean;
@@ -28,7 +26,6 @@ const isSponsoredIncludedInPremium = (product?: { sponsored_included?: boolean; 
 function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNewProps) {
   const cart = useSnapshot(cartState);
   const currentLang = String(t('lang_code') || 'en');
-  const { isLoading } = useLoading();
 
   const handleSignIn = async (formData: FormState) => {
     try {

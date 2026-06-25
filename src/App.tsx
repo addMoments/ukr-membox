@@ -8,7 +8,6 @@ import AdminRouteGuard from './v2-components/AdminRouteGuard';
 import { is_live } from './consts';
 import { trackMetaPageView } from './client/meta-pixel';
 import Footer from './components/Footer';
-import { LoadingProvider, useLoading, LoadingSpinner } from './contexts/LoadingContext';
 
 function RouteChangeEmitter() {
   const location = useLocation();
@@ -90,21 +89,15 @@ function App() {
 
   if (!i18nReady) return null;
 
-  return (
-    <LoadingProvider>
-      <AppContent />
-    </LoadingProvider>
-  );
+  return <AppContent />;
 }
 
 function AppContent() {
-  const { isLoading } = useLoading();
-
   return (
     <BrowserRouter>
       <ScrollToTop />
       <RouteChangeEmitter />
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={null}>
         <Routes>
           {/* Host event detay ve alt sayfalari icin auth guard:
               login degilse RequireAuth /signin?next=... yonlendirme yapar,
@@ -156,7 +149,6 @@ function AppContent() {
       </Suspense>
       <V2Toast />
       <Footer />
-      {isLoading && <LoadingSpinner />}
     </BrowserRouter>
   );
 }
