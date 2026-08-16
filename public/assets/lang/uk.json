@@ -544,6 +544,7 @@
         "total": "Разом",
         "deliveryEmail": "Email для доставки",
         "emailPlaceholder": "hello@example.com",
+        "promoPlaceholder": "Введіть промокод",
         "confirmEmail": "Підтвердити email",
         "emailInfo": "Інформація про обліковий запис та посилання для доступу надійдуть на цю пошту одразу після покупки.",
         "completeOrder": "Завершити замовлення",

@@ -416,7 +416,7 @@ function V2Checkout() {
                 <input
                   name="promo_code"
                   className="checkout-promo-input"
-                  placeholder="SUMMER10"
+                  placeholder={t('checkout.promoPlaceholder')}
                   autoComplete="off"
                   onChange={clearAppliedPromo}
                 />

@@ -543,6 +543,7 @@
         "total": "Total",
         "deliveryEmail": "Delivery Email",
         "emailPlaceholder": "hello@example.com",
+        "promoPlaceholder": "Enter promo code",
         "confirmEmail": "Confirm email",
         "emailInfo": "Your account information and access links will arrive via this email immediately after purchase.",
         "completeOrder": "Complete Order",
