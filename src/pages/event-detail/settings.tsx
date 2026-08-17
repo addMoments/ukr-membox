@@ -18,6 +18,13 @@ import { t } from '../../packages/i18n';
 import { sendToMsg } from '../../types/mesage-screen';
 import { fetch } from '../../client/core';
 import { rm_key } from '../../utils/persistence';
+import { daysBetween, formatDuration } from '../../utils/duration';
+
+// Backend naive timestamp donebildigi icin karsilastirmadan once UTC'ye sabitlenir.
+const isActivated = (activationDate?: string | null) => !!(
+  activationDate &&
+  new Date(activationDate + (activationDate.includes('Z') || activationDate.includes('+') ? '' : 'Z')).getTime() <= Date.now()
+);
 
 const SettingsToggle = ({name, description, checked, formName}: {name: string, description: string, checked: boolean, formName: string})=>{
 
@@ -55,6 +62,11 @@ function EventSettingsInner({event}: {event: Event}) {
   const [exportJob, setExportJob] = useState<Job | null>(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Paketin aktif kalma suresi ayri bir alanda tutulmuyor; active_until ile
+  // activation_date farki tam olarak products.options.activation_days'i verir.
+  const activeDays = daysBetween(event.activation_date, event.active_until);
+  const activeDuration = activeDays ? formatDuration(activeDays) : '';
   const langCode = t('lang_code');
   const isUkrainian = langCode === 'uk';
   const eventDeleteTitle = isUkrainian ? 'Видалити подію' : 'Delete event';
@@ -72,18 +84,21 @@ function EventSettingsInner({event}: {event: Event}) {
     const form = parse_submit_event(e);
     const eventUid = unpackUUID(packedUid || "");
 
-    const { activation_date, ...rest } = form;
+    const { activation_date, event_date, ...rest } = form;
 
     setGeneralStatus({ state: 'saving' });
     setDateStatus(null);
 
+    // event_date bir kolon degil; settings JSONB icinde yasiyor, diger anahtarlar korunmali.
+    const settings = { ...(event.settings || {}), event_date: event_date || null };
+
     // Always fire the main fields request
     const mainReq = pgErr(`/events?uid=eq.${eventUid}`, {
       method: 'PATCH',
-      body: JSON.stringify(rest),
+      body: JSON.stringify({ ...rest, settings }),
     });
 
-    const alreadyStarted = event.activation_date && new Date(event.activation_date + (event.activation_date.includes('Z') || event.activation_date.includes('+') ? '' : 'Z')).getTime() <= Date.now();
+    const alreadyStarted = isActivated(event.activation_date);
 
     // date input is disabled when alreadyStarted — skip it entirely
     const dateReq = !alreadyStarted && activation_date
@@ -314,14 +329,29 @@ function EventSettingsInner({event}: {event: Event}) {
             />
           </div>
           <div className="settings-field">
+            <label className="settings-field-label">{t('settings.generalDetails.eventDateLabel')}</label>
+            <input
+              type="date"
+              name="event_date"
+              className="settings-field-input"
+              defaultValue={event.settings?.event_date?.split('T')[0] || ''}
+            />
+            <p className="settings-field-hint">{t('settings.generalDetails.eventDateHelp')}</p>
+          </div>
+          <div className="settings-field">
             <label className="settings-field-label">{t('settings.generalDetails.dateLabel')}</label>
             <input
               type="date"
               name="activation_date"
               className="settings-field-input"
               defaultValue={event.activation_date?.split('T')[0] || ''}
-              disabled={!!(event.activation_date && new Date(event.activation_date + (event.activation_date.includes('Z') || event.activation_date.includes('+') ? '' : 'Z')).getTime() <= Date.now())}
+              disabled={isActivated(event.activation_date)}
             />
+            <p className="settings-field-hint">
+              {isActivated(event.activation_date)
+                ? t('settings.generalDetails.dateLockedAfterStart')
+                : t('settings.generalDetails.dateHelp', { duration: activeDuration })}
+            </p>
             {dateStatus?.state === 'error' && <span style={{color: '#dc2626', fontSize: '0.8rem'}}>✗ {dateStatus.message}</span>}
             {dateStatus?.state === 'success' && <span style={{color: '#16a34a', fontSize: '0.8rem'}}>✓ {t('settings.saved')}</span>}
           </div>

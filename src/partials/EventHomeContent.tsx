@@ -380,7 +380,7 @@ function EventHomeContent({
                   <div className="ehc-detail-icon">
                     <i className="fa-solid fa-calendar-days" />
                   </div>
-                  <span>{formatDate(event.activation_date) || t('eventHome.heroCard.dateNotSet')}</span>
+                  <span>{formatDate(event.settings?.event_date || event.activation_date) || t('eventHome.heroCard.dateNotSet')}</span>
                 </div>
                 {/* <div className="ehc-detail-row">
                   <div className="ehc-detail-icon">

@@ -149,7 +149,7 @@ function EventNavigator({
                         </div>
                         <div className="event-navigator-event-meta">
                           <span className="event-navigator-event-title">{ev.name || t('sidebar.untitled')}</span>
-                          <span className="event-navigator-event-date">{formatDate(ev.activation_date)}</span>
+                          <span className="event-navigator-event-date">{formatDate(ev.settings?.event_date || ev.activation_date)}</span>
                         </div>
                         {isCurrentEvent && (
                           <i className="fa-solid fa-circle-check event-navigator-dropdown-check" />

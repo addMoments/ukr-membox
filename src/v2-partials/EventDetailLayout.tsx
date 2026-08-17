@@ -151,7 +151,7 @@ function EventDetailLayout({ children }: EventDetailLayoutProps) {
         <EventNavigator
           eventUid={event.uid}
           eventTitle={event.name || t('sidebar.untitled')}
-          eventDate={formatDate(event.activation_date)}
+          eventDate={formatDate(event.settings?.event_date || event.activation_date)}
           eventImageUrl={event.image ? `${S3_ROOT}${event.image}` : ''}
           packedUid={packedUid || ''}
           features={features}

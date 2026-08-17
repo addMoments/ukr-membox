@@ -178,7 +178,7 @@ function Participant() {
       bannerImageUrl={event.image ? S3_ROOT + event.image : null}
       eventTitle={event.name || ''}
       eventType={event.event_type || 'Event'}
-      eventDate={formatDate(event.activation_date)}
+      eventDate={formatDate(event.settings?.event_date || event.activation_date)}
       eventLocation={""}
       welcomeMessage={event.welcome_message || event.description || ''}
       eventInitials={getEventInitials(event.name)}

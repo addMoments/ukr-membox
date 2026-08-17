@@ -47,7 +47,7 @@ function GoldenHour({ event, colorsOverride, fontOverride }: GoldenHourProps) {
         <div className="gh-event-title">
           <h1 className="gh-headline">{event.name || 'Untitled Event'}</h1>
           <div className="gh-event-meta">
-            <span>{formatDate(event.activation_date) || 'Date not set'}</span>
+            <span>{formatDate(event.settings?.event_date || event.activation_date) || 'Date not set'}</span>
             {event.description && (
               <>
                 <span className="gh-dot"></span>

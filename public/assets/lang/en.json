@@ -5,6 +5,17 @@
     "sign_in": "Sign in",
     "get_started": "Get started",
     "footer_description": "The easiest way to collect photos from your guests. Create a digital album for your special events without any app downloads.",
+    "duration": {
+        "daysOne": "{{n}} day",
+        "daysFew": "{{n}} days",
+        "daysMany": "{{n}} days",
+        "weeksOne": "{{n}} week",
+        "weeksFew": "{{n}} weeks",
+        "weeksMany": "{{n}} weeks",
+        "monthsOne": "{{n}} month",
+        "monthsFew": "{{n}} months",
+        "monthsMany": "{{n}} months"
+    },
     "common": {
         "events": "Events",
         "event": "Event",
@@ -126,9 +137,12 @@
             "description": "Set the basic information for your event guests.",
             "nameLabel": "Name",
             "namePlaceholder": "Enter event name",
-            "dateLabel": "Date",
+            "dateLabel": "Activation date",
+        "dateHelp": "This is the date your package will be activated. We recommend setting it a few days before your event, or earlier if needed. You can change the activation date anytime before activation. Once your package is activated, the activation date cannot be changed. Your event link will remain active for {{duration}} from the activation date.",
+        "eventDateLabel": "Event date",
+        "eventDateHelp": "This date will be shown on your guest welcome page. You can change it anytime.",
             "dateRejected": "Date could not be saved. It may conflict with event constraints.",
-            "dateLockedAfterStart": "Date cannot be changed after the event has started.",
+            "dateLockedAfterStart": "Your package has been activated, so the activation date can no longer be changed.",
             "welcomeMessageLabel": "Welcome Message",
             "welcomeMessagePlaceholder": "Welcome to our digital album! We're so excited to celebrate with you."
         },
