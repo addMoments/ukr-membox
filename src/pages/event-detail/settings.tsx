@@ -347,11 +347,20 @@ function EventSettingsInner({event}: {event: Event}) {
               defaultValue={event.activation_date?.split('T')[0] || ''}
               disabled={isActivated(event.activation_date)}
             />
-            <p className="settings-field-hint">
-              {isActivated(event.activation_date)
-                ? t('settings.generalDetails.dateLockedAfterStart')
-                : t('settings.generalDetails.dateHelp', { duration: activeDuration })}
-            </p>
+            {isActivated(event.activation_date) ? (
+              <p className="settings-field-hint">{t('settings.generalDetails.dateLockedAfterStart')}</p>
+            ) : (
+              <>
+                <p className="settings-field-hint">{t('settings.generalDetails.dateHelp')}</p>
+                {/* "Not:" satiri ayri paragraf: hint flex container oldugu icin \n ile
+                    satir kirmak yerine ikinci bir <p> guvenli. */}
+                <p className="settings-field-hint">
+                  {activeDuration
+                    ? t('settings.generalDetails.dateNote', { duration: activeDuration })
+                    : t('settings.generalDetails.dateNoteNoDuration')}
+                </p>
+              </>
+            )}
             {dateStatus?.state === 'error' && <span style={{color: '#dc2626', fontSize: '0.8rem'}}>✗ {dateStatus.message}</span>}
             {dateStatus?.state === 'success' && <span style={{color: '#16a34a', fontSize: '0.8rem'}}>✓ {t('settings.saved')}</span>}
           </div>
