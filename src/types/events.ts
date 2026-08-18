@@ -18,8 +18,10 @@ export interface EventPublic {
   uid: string;
   name: string;
   event_type: EventType;
-  activation_date: string;
-  active_until: string;
+  // Host paketi alinca tarih secmemis olabilir; secilene kadar ikisi de NULL kalir
+  // (active_until'i DB trigger'i activation_date'ten turetir).
+  activation_date: string | null;
+  active_until: string | null;
   storage_until?: string | null;
   description: string;
   welcome_message: string;

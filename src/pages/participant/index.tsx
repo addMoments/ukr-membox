@@ -140,6 +140,12 @@ function Participant() {
     }
   };
 
+  // Host aktivasyon tarihini henuz secmemisse kapi kapali kalir; aktive edilmemis
+  // event misafire acilmaz.
+  if (event.uid && (!event.activation_date || !event.active_until)) {
+    return <V2GuestGate state="not-started" event={event} theme={event.settings?.colors} />;
+  }
+
   if (event.uid && event.activation_date && event.active_until) {
     const now = Date.now();
     const start = new Date(event.activation_date + (event.activation_date.includes('Z') || event.activation_date.includes('+') ? '' : 'Z')).getTime();

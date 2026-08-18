@@ -32,7 +32,7 @@ function pad(n: number) {
   return n.toString().padStart(2, '0');
 }
 
-function formatDate(dateString: string) {
+function formatDate(dateString?: string | null) {
   if (!dateString) return '';
   const normalized = dateString.endsWith('Z') || dateString.includes('+') ? dateString : dateString + 'Z';
   return new Date(normalized).toLocaleDateString(undefined, {
@@ -41,16 +41,21 @@ function formatDate(dateString: string) {
 }
 
 function V2GuestGate({ state, event, theme = defaultGuestTheme }: V2GuestGateProps) {
-  const startMs = new Date(
-    event.activation_date.endsWith('Z') || event.activation_date.includes('+')
-      ? event.activation_date
-      : event.activation_date + 'Z'
-  ).getTime();
+  // Host aktivasyon tarihini henuz secmemis olabilir. O zaman geri sayacak bir an
+  // yok: sayac yerine duz "baslamadi" mesaji gosterilir.
+  const activationIso = event.activation_date;
+  const startMs = activationIso
+    ? new Date(
+        activationIso.endsWith('Z') || activationIso.includes('+')
+          ? activationIso
+          : activationIso + 'Z'
+      ).getTime()
+    : null;
 
-  const [countdown, setCountdown] = useState<Countdown>(() => getCountdown(startMs));
+  const [countdown, setCountdown] = useState<Countdown>(() => getCountdown(startMs ?? Date.now()));
 
   useEffect(() => {
-    if (state !== 'not-started') return;
+    if (state !== 'not-started' || startMs === null) return;
     const timer = setInterval(() => {
       setCountdown(getCountdown(startMs));
     }, 1000);
@@ -73,29 +78,35 @@ function V2GuestGate({ state, event, theme = defaultGuestTheme }: V2GuestGatePro
                 <p className="guest-gate-event-name">{event.name}</p>
               </div>
 
-              <div className="guest-gate-countdown">
-                <div className="guest-gate-countdown-block">
-                  <span className="guest-gate-countdown-value">{pad(countdown.days)}</span>
-                  <span className="guest-gate-countdown-label">Days</span>
-                </div>
-                <span className="guest-gate-countdown-sep">:</span>
-                <div className="guest-gate-countdown-block">
-                  <span className="guest-gate-countdown-value">{pad(countdown.hours)}</span>
-                  <span className="guest-gate-countdown-label">Hours</span>
-                </div>
-                <span className="guest-gate-countdown-sep">:</span>
-                <div className="guest-gate-countdown-block">
-                  <span className="guest-gate-countdown-value">{pad(countdown.minutes)}</span>
-                  <span className="guest-gate-countdown-label">Mins</span>
-                </div>
-                <span className="guest-gate-countdown-sep">:</span>
-                <div className="guest-gate-countdown-block">
-                  <span className="guest-gate-countdown-value">{pad(countdown.seconds)}</span>
-                  <span className="guest-gate-countdown-label">Secs</span>
-                </div>
-              </div>
+              {startMs !== null ? (
+                <>
+                  <div className="guest-gate-countdown">
+                    <div className="guest-gate-countdown-block">
+                      <span className="guest-gate-countdown-value">{pad(countdown.days)}</span>
+                      <span className="guest-gate-countdown-label">Days</span>
+                    </div>
+                    <span className="guest-gate-countdown-sep">:</span>
+                    <div className="guest-gate-countdown-block">
+                      <span className="guest-gate-countdown-value">{pad(countdown.hours)}</span>
+                      <span className="guest-gate-countdown-label">Hours</span>
+                    </div>
+                    <span className="guest-gate-countdown-sep">:</span>
+                    <div className="guest-gate-countdown-block">
+                      <span className="guest-gate-countdown-value">{pad(countdown.minutes)}</span>
+                      <span className="guest-gate-countdown-label">Mins</span>
+                    </div>
+                    <span className="guest-gate-countdown-sep">:</span>
+                    <div className="guest-gate-countdown-block">
+                      <span className="guest-gate-countdown-value">{pad(countdown.seconds)}</span>
+                      <span className="guest-gate-countdown-label">Secs</span>
+                    </div>
+                  </div>
 
-              <p className="guest-gate-date">Starting on {formatDate(event.activation_date)}</p>
+                  <p className="guest-gate-date">Starting on {formatDate(event.activation_date)}</p>
+                </>
+              ) : (
+                <p className="guest-gate-date">The host has not set the start date yet.</p>
+              )}
             </>
           ) : (
             <>

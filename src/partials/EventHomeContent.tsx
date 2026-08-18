@@ -262,10 +262,11 @@ function EventHomeContent({
   const endedDismissKey = `event-ended-dismiss-${event.uid}`;
 
   const isLive = (()=>{
-    if (!event.activation_date) return false;
+    // Tarihlerden biri bile yoksa event aktive edilmemistir; canli sayilmaz.
+    if (!event.activation_date || !event.active_until) return false;
     const activationDate = new Date(event.activation_date);
     const now = new Date();
-    const activeUntil = new Date(event.active_until); 
+    const activeUntil = new Date(event.active_until);
     return now.getTime() >= activationDate.getTime() && now.getTime() < activeUntil.getTime();
   })();
 
