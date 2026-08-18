@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { t } from '../packages/i18n';
 import { EventPublic } from '../types/events';
 import { GuestTheme, defaultGuestTheme } from '../types/guestTheme';
 import '../v2-styles/PaymentSuccess.css';
@@ -35,7 +36,8 @@ function pad(n: number) {
 function formatDate(dateString?: string | null) {
   if (!dateString) return '';
   const normalized = dateString.endsWith('Z') || dateString.includes('+') ? dateString : dateString + 'Z';
-  return new Date(normalized).toLocaleDateString(undefined, {
+  // Misafir sayfasi da secili dile gore formatlanir; tarayici diline birakilmaz.
+  return new Date(normalized).toLocaleDateString(t('lang_code'), {
     year: 'numeric', month: 'long', day: 'numeric',
   });
 }
@@ -74,7 +76,7 @@ function V2GuestGate({ state, event, theme = defaultGuestTheme }: V2GuestGatePro
               </div>
 
               <div className="payment-success-content">
-                <h1 className="payment-success-title">Event Has Not Started Yet</h1>
+                <h1 className="payment-success-title">{t('guest.gate.notStartedTitle')}</h1>
                 <p className="guest-gate-event-name">{event.name}</p>
               </div>
 
@@ -83,29 +85,29 @@ function V2GuestGate({ state, event, theme = defaultGuestTheme }: V2GuestGatePro
                   <div className="guest-gate-countdown">
                     <div className="guest-gate-countdown-block">
                       <span className="guest-gate-countdown-value">{pad(countdown.days)}</span>
-                      <span className="guest-gate-countdown-label">Days</span>
+                      <span className="guest-gate-countdown-label">{t('guest.gate.days')}</span>
                     </div>
                     <span className="guest-gate-countdown-sep">:</span>
                     <div className="guest-gate-countdown-block">
                       <span className="guest-gate-countdown-value">{pad(countdown.hours)}</span>
-                      <span className="guest-gate-countdown-label">Hours</span>
+                      <span className="guest-gate-countdown-label">{t('guest.gate.hours')}</span>
                     </div>
                     <span className="guest-gate-countdown-sep">:</span>
                     <div className="guest-gate-countdown-block">
                       <span className="guest-gate-countdown-value">{pad(countdown.minutes)}</span>
-                      <span className="guest-gate-countdown-label">Mins</span>
+                      <span className="guest-gate-countdown-label">{t('guest.gate.minutes')}</span>
                     </div>
                     <span className="guest-gate-countdown-sep">:</span>
                     <div className="guest-gate-countdown-block">
                       <span className="guest-gate-countdown-value">{pad(countdown.seconds)}</span>
-                      <span className="guest-gate-countdown-label">Secs</span>
+                      <span className="guest-gate-countdown-label">{t('guest.gate.seconds')}</span>
                     </div>
                   </div>
 
-                  <p className="guest-gate-date">Starting on {formatDate(event.activation_date)}</p>
+                  <p className="guest-gate-date">{t('guest.gate.startingOn', { date: formatDate(event.activation_date) })}</p>
                 </>
               ) : (
-                <p className="guest-gate-date">The host has not set the start date yet.</p>
+                <p className="guest-gate-date">{t('guest.gate.dateNotSet')}</p>
               )}
             </>
           ) : (
@@ -115,14 +117,14 @@ function V2GuestGate({ state, event, theme = defaultGuestTheme }: V2GuestGatePro
               </div>
 
               <div className="payment-success-content">
-                <h1 className="payment-success-title">Thank You</h1>
+                <h1 className="payment-success-title">{t('guest.gate.endedTitle')}</h1>
                 <p className="guest-gate-event-name">{event.name}</p>
                 <p className="payment-success-description">
-                  Thank you for being part of this special event.
+                  {t('guest.gate.endedDescription')}
                 </p>
               </div>
 
-              <p className="guest-gate-date">This event ended on {formatDate(event.active_until)}</p>
+              <p className="guest-gate-date">{t('guest.gate.endedOn', { date: formatDate(event.active_until) })}</p>
             </>
           )}
 

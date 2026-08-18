@@ -447,6 +447,18 @@
         "statusCancelled": "Скасовано"
     },
     "guest": {
+        "gate": {
+            "notStartedTitle": "Подія ще не почалася",
+            "days": "Днів",
+            "hours": "Годин",
+            "minutes": "Хв",
+            "seconds": "Сек",
+            "startingOn": "Початок {{date}}",
+            "dateNotSet": "Організатор ще не встановив дату початку.",
+            "endedTitle": "Дякуємо",
+            "endedDescription": "Дякуємо, що були частиною цієї особливої події.",
+            "endedOn": "Ця подія завершилася {{date}}"
+        },
         "eventAmbiance": "Атмосфера події",
         "uploadPreview": "Попередній перегляд",
         "addYourMoments": "Додайте ваші моменти",

@@ -446,6 +446,18 @@
         "statusCancelled": "Cancelled"
     },
     "guest": {
+        "gate": {
+            "notStartedTitle": "Event Has Not Started Yet",
+            "days": "Days",
+            "hours": "Hours",
+            "minutes": "Mins",
+            "seconds": "Secs",
+            "startingOn": "Starting on {{date}}",
+            "dateNotSet": "The host has not set the start date yet.",
+            "endedTitle": "Thank You",
+            "endedDescription": "Thank you for being part of this special event.",
+            "endedOn": "This event ended on {{date}}"
+        },
         "eventAmbiance": "Event ambiance",
         "uploadPreview": "Upload preview",
         "addYourMoments": "Add your moments",
