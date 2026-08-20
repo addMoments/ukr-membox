@@ -16,9 +16,14 @@ const pluralForm = (n: number, langCode: string): PluralForm => {
   return 'Many';
 };
 
+// Ukraynacada edatlar ismin halini yonetir: "posilannya aktivne 1 misyats" (nominativ) dogru,
+// ama "uprodovzh" genitiv ister -> "uprodovzh 1 misyatsya". Ceviri anahtarlari bu yuzden iki
+// namespace'te tutuluyor; Ingilizcede hal olmadigi icin iki set de ayni metni verir.
+type GrammaticalCase = 'nominative' | 'genitive';
+
 // Gun sayisini en dogal birimle yazar: 21 -> "3 weeks", 31 -> "1 month", 90 -> "3 months".
 // Ay yaklasik 30 gun sayilir; pakete gore 28-31 arasi degerler tek ay olarak okunur.
-export const formatDuration = (days: number): string => {
+export const formatDuration = (days: number, grammaticalCase: GrammaticalCase = 'nominative'): string => {
   const langCode = t('lang_code');
   const months = Math.round(days / 30);
 
@@ -33,7 +38,8 @@ export const formatDuration = (days: number): string => {
     count = days / 7;
   }
 
-  return t(`duration.${unit.toLowerCase()}${pluralForm(count, langCode)}`, { n: count });
+  const namespace = grammaticalCase === 'genitive' ? 'durationGenitive' : 'duration';
+  return t(`${namespace}.${unit.toLowerCase()}${pluralForm(count, langCode)}`, { n: count });
 };
 
 // Iki ISO tarih arasindaki tam gun farki. Backend naive timestamp donebildigi icin

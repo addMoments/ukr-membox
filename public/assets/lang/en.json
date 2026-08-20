@@ -138,11 +138,11 @@
             "nameLabel": "Name",
             "namePlaceholder": "Enter event name",
             "dateLabel": "Activation Date",
-        "dateHelp": "Choose when you want to start uploading media and testing your event. We recommend starting a few days before your event. You can change this date before activation. It cannot be changed after activation.",
-        "dateNote": "Note: Your event link will be available for {{duration}} from this date.",
-        "dateNoteNoDuration": "Note: Until you set this date, guests who open your event link will see that the event has not started.",
-        "eventDateLabel": "Event Date",
-        "eventDateHelp": "This will be shown on your guest welcome page. You can change it anytime. We recommend setting real date of your event.",
+            "dateHelp": "This is the date package will be activated. To explore, set the date a few days before the event. You can change the date anytime before activation.",
+            "dateNote": "Note: Once activated, date can’t be changed. Link is active {{duration}} from this date.",
+            "dateNoteNoDuration": "Note: Once activated, date can’t be changed. Until you set this date, guests who open your event link will see that the event has not started.",
+            "eventDateLabel": "Event Date",
+            "eventDateHelp": "This will be shown on your guest welcome page. You can change it anytime. We recommend setting real date of your event.",
             "dateRejected": "Date could not be saved. It may conflict with event constraints.",
             "dateLockedAfterStart": "Your package has been activated, so the activation date can no longer be changed.",
             "welcomeMessageLabel": "Welcome Message",
@@ -579,7 +579,7 @@
         "remove": "Remove",
         "enterEmail": "Please enter an email address",
         "cartNotFound": "Cart state not found",
-        "novaPoshtaRates" :  "At Nova Poshta rates"
+        "novaPoshtaRates": "At Nova Poshta rates"
     },
     "extendStorage": {
         "modalTitle": "Your event will be deleted in 14 days",
@@ -761,5 +761,16 @@
                 "passwordsDoNotMatch": "Passwords do not match."
             }
         }
+    },
+    "durationGenitive": {
+        "daysOne": "{{n}} day",
+        "daysFew": "{{n}} days",
+        "daysMany": "{{n}} days",
+        "weeksOne": "{{n}} week",
+        "weeksFew": "{{n}} weeks",
+        "weeksMany": "{{n}} weeks",
+        "monthsOne": "{{n}} month",
+        "monthsFew": "{{n}} months",
+        "monthsMany": "{{n}} months"
     }
 }
