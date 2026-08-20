@@ -1,0 +1,34 @@
+.settings-field-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #E7E5E4;
+  border-radius: 12px;
+  background: #FAFAF9;
+}
+
+.settings-field-note-icon {
+  flex-shrink: 0;
+  /* Ikon ilk satirin ortasina otursun diye metnin line-height'i kadar yukseklik. */
+  line-height: 1.5;
+  font-size: 14px;
+  color: #4F46E5;
+}
+
+.settings-field-note-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.settings-field-note-body p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4F46E5;
+  /* App.css'te global "p { text-align: center }" var; kutu metni sola yaslanmali.
+     Eski .settings-field-hint bir flex container oldugu icin bundan etkilenmiyordu. */
+  text-align: left;
+}

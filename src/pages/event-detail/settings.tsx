@@ -4,6 +4,7 @@ import EventDetailLayout from '../../v2-partials/EventDetailLayout';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import ColoredSettingsBox from '../../v2-components/ColoredSettingsBox';
 import AdvertorialSettings from '../../v2-components/AdvertorialSettings';
+import SettingsFieldNote from '../../v2-components/SettingsFieldNote';
 import Button from '../../components/Button';
 import '../../v2-styles/Settings.css';
 import { parse_submit_event } from '../../utils/form_event_parse';
@@ -66,7 +67,8 @@ function EventSettingsInner({event}: {event: Event}) {
   // Paketin aktif kalma suresi ayri bir alanda tutulmuyor; active_until ile
   // activation_date farki tam olarak products.options.activation_days'i verir.
   const activeDays = daysBetween(event.activation_date, event.active_until);
-  const activeDuration = activeDays ? formatDuration(activeDays) : '';
+  // dateNote'taki cumle Ukraynacada "uprodovzh" ile kuruluyor ve bu edat genitiv istiyor.
+  const activeDuration = activeDays ? formatDuration(activeDays, 'genitive') : '';
   const langCode = t('lang_code');
   const isUkrainian = langCode === 'uk';
   const eventDeleteTitle = isUkrainian ? 'Видалити подію' : 'Delete event';
@@ -336,7 +338,9 @@ function EventSettingsInner({event}: {event: Event}) {
               className="settings-field-input"
               defaultValue={event.settings?.event_date?.split('T')[0] || ''}
             />
-            <p className="settings-field-hint">{t('settings.generalDetails.eventDateHelp')}</p>
+            <SettingsFieldNote>
+              <p>{t('settings.generalDetails.eventDateHelp')}</p>
+            </SettingsFieldNote>
           </div>
           <div className="settings-field">
             <label className="settings-field-label">{t('settings.generalDetails.dateLabel')}</label>
@@ -348,18 +352,20 @@ function EventSettingsInner({event}: {event: Event}) {
               disabled={isActivated(event.activation_date)}
             />
             {isActivated(event.activation_date) ? (
-              <p className="settings-field-hint">{t('settings.generalDetails.dateLockedAfterStart')}</p>
+              <SettingsFieldNote>
+                <p>{t('settings.generalDetails.dateLockedAfterStart')}</p>
+              </SettingsFieldNote>
             ) : (
-              <>
-                <p className="settings-field-hint">{t('settings.generalDetails.dateHelp')}</p>
-                {/* "Not:" satiri ayri paragraf: hint flex container oldugu icin \n ile
-                    satir kirmak yerine ikinci bir <p> guvenli. */}
-                <p className="settings-field-hint">
+              <SettingsFieldNote>
+                <p>{t('settings.generalDetails.dateHelp')}</p>
+                {/* "Note:" satiri ayri paragraf: tek metinde \n ile satir kirmak yerine
+                    ikinci bir <p> guvenli, aralarini kutunun kendi gap'i aciyor. */}
+                <p>
                   {activeDuration
                     ? t('settings.generalDetails.dateNote', { duration: activeDuration })
                     : t('settings.generalDetails.dateNoteNoDuration')}
                 </p>
-              </>
+              </SettingsFieldNote>
             )}
             {dateStatus?.state === 'error' && <span style={{color: '#dc2626', fontSize: '0.8rem'}}>✗ {dateStatus.message}</span>}
             {dateStatus?.state === 'success' && <span style={{color: '#16a34a', fontSize: '0.8rem'}}>✓ {t('settings.saved')}</span>}
