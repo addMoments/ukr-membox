@@ -320,7 +320,10 @@ function EventSettingsInner({event}: {event: Event}) {
         </div>
         <div className="settings-form-grid" >
           {/* names are from db colnames */}
-          <div className="settings-field">
+          {/* Name tam genisliktte: bilgi kutusu olmadigi icin yarim sutunda kalinca
+              yanindaki tarih alani satiri yukseltiyor ve altinda buyuk bir bosluk kaliyordu.
+              Boylece iki tarih alani yan yana ve esit yukseklikte hizalaniyor. */}
+          <div className="settings-field full-width">
             <label className="settings-field-label">{t('settings.generalDetails.nameLabel')}</label>
             <input 
               type="text" 
