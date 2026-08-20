@@ -7,6 +7,7 @@ import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
 import '../../v2-styles/AdminPageHeader.css';
 import '../../v2-styles/AdminOrders.css';
+import PasswordInput from '../../v2-components/PasswordInput';
 
 // Ne: ISO tarih degerini admin listesinde okunur hale getirir.
 // Nasil: Bos degerde tire, dolu degerde en-GB tarih/saat formatini kullanir.
@@ -143,8 +144,8 @@ function PanelAdmins() {
           <form className="admin-panel-form" onSubmit={onSubmit}>
             <input name="email" type="email" className="admin-control-input" placeholder="admin@example.com" disabled={saving} />
             <input name="name" className="admin-control-input" placeholder={at('admin.common.name', 'Name', 'Ім\'я')} disabled={saving} />
-            <input name="password" type="password" className="admin-control-input" placeholder={at('admin.panelAdmins.temporaryPassword', 'Temporary password', 'Тимчасовий пароль')} disabled={saving} />
-            <input name="confirm_password" type="password" className="admin-control-input" placeholder={at('admin.panelAdmins.confirmPassword', 'Confirm password', 'Підтвердити пароль')} disabled={saving} />
+            <PasswordInput name="password" className="admin-control-input" placeholder={at('admin.panelAdmins.temporaryPassword', 'Temporary password', 'Тимчасовий пароль')} disabled={saving} />
+            <PasswordInput name="confirm_password" className="admin-control-input" placeholder={at('admin.panelAdmins.confirmPassword', 'Confirm password', 'Підтвердити пароль')} disabled={saving} />
             <button type="submit" className="admin-save-btn" disabled={saving}>
               {saving ? at('admin.common.creating', 'Creating...', 'Створення...') : at('admin.common.create', 'Create', 'Створити')}
             </button>

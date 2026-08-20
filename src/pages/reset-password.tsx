@@ -4,6 +4,7 @@ import V2Header from '../v2-components/V2Header';
 import V2Footer from '../v2-components/V2Footer';
 import { confirmPasswordReset } from '../client/auth';
 import { t } from '../packages/i18n';
+import PasswordInput from '../v2-components/PasswordInput';
 import '../v2-styles/AuthForm.css';
 
 function ResetPassword() {
@@ -74,8 +75,7 @@ function ResetPassword() {
                 <div className="v2-auth-fields">
                   <div className="v2-auth-field-group">
                     <label htmlFor="password" className="v2-auth-label">{t('auth.password')}</label>
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="password"
                       name="password"
                       className="v2-auth-input"
@@ -87,8 +87,7 @@ function ResetPassword() {
                   </div>
                   <div className="v2-auth-field-group">
                     <label htmlFor="confirmPassword" className="v2-auth-label">{t('auth.confirmPassword')}</label>
-                    <input
-                      type="password"
+                    <PasswordInput
                       id="confirmPassword"
                       name="confirmPassword"
                       className="v2-auth-input"

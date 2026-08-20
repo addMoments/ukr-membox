@@ -3,6 +3,7 @@ import '../v2-styles/AuthForm.css';
 import { FormState, parse_submit_event } from '../utils/form_event_parse';
 import { S3_ROOT } from '../consts';
 import { t } from '../packages/i18n';
+import PasswordInput from '../v2-components/PasswordInput';
 
 interface V2SignUpFormProps {
   onSubmit: (formData: FormState) => void;
@@ -94,8 +95,7 @@ function V2SignUpForm({ onSubmit, prefillEmail, emailReadOnly, hideGoogleButton 
                   <label htmlFor="password" className="v2-auth-label">
                     {t('auth.password')}
                   </label>
-                  <input
-                    type="password"
+                  <PasswordInput
                     id="password"
                     name="password"
                     className="v2-auth-input"
@@ -109,8 +109,7 @@ function V2SignUpForm({ onSubmit, prefillEmail, emailReadOnly, hideGoogleButton 
                   <label htmlFor="confirmPassword" className="v2-auth-label">
                     {t('auth.confirmPassword')}
                   </label>
-                  <input
-                    type="password"
+                  <PasswordInput
                     id="confirmPassword"
                     name="confirmPassword"
                     className="v2-auth-input"
