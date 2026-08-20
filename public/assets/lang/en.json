@@ -140,7 +140,6 @@
             "dateLabel": "Activation Date",
             "dateHelp": "This is the date package will be activated. To explore, set the date a few days before the event. You can change the date anytime before activation.",
             "dateNote": "Note: Once activated, date can’t be changed. Link is active {{duration}} from this date.",
-            "dateNoteNoDuration": "Note: Once activated, date can’t be changed. Until you set this date, guests who open your event link will see that the event has not started.",
             "eventDateLabel": "Event Date",
             "eventDateHelp": "This will be shown on your guest welcome page. You can change it anytime. We recommend setting real date of your event.",
             "dateRejected": "Date could not be saved. It may conflict with event constraints.",

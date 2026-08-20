@@ -54,6 +54,14 @@ const EventSettings = ()=>{
 
 interface FormStatus { state: 'saving' | 'success' | 'error'; message?: string }
 
+// Ne: active_until okunamadiginda kullanilan varsayilan paket suresi (gun).
+// Nasil: DB trigger'i active_until'i yalnizca activation_date degisince tazeliyor, event
+//        activation_date NULL iken olusmussa alan bos kaliyor (NULL + interval = NULL).
+// Neden: Musteri aktivasyon notunun her event'te tam haliyle gorunmesini istedi. Bugun tum
+//        core paketler 30-31 gun, yani ikisi de "1 ay" olarak yaziliyor. Paket sureleri
+//        degistirilirse (admin > urunler > activation_days) bu deger de guncellenmeli.
+const DEFAULT_ACTIVE_DAYS = 30;
+
 function EventSettingsInner({event}: {event: Event}) {
   const { uid: packedUid } = useParams<{ uid: string }>();
   const [generalStatus, setGeneralStatus] = useState<FormStatus | null>(null);
@@ -68,7 +76,7 @@ function EventSettingsInner({event}: {event: Event}) {
   // activation_date farki tam olarak products.options.activation_days'i verir.
   const activeDays = daysBetween(event.activation_date, event.active_until);
   // dateNote'taki cumle Ukraynacada "uprodovzh" ile kuruluyor ve bu edat genitiv istiyor.
-  const activeDuration = activeDays ? formatDuration(activeDays, 'genitive') : '';
+  const activeDuration = formatDuration(activeDays ?? DEFAULT_ACTIVE_DAYS, 'genitive');
   const langCode = t('lang_code');
   const isUkrainian = langCode === 'uk';
   const eventDeleteTitle = isUkrainian ? 'Видалити подію' : 'Delete event';
@@ -363,11 +371,7 @@ function EventSettingsInner({event}: {event: Event}) {
                 <p>{t('settings.generalDetails.dateHelp')}</p>
                 {/* "Note:" satiri ayri paragraf: tek metinde \n ile satir kirmak yerine
                     ikinci bir <p> guvenli, aralarini kutunun kendi gap'i aciyor. */}
-                <p>
-                  {activeDuration
-                    ? t('settings.generalDetails.dateNote', { duration: activeDuration })
-                    : t('settings.generalDetails.dateNoteNoDuration')}
-                </p>
+                <p>{t('settings.generalDetails.dateNote', { duration: activeDuration })}</p>
               </SettingsFieldNote>
             )}
             {dateStatus?.state === 'error' && <span style={{color: '#dc2626', fontSize: '0.8rem'}}>✗ {dateStatus.message}</span>}
