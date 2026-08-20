@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import i18n from '../packages/i18n';
 import { ensureCanonicalLink, ensureMetaTag } from '../utils/seo';
+import { get_key } from '../utils/persistence';
 
 const seoByLanguage = {
   en: {
@@ -66,24 +67,15 @@ function EventNew() {
     });
     observer.observe(document.body, { childList: true, subtree: true, attributes: true });
 
+    // Ne: Auth token'i dogrudan indexedDB'yi acmak yerine ortak persistence katmanindan okur.
+    // Nasil: get_key('tkn') ayni anahtari ('lsgtkn') okur; anahtar yoksa reject ettigi icin
+    //        catch ile null'a dusuruluyor.
+    // Neden: Buradaki ham indexedDB.open('storageDB', 1) cagrisi, DB hic yoksa onu object
+    //        store'suz yaratip kalici olarak bozuyordu. Ortak katman DB'yi hem dogru yaratir
+    //        hem de bozuk kalmis DB'yi onarir.
     const checkLoginFromIDB = async () => {
       try {
-        const req = indexedDB.open('storageDB', 1);
-        const token = await new Promise<string | null>((resolve) => {
-          req.onsuccess = () => {
-            try {
-              const db = req.result;
-              const tx = db.transaction('keyValueStore', 'readonly');
-              const store = tx.objectStore('keyValueStore');
-              const get = store.get('lsgtkn');
-              get.onsuccess = () => resolve((get.result && get.result.v) || null);
-              get.onerror = () => resolve(null);
-            } catch {
-              resolve(null);
-            }
-          };
-          req.onerror = () => resolve(null);
-        });
+        const token = await get_key('tkn').catch(() => null);
 
         if (!!token) {
           resolveAuth(true);

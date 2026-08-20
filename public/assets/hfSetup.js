@@ -147,18 +147,36 @@
       !isWordPress && lang === "uk"
     );
 
+    // Ne: Header'daki login butonlarini secmek icin IndexedDB'deki auth token'i okur.
+    // Nasil: DB versiyonsuz acilir ve onupgradeneeded'da 'keyValueStore' garanti edilir.
+    // Neden: Versiyonlu acilis (open('storageDB', 1)) DB hic yoksa onu BOS olarak yaratiyordu.
+    //        DB v1'de kalip store'suz kaldigi icin React tarafindaki persistence katmani bir daha
+    //        onupgradeneeded tetikleyemiyor ve her yazma "One of the specified object stores was
+    //        not found" ile patliyordu (kullanici giris yapamiyor).
     const getAuthTokenFromIDB = ()=> new Promise(resolve => {
       try {
-        const req = indexedDB.open('storageDB', 1);
-        req.onsuccess = ()=>{
+        const req = indexedDB.open('storageDB');
+        req.onupgradeneeded = ()=>{
           const db = req.result;
-          const tx = db.transaction('keyValueStore', 'readonly');
-          const store = tx.objectStore('keyValueStore');
-          const get = store.get('lsgtkn');
-          get.onsuccess = ()=> resolve((get.result && get.result.v) || null);
-          get.onerror = ()=> resolve(null);
+          if (!db.objectStoreNames.contains('keyValueStore')){
+            db.createObjectStore('keyValueStore');
+          }
+        };
+        req.onsuccess = ()=>{
+          // Not: Bu callback disaridaki try/catch'in kapsaminda degil; kendi korumasi olmali,
+          // yoksa buradan atilan hata promise'i sonsuza kadar askida birakir.
+          try {
+            const db = req.result;
+            if (!db.objectStoreNames.contains('keyValueStore')){ resolve(null); return; }
+            const tx = db.transaction('keyValueStore', 'readonly');
+            const store = tx.objectStore('keyValueStore');
+            const get = store.get('lsgtkn');
+            get.onsuccess = ()=> resolve((get.result && get.result.v) || null);
+            get.onerror = ()=> resolve(null);
+          } catch(e){ resolve(null); }
         };
         req.onerror = ()=> resolve(null);
+        req.onblocked = ()=> resolve(null);
       } catch(e){ resolve(null); }
     });
 
