@@ -425,7 +425,11 @@
         "currency": "UAH",
         "selectPackage": "Select Package",
         "addOns": "Add-Ons",
-        "addOnsSubtitle": "Enhance your experience with these modular extras."
+        "addOnsSubtitle": "Enhance your experience with these modular extras.",
+        "invoiceTitle": "Order invoice",
+        "invoiceContinue": "Continue",
+        "addMore": "Want to add something else?",
+        "addItem": "Add"
     },
     "addons": {
         "purchasedTitle": "Your Shipments",

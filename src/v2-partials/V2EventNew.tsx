@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import '../v2-styles/EventNew.css';
+import '../v2-styles/PaywallInvoice.css';
 import { t } from '../packages/i18n';
 import { S3_ROOT } from '../consts';
 import { Link } from 'react-router-dom';
-import { cartState, getCartQty, initCartState, setCartQty } from '../client/cart';
+import { cartState, getCartQty, initCartState, setCartQty, QUANTITY_STEP, stepPackQty } from '../client/cart';
 import { useSnapshot } from 'valtio';
 import ProductIcon from '../v2-components/ProductIcon';
 import V2SignInForm from './V2SignInForm';
@@ -18,6 +19,26 @@ interface V2EventNewProps {
 
 const PREMIUM_PACKAGE_ID = 'premium';
 const SPONSORED_ADDON_ID = 'advertorial';
+
+const PAYWALL_FALLBACKS: Record<string, { en: string; uk: string }> = {
+  'paywall.invoiceTitle': { en: 'Order invoice', uk: 'Рахунок замовлення' },
+  'paywall.invoiceContinue': { en: 'Continue', uk: 'Продовжити' },
+  'paywall.addMore': { en: 'Want to add something else?', uk: 'Хочете додати щось ще?' },
+  'paywall.addItem': { en: 'Add', uk: 'Додати' },
+};
+
+const paywallText = (key: string) => {
+  const value = t(key);
+  if (value && value !== key) return value;
+  return PAYWALL_FALLBACKS[key]?.[t('lang_code') === 'uk' ? 'uk' : 'en'] ?? key;
+};
+
+const PAYWALL_INVOICE_ID = 'paywall-invoice';
+
+const setPaywallInvoiceOpen = (open: boolean) => {
+  document.querySelector('#' + PAYWALL_INVOICE_ID)?.classList.toggle('is-open', open);
+  document.documentElement.classList.toggle('paywall-invoice-open', open);
+};
 
 const isSponsoredIncludedInPremium = (product?: { sponsored_included?: boolean; advertorial_included?: boolean }) => {
   return product?.sponsored_included === true || product?.advertorial_included === true;
@@ -101,7 +122,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
 
   const addonClick = (id: string) => {
     if (id === SPONSORED_ADDON_ID && isPremiumSelected && isPremiumSponsoredIncluded) return;
-    setCartQty(id, getCartQty(id) > 0 ? 0 : 1);
+    setCartQty(id, getCartQty(id) > 0 ? 0 : QUANTITY_STEP);
   };
 
   // Ne: Backend'in display_* alanlarindan gosterilecek isim/aciklama cikarir.
@@ -182,6 +203,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
             <div className="event-new-addons-grid">
               {addOns.map((addOn) => {
                 const isSponsoredAdvertorial = addOn.id === SPONSORED_ADDON_ID;
+                const qty = getCartQty(addOn.id);
                 return (
                   <AddOnCard
                     key={addOn.id}
@@ -193,9 +215,11 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
                     image={addOn.options?.image}
                     mobileImage={addOn.options?.mobile_image}
                     isSponsoredAdvertorial={isSponsoredAdvertorial}
-                    isSelected={getCartQty(addOn.id) > 0}
+                    isSelected={qty > 0}
+                    quantity={qty}
                     isDisabled={isSponsoredAdvertorial && isPremiumSelected && isPremiumSponsoredIncluded}
                     onToggle={() => addonClick(addOn.id)}
+                    onQtyChange={(next) => setCartQty(addOn.id, next)}
                   />
                 );
               })}
@@ -236,13 +260,80 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
             <div className="event-new-checkout-divider"></div>
             <span className="event-new-checkout-items">{t('paywall.itemsSelected', { count: itemCount })}</span>
           </div>
-          <Link
-            style={{ textDecoration: 'none', pointerEvents: hasCoreSelected ? undefined : 'none' }}
-            to={hasCoreSelected ? "/checkout" : "#"}
+          <button
+            type="button"
+            disabled={!hasCoreSelected}
             className={`event-new-checkout-btn${hasCoreSelected ? '' : ' disabled'}`}
+            onClick={() => {
+              if (!hasCoreSelected) return;
+              setPaywallInvoiceOpen(true);
+            }}
           >
             {t('paywall.proceedToCheckout')}
-          </Link>
+          </button>
+        </div>
+      </div>
+
+      <div
+        id={PAYWALL_INVOICE_ID}
+        className="paywall-invoice-overlay"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setPaywallInvoiceOpen(false);
+        }}
+      >
+        <div className="paywall-invoice" onClick={(e) => e.stopPropagation()}>
+          <div className="paywall-invoice-inner">
+            <div className="paywall-invoice-head">
+              <h2 className="paywall-invoice-title">{paywallText('paywall.invoiceTitle')}</h2>
+              <button
+                type="button"
+                className="paywall-invoice-close"
+                aria-label={t('addons.close')}
+                onClick={() => setPaywallInvoiceOpen(false)}
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="paywall-invoice-body">
+              {cart.cartItems.filter((item) => item.quantity > 0).map((item) => {
+                const product = cart.products.find((p) => p.id === item.product_uid);
+                if (!product) return null;
+                const texts = resolveDisplayTexts(product);
+                return (
+                  <div key={item.product_uid} className="paywall-invoice-row">
+                    <div>
+                      <p className="paywall-invoice-row-name">{texts.name || product.id}</p>
+                      <p className="paywall-invoice-row-qty">{t('checkout.qty', { count: item.quantity })}</p>
+                    </div>
+                    <span className="paywall-invoice-row-price">₴{(Number(product.price) * item.quantity).toFixed(2)}</span>
+                  </div>
+                );
+              })}
+              <div className="paywall-invoice-total">
+                <span className="paywall-invoice-total-label">{t('checkout.total')}</span>
+                <span className="paywall-invoice-total-value">₴{Number(total).toFixed(2)}</span>
+              </div>
+              <div className="paywall-invoice-add">
+                <p className="paywall-invoice-add-title">{paywallText('paywall.addMore')}</p>
+                <button
+                  type="button"
+                  className="paywall-invoice-add-btn"
+                  onClick={() => setPaywallInvoiceOpen(false)}
+                >
+                  {paywallText('paywall.addItem')}
+                </button>
+              </div>
+            </div>
+            <div className="paywall-invoice-foot">
+              <Link
+                to="/checkout"
+                className="event-new-checkout-btn paywall-invoice-continue"
+                onClick={() => setPaywallInvoiceOpen(false)}
+              >
+                {paywallText('paywall.invoiceContinue')}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -326,11 +417,33 @@ interface AddOnCardProps {
   mobileImage?: string;
   isSponsoredAdvertorial?: boolean;
   isSelected: boolean;
+  quantity?: number;
   isDisabled?: boolean;
   onToggle: () => void;
+  onQtyChange?: (quantity: number) => void;
 }
 
-function AddOnCard({ id, displayName, displayDescription, price, icon, image, mobileImage, isSponsoredAdvertorial = false, isSelected, isDisabled = false, onToggle }: AddOnCardProps) {
+function AddonQtyStepper({ quantity, disabled, onQtyChange }: { quantity: number; disabled?: boolean; onQtyChange: (quantity: number) => void }) {
+  return (
+    <div className="event-new-quantity-control" onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        className="event-new-quantity-btn"
+        disabled={disabled || quantity <= 0}
+        onClick={() => onQtyChange(stepPackQty(quantity, -1))}
+      >−</button>
+      <span className="event-new-quantity-value">{quantity}</span>
+      <button
+        type="button"
+        className="event-new-quantity-btn event-new-quantity-btn-add"
+        disabled={disabled}
+        onClick={() => onQtyChange(stepPackQty(quantity, 1))}
+      >+</button>
+    </div>
+  );
+}
+
+function AddOnCard({ id, displayName, displayDescription, price, icon, image, mobileImage, isSponsoredAdvertorial = false, isSelected, quantity = 0, isDisabled = false, onToggle, onQtyChange }: AddOnCardProps) {
   const cardClass = [
     'event-new-addon-card',
     image ? 'event-new-addon-card-image' : '',
@@ -385,6 +498,7 @@ function AddOnCard({ id, displayName, displayDescription, price, icon, image, mo
       <h3 className="event-new-addon-name">{resolvedName}</h3>
       <p className="event-new-addon-description">{resolvedDescription}</p>
       <div className="event-new-addon-footer">
+        {onQtyChange && <AddonQtyStepper quantity={quantity} disabled={isDisabled} onQtyChange={onQtyChange} />}
         <span className="event-new-addon-price">₴{price}</span>
         <input
           type="checkbox"

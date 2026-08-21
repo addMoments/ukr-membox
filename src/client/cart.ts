@@ -28,6 +28,19 @@ const getCartQty = (productId: string) => {
     return item ? item.quantity : 0;
 }
 
+export const QUANTITY_STEP = 8;
+
+export function stepPackQty(current: number, direction: 1 | -1): number {
+    if (direction > 0) {
+        if (current <= 0) return QUANTITY_STEP;
+        if (current % QUANTITY_STEP === 0) return current + QUANTITY_STEP;
+        return Math.ceil(current / QUANTITY_STEP) * QUANTITY_STEP;
+    }
+    if (current <= QUANTITY_STEP) return 0;
+    if (current % QUANTITY_STEP === 0) return current - QUANTITY_STEP;
+    return Math.floor(current / QUANTITY_STEP) * QUANTITY_STEP;
+}
+
 const saveCartState = async () => {
     const state: Record<string, number> = {};
 

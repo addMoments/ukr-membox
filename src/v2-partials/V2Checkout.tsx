@@ -5,7 +5,7 @@ import V2Footer from '../v2-components/V2Footer';
 import ProductIcon from '../v2-components/ProductIcon';
 import '../v2-styles/Checkout.css';
 import { SERV_ROOT } from '../consts';
-import { cartState, initCartState, setCartQty } from '../client/cart';
+import { cartState, initCartState, setCartQty, stepPackQty } from '../client/cart';
 import { useSnapshot } from 'valtio';
 import { t } from '../packages/i18n';
 import { fetch } from '../client/core';
@@ -67,7 +67,7 @@ interface ProductDisplayFields {
 // Per-product config state: { [productId]: { design_id?: string, [key]: string } }
 type BuyerConfigsState = Record<string, Record<string, string>>;
 
-const SINGLE_QUANTITY_ADDON_IDS = new Set(['audioGuestbook', 'audiobook', 'advertorial', 'sponsored']);
+const SINGLE_QUANTITY_ADDON_IDS = new Set(['advertorial', 'sponsored']);
 
 // Ne: Cart item listesinden Meta AddToCart icin tekrar kullanilabilir signature uretir.
 // Nasil: Quantity'si pozitif urunleri product_uid:quantity formatinda siralayip pipe ile birlestirir.
@@ -623,7 +623,8 @@ interface CartItemCardProps {
 function CartItemCard({ product, displayName, displayDescription, quantity, config, onConfigChange, onQtyChange, onRemove }: CartItemCardProps) {
   const isPhysical = product.fullfillment_type === 'physical';
   const isAddOn = !!product.is_add_on;
-  const showQuantityStepper = isAddOn && !SINGLE_QUANTITY_ADDON_IDS.has(product.id);
+  const showQuantityStepper =
+    (isPhysical || isAddOn) && !SINGLE_QUANTITY_ADDON_IDS.has(product.id);
   const designs: Design[] = product.options?.designs || [];
   const configFields: ConfigField[] = product.options?.config_fields || [];
 
@@ -734,13 +735,13 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
               <button
                 type="button"
                 className="checkout-item-stepper-btn"
-                onClick={() => quantity > 1 ? onQtyChange(quantity - 1) : onRemove()}
+                onClick={() => onQtyChange(stepPackQty(quantity, -1))}
               >−</button>
               <span className="checkout-item-stepper-count">{quantity}</span>
               <button
                 type="button"
                 className="checkout-item-stepper-btn"
-                onClick={() => onQtyChange(quantity + 1)}
+                onClick={() => onQtyChange(stepPackQty(quantity, 1))}
               >+</button>
             </div>
           ) : null}

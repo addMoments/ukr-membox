@@ -1,0 +1,17 @@
+node_modules
+build
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+.DS_Store
+.cursor
+.taskmaster
+deploy
+project-docs
+wordpress-components
+*.md
+*.pem
+npm-debug.log
+.eslintcache

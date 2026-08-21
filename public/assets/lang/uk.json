@@ -425,7 +425,11 @@
         "currency": "UAH",
         "selectPackage": "Вибрати пакет",
         "addOns": "Додатки",
-        "addOnsSubtitle": "Покращте свій досвід цими модульними додатками."
+        "addOnsSubtitle": "Покращте свій досвід цими модульними додатками.",
+        "invoiceTitle": "Рахунок замовлення",
+        "invoiceContinue": "Продовжити",
+        "addMore": "Хочете додати щось ще?",
+        "addItem": "Додати"
     },
     "addons": {
         "purchasedTitle": "Ваші відправлення",
