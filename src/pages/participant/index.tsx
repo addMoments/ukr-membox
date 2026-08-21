@@ -85,6 +85,14 @@ function Participant() {
           getPublicAdvertorialConfig(packedUid).catch(() => null),
         ]);
 
+        // Ne: Event kaydi gelmediyse erken cikar.
+        // Neden: eventData[0] undefined iken .settings okumak TypeError firlatip
+        //        asagidaki catch uzerinden her hatayi 404'e ceviriyordu.
+        if (!eventData || !eventData[0]) {
+          navigate("/404");
+          return;
+        }
+
         setEvent(eventData[0]);
         applyGuestFont(eventData[0].settings?.font);
         setRecentUploads(uploadsData as UploadEntry[]);
@@ -102,6 +110,9 @@ function Participant() {
           setEventClosedMessage(getEventClosedMessage(err) || eventClosedDefaultMessage);
           return;
         }
+        // Ne: Beklenmeyen bootstrap hatalarini konsola yazar.
+        // Neden: Backend 500'leri sessizce 404 sayfasina donusup teshisi imkansiz kiliyordu.
+        console.error('[guest-bootstrap] failed', err);
         navigate("/404");
       }
     }, [eventClosedDefaultMessage, navigate, packedUid, uid]);
