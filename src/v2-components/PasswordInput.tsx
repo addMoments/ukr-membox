@@ -2,13 +2,6 @@ import { InputHTMLAttributes, useState } from "react";
 import "../v2-styles/PasswordInput.css";
 import { textOr } from "../utils/admin_i18n";
 
-// Ne: Sifre alanini, icinde goster/gizle gozu olan bir input'a cevirir.
-// Nasil: Input bir sarmalayiciya alinir, gozu type="button" olarak sagda konumlanir ve
-//        tiklandiginda input type'i password <-> text arasinda degisir.
-// Neden: Kullanici yazdigi sifreyi dogrulayabilsin. Dugmenin type="button" olmasi sart,
-//        aksi halde form icinde varsayilan submit dugmesi gibi davranip formu gonderir.
-//        Dugmeye name verilmez; form_event_parse "*[name]" ile topladigi icin
-//        aksi halde gonderilen veriye sizardi.
 interface PasswordInputProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "type"
