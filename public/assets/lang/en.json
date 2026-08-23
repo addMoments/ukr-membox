@@ -580,6 +580,27 @@
         "remove": "Remove",
         "enterEmail": "Please enter an email address",
         "cartNotFound": "Cart state not found",
+        "promoLabel": "Promo code",
+        "promoApply": "Apply",
+        "promoApplyingButton": "Applying...",
+        "promoApplyingMessage": "Applying promo code...",
+        "promoRequired": "Please enter a promo code",
+        "promoApplied": "Promo code {{code}} applied.",
+        "grossTotal": "Gross total",
+        "netTotal": "Net total",
+        "promoDiscount": "Promo discount",
+        "promoErrors": {
+            "notFound": "Promo code not found",
+            "expired": "Promo code expired",
+            "requiresPremium": "Promo code applies only to the Premium package",
+            "usageLimitReached": "Promo code usage limit reached",
+            "inactive": "Promo code is inactive",
+            "required": "Please enter a promo code",
+            "notStarted": "Promo code is not active yet",
+            "unsupported": "Promo code cannot be applied",
+            "invalidPurchase": "Cart information is invalid",
+            "generic": "Promo code could not be applied"
+        },
         "novaPoshtaRates": "At Nova Poshta rates"
     },
     "extendStorage": {

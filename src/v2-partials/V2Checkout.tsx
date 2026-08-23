@@ -5,7 +5,7 @@ import V2Footer from '../v2-components/V2Footer';
 import ProductIcon from '../v2-components/ProductIcon';
 import '../v2-styles/Checkout.css';
 import { SERV_ROOT } from '../consts';
-import { cartState, initCartState, setCartQty } from '../client/cart';
+import { cartState, getQtyRule, initCartState, roundQtyToRule, setCartQty } from '../client/cart';
 import { useSnapshot } from 'valtio';
 import { t } from '../packages/i18n';
 import { fetch } from '../client/core';
@@ -14,6 +14,7 @@ import { pgREST } from '../client/postgrest';
 import { get_key } from '../utils/persistence';
 import { Product } from '../types/products';
 import { getPromoErrorMessage, validatePromoCode } from '../client/promo';
+import { textOr } from '../utils/admin_i18n';
 import { PromoValidationResponse } from '../types/promo';
 import { markMetaEventOnce, trackMetaAddToCart } from '../client/meta-pixel';
 
@@ -106,9 +107,18 @@ function V2Checkout() {
     cart.cartItems.forEach((item) => {
       if (item.quantity > 1 && SINGLE_QUANTITY_ADDON_IDS.has(item.product_uid)) {
         setCartQty(item.product_uid, 1);
+        return;
+      }
+      // Ne: Sepetten geri yuklenen adedi urunun min_qty/qty_step kuralina oturtur.
+      // Neden: Kural urun kaydina sonradan eklendiginde, daha once 1 adet olarak kaydedilmis
+      //        QR Card sepette 1 olarak kalir ve checkout gecerli olmayan bir adet gonderir.
+      const product = cart.products.find(p => p.id === item.product_uid);
+      const corrected = roundQtyToRule(item.quantity, product);
+      if (item.quantity > 0 && corrected !== item.quantity) {
+        setCartQty(item.product_uid, corrected);
       }
     });
-  }, [cart.cartItems, cart.init]);
+  }, [cart.cartItems, cart.products, cart.init]);
 
   useEffect(() => {
     if (!cart.init || addToCartTrackedRef.current) return;
@@ -167,7 +177,7 @@ function V2Checkout() {
 
     if (!promoCode) {
       setAppliedPromo(null);
-      setPromoMessage({ ok: false, text: 'Promo code is required' });
+      setPromoMessage({ ok: false, text: textOr('checkout.promoRequired', 'Please enter a promo code', 'Будь ласка, введіть промокод') });
       return;
     }
 
@@ -179,14 +189,19 @@ function V2Checkout() {
     }
 
     setPromoApplying(true);
-    setPromoMessage({ ok: true, text: 'Applying promo code...' });
+    setPromoMessage({ ok: true, text: textOr('checkout.promoApplyingMessage', 'Applying promo code...', 'Застосовуємо промокод...') });
     try {
       const result = await validatePromoCode({
         promo_code: promoCode,
         purchase_info: cartStateData,
       });
       setAppliedPromo(result);
-      setPromoMessage({ ok: true, text: `Promo code ${result.promo_code_text_snapshot} applied.` });
+      setPromoMessage({ ok: true, text: textOr(
+        'checkout.promoApplied',
+        `Promo code ${result.promo_code_text_snapshot} applied.`,
+        `Промокод ${result.promo_code_text_snapshot} застосовано.`,
+        { code: result.promo_code_text_snapshot },
+      ) });
     } catch (err) {
       setAppliedPromo(null);
       setPromoMessage({ ok: false, text: getPromoErrorMessage(err) });
@@ -388,7 +403,7 @@ function V2Checkout() {
 
             <div className="checkout-summary-rows">
               <div className="checkout-summary-row">
-                <span className="checkout-summary-row-label">{appliedPromo ? 'Gross total' : t('checkout.subtotal')}</span>
+                <span className="checkout-summary-row-label">{appliedPromo ? textOr('checkout.grossTotal', 'Gross total', 'Загальна сума') : t('checkout.subtotal')}</span>
                 <span className="checkout-summary-row-value">{formatMoney(appliedPromo?.gross_total ?? cart.total)}</span>
               </div>
               <div className="checkout-summary-row checkout-summary-row-divider">
@@ -397,7 +412,7 @@ function V2Checkout() {
               </div>
               {appliedPromo && (
                 <div className="checkout-summary-row checkout-summary-discount-row">
-                  <span className="checkout-summary-row-label">Promo discount</span>
+                  <span className="checkout-summary-row-label">{textOr('checkout.promoDiscount', 'Promo discount', 'Знижка за промокодом')}</span>
                   <span className="checkout-summary-row-value">
                     -{formatMoney(appliedPromo.discount_amount)}
                     {formattedPromoDiscountPercent ? ` (-${formattedPromoDiscountPercent}%)` : ''}
@@ -405,13 +420,13 @@ function V2Checkout() {
                 </div>
               )}
               <div className="checkout-summary-total">
-                <span className="checkout-summary-total-label">{appliedPromo ? 'Net total' : t('checkout.total')}</span>
+                <span className="checkout-summary-total-label">{appliedPromo ? textOr('checkout.netTotal', 'Net total', 'До сплати') : t('checkout.total')}</span>
                 <span className="checkout-summary-total-value">{formatMoney(appliedPromo?.net_total ?? cart.total)}</span>
               </div>
             </div>
 
             <div className="checkout-promo-section">
-              <label className="checkout-email-label">Promo code</label>
+              <label className="checkout-email-label">{textOr('checkout.promoLabel', 'Promo code', 'Промокод')}</label>
               <div className="checkout-promo-row">
                 <input
                   name="promo_code"
@@ -426,7 +441,9 @@ function V2Checkout() {
                   onClick={handleApplyPromo}
                   disabled={promoApplying}
                 >
-                  {promoApplying ? 'Applying...' : 'Apply'}
+                  {promoApplying
+                    ? textOr('checkout.promoApplyingButton', 'Applying...', 'Застосовуємо...')
+                    : textOr('checkout.promoApply', 'Apply', 'Застосувати')}
                 </button>
               </div>
               {promoMessage && (
@@ -624,6 +641,9 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
   const isPhysical = product.fullfillment_type === 'physical';
   const isAddOn = !!product.is_add_on;
   const showQuantityStepper = isAddOn && !SINGLE_QUANTITY_ADDON_IDS.has(product.id);
+  // Not: Adet kurallari urun kaydindan geliyor (options.min_qty / options.qty_step).
+  // Kural tanimlanmamis urunlerde ikisi de 1 oldugu icin stepper eskisi gibi birer birer artar.
+  const { min: minQty, step: qtyStep } = getQtyRule(product);
   const designs: Design[] = product.options?.designs || [];
   const configFields: ConfigField[] = product.options?.config_fields || [];
 
@@ -734,13 +754,13 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
               <button
                 type="button"
                 className="checkout-item-stepper-btn"
-                onClick={() => quantity > 1 ? onQtyChange(quantity - 1) : onRemove()}
+                onClick={() => quantity - qtyStep >= minQty ? onQtyChange(quantity - qtyStep) : onRemove()}
               >−</button>
               <span className="checkout-item-stepper-count">{quantity}</span>
               <button
                 type="button"
                 className="checkout-item-stepper-btn"
-                onClick={() => onQtyChange(quantity + 1)}
+                onClick={() => onQtyChange(quantity + qtyStep)}
               >+</button>
             </div>
           ) : null}

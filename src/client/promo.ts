@@ -1,6 +1,7 @@
 import { SERV_ROOT } from '../consts';
 import { FetchHttpError, fetch as authFetch } from './core';
 import { normalizePartnership } from './partnership';
+import { textOr } from '../utils/admin_i18n';
 import {
   AdminPromo,
   CreatePromoPayload,
@@ -102,16 +103,21 @@ const normalizeReportRow = (value: unknown): PromoReportRow => {
   };
 };
 
-export const promoErrorMessages: Record<string, string> = {
-  promo_not_found: 'Promo code not found',
-  promo_expired: 'Promo code expired',
-  promo_requires_premium: 'Promo code applies only to premium package',
-  promo_usage_limit_reached: 'Promo code usage limit reached',
-  promo_inactive: 'Promo code is inactive',
-  promo_code_required: 'Promo code is required',
-  promo_not_started: 'Promo code is not active yet',
-  promo_unsupported_discount_type: 'Promo code cannot be applied',
-  invalid_purchase_info: 'Cart information is invalid',
+// Ne: Backend promo hata kodlarini ceviri anahtari + EN/UK yedek metnine baglar.
+// Nasil: textOr once checkout.promoErrors.* anahtarini dener, uzaktan yuklenen JSON'da
+//        yoksa buradaki iki metinden aktif dile uyani dondurur.
+// Neden: Bu mesajlar checkout'ta promo kutusunun altinda kullaniciya gosteriliyordu ve
+//        Ukraynaca arayuzde de Ingilizce kaliyordu (2.10).
+const promoErrorTexts: Record<string, { key: string; en: string; uk: string }> = {
+  promo_not_found: { key: 'checkout.promoErrors.notFound', en: 'Promo code not found', uk: 'Промокод не знайдено' },
+  promo_expired: { key: 'checkout.promoErrors.expired', en: 'Promo code expired', uk: 'Термін дії промокоду минув' },
+  promo_requires_premium: { key: 'checkout.promoErrors.requiresPremium', en: 'Promo code applies only to the Premium package', uk: 'Промокод діє лише для пакета Premium' },
+  promo_usage_limit_reached: { key: 'checkout.promoErrors.usageLimitReached', en: 'Promo code usage limit reached', uk: 'Ліміт використання промокоду вичерпано' },
+  promo_inactive: { key: 'checkout.promoErrors.inactive', en: 'Promo code is inactive', uk: 'Промокод неактивний' },
+  promo_code_required: { key: 'checkout.promoErrors.required', en: 'Please enter a promo code', uk: 'Будь ласка, введіть промокод' },
+  promo_not_started: { key: 'checkout.promoErrors.notStarted', en: 'Promo code is not active yet', uk: 'Промокод ще не активний' },
+  promo_unsupported_discount_type: { key: 'checkout.promoErrors.unsupported', en: 'Promo code cannot be applied', uk: 'Промокод не можна застосувати' },
+  invalid_purchase_info: { key: 'checkout.promoErrors.invalidPurchase', en: 'Cart information is invalid', uk: 'Дані кошика некоректні' },
 };
 
 // Ne: Backend promo hata cevabindan kullaniciya gosterilecek hata kodunu ceker.
@@ -122,12 +128,14 @@ export function getPromoErrorMessage(err: unknown): string {
     const body = asRecord(err.body);
     const code = [body.error_code, body.code, body.error, body.message]
       .find((value): value is string => typeof value === 'string');
-    if (code && promoErrorMessages[code]) return promoErrorMessages[code];
+    const known = code ? promoErrorTexts[code] : undefined;
+    if (known) return textOr(known.key, known.en, known.uk);
     if (typeof body.message === 'string') return body.message;
   }
 
+  // Not: err.message backend/ag kaynakli ham metin; cevrilemez, oldugu gibi gosterilir.
   if (err instanceof Error) return err.message;
-  return 'Promo code could not be applied';
+  return textOr('checkout.promoErrors.generic', 'Promo code could not be applied', 'Не вдалося застосувати промокод');
 }
 
 // Ne: Checkout promo kodunu backend'e dogrulatir.

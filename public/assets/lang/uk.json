@@ -580,6 +580,27 @@
         "remove": "Видалити",
         "enterEmail": "Будь ласка, введіть адресу електронної пошти",
         "cartNotFound": "Кошик не знайдено",
+        "promoLabel": "Промокод",
+        "promoApply": "Застосувати",
+        "promoApplyingButton": "Застосовуємо...",
+        "promoApplyingMessage": "Застосовуємо промокод...",
+        "promoRequired": "Будь ласка, введіть промокод",
+        "promoApplied": "Промокод {{code}} застосовано.",
+        "grossTotal": "Загальна сума",
+        "netTotal": "До сплати",
+        "promoDiscount": "Знижка за промокодом",
+        "promoErrors": {
+            "notFound": "Промокод не знайдено",
+            "expired": "Термін дії промокоду минув",
+            "requiresPremium": "Промокод діє лише для пакета Premium",
+            "usageLimitReached": "Ліміт використання промокоду вичерпано",
+            "inactive": "Промокод неактивний",
+            "required": "Будь ласка, введіть промокод",
+            "notStarted": "Промокод ще не активний",
+            "unsupported": "Промокод не можна застосувати",
+            "invalidPurchase": "Дані кошика некоректні",
+            "generic": "Не вдалося застосувати промокод"
+        },
         "novaPoshtaRates": "За тарифами Nova Poshta"
     },
     "extendStorage": {
