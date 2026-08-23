@@ -23,6 +23,35 @@ const setCartQty = async (productId: string, quantity: number) => {
     saveCartState();
 }
 
+// Ne: Bir urunun satis adedi kurallarini okur: en az kac adet ve kacar kacar artar.
+// Nasil: products.options.min_qty / qty_step alanlarindan okur; alan yoksa ikisi de 1 doner,
+//        yani kural tanimlanmamis urunler bugunku davranisini aynen korur.
+// Neden: QR Card (printedBanner) 8'li bloklar halinde basiliyor (2.16). Kural "fiziksel urun"
+//        olmaya baglanamaz - welcome_board ve aesel de fiziksel ama tek adet satiliyor - bu
+//        yuzden yalnizca urun kaydindaki bu iki alandan okunuyor.
+const getQtyRule = (product?: Pick<Product, 'options'> | null): { min: number; step: number } => {
+    const toPositiveInt = (value: unknown) => {
+        const parsed = typeof value === 'number' ? value : Number(value);
+        return Number.isFinite(parsed) && parsed >= 1 ? Math.floor(parsed) : 1;
+    };
+    return {
+        min: toPositiveInt(product?.options?.min_qty),
+        step: toPositiveInt(product?.options?.qty_step),
+    };
+};
+
+// Ne: Serbest bir adedi urunun min_qty/qty_step kuralina oturtur.
+// Nasil: min'in altini min'e cikarir, ustunu min + (step'in tam kati) degerine yuvarlar.
+// Neden: Yalnizca stepper degil, eski cart state'inden geri yuklenen adetler de ayni kuraldan
+//        gecsin; aksi halde kural eklenmeden once sepete atilmis 1 adet QR Card 1 olarak kalir.
+const roundQtyToRule = (quantity: number, product?: Pick<Product, 'options'> | null): number => {
+    const { min, step } = getQtyRule(product);
+    if (quantity <= min) return min;
+    return min + Math.round((quantity - min) / step) * step;
+};
+
+const findProduct = (productId: string) => cartState.products.find(product => product.id === productId);
+
 const getCartQty = (productId: string) => {
     const item = cartState.cartItems.find(item => item.product_uid === productId);
     return item ? item.quantity : 0;
@@ -110,5 +139,8 @@ export {
     clearCartState,
     cartState,
     setCartQty,
-    getCartQty
+    getCartQty,
+    getQtyRule,
+    roundQtyToRule,
+    findProduct
 }

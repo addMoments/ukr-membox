@@ -3,7 +3,7 @@ import '../v2-styles/EventNew.css';
 import { t } from '../packages/i18n';
 import { S3_ROOT } from '../consts';
 import { Link } from 'react-router-dom';
-import { cartState, getCartQty, initCartState, setCartQty } from '../client/cart';
+import { cartState, findProduct, getCartQty, getQtyRule, initCartState, setCartQty } from '../client/cart';
 import { useSnapshot } from 'valtio';
 import ProductIcon from '../v2-components/ProductIcon';
 import V2SignInForm from './V2SignInForm';
@@ -101,7 +101,9 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
 
   const addonClick = (id: string) => {
     if (id === SPONSORED_ADDON_ID && isPremiumSelected && isPremiumSponsoredIncluded) return;
-    setCartQty(id, getCartQty(id) > 0 ? 0 : 1);
+    // Not: Add-on sepete 1 adet degil, urunun min_qty degeriyle giriyor. Kural tanimlanmamis
+    // urunlerde min_qty 1'e dustugu icin davranis degismiyor; QR Card'da ilk secim 8 oluyor.
+    setCartQty(id, getCartQty(id) > 0 ? 0 : getQtyRule(findProduct(id)).min);
   };
 
   // Ne: Backend'in display_* alanlarindan gosterilecek isim/aciklama cikarir.
