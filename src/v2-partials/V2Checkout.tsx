@@ -263,7 +263,7 @@ function V2Checkout() {
     }
 
     if (hasPhysical && !shippingAddress) {
-      alert('Please add a shipping address for physical items.');
+      alert(textOr('checkout.shipping.addressRequired', 'Please add a shipping address for physical items.', 'Будь ласка, додайте адресу доставки для фізичних товарів.'));
       return;
     }
 
@@ -276,7 +276,12 @@ function V2Checkout() {
 
       if (designs.length > 0 && !cfg.design_id && !designs[0]?.id) {
         const resolvedName = resolveDisplayTexts(product).name || product.id;
-        alert(`Please select a design for "${resolvedName}".`);
+        alert(textOr(
+          'checkout.selectDesign',
+          `Please select a design for "${resolvedName}".`,
+          `Будь ласка, оберіть дизайн для «${resolvedName}».`,
+          { product: resolvedName },
+        ));
         return;
       }
       const selectedDesignId = cfg.design_id || designs[0]?.id || '';
@@ -291,7 +296,12 @@ function V2Checkout() {
       for (const field of fieldsToValidate) {
         if (!cfg[field.key]?.trim()) {
           const resolvedName = resolveDisplayTexts(product).name || product.id;
-          alert(`Please fill "${field.label}" for "${resolvedName}".`);
+          alert(textOr(
+            'checkout.fillField',
+            `Please fill "${field.label}" for "${resolvedName}".`,
+            `Будь ласка, заповніть «${field.label}» для «${resolvedName}».`,
+            { field: field.label, product: resolvedName },
+          ));
           return;
         }
       }
@@ -456,13 +466,15 @@ function V2Checkout() {
             {hasPhysical && (
               <div className="checkout-shipping-section">
                 <div className="checkout-shipping-header">
-                  <span className="checkout-email-label">Shipping Address</span>
+                  <span className="checkout-email-label">{textOr('checkout.shipping.addressTitle', 'Shipping Address', 'Адреса доставки')}</span>
                   <button
                     type="button"
                     className="checkout-address-btn"
                     onClick={() => setShowAddressModal(true)}
                   >
-                    {shippingAddress ? 'Edit' : '+ Add Shipping Address'}
+                    {shippingAddress
+                      ? textOr('checkout.shipping.edit', 'Edit', 'Редагувати')
+                      : textOr('checkout.shipping.addAddress', '+ Add Shipping Address', '+ Додати адресу доставки')}
                   </button>
                 </div>
                 {shippingAddress && (
@@ -702,7 +714,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
           <div className="checkout-item-config">
             {designs.length > 0 && (
               <div className="checkout-item-config-field">
-                <label className="checkout-item-config-label">Design</label>
+                <label className="checkout-item-config-label">{textOr('checkout.design', 'Design', 'Дизайн')}</label>
                 <select
                   className="checkout-item-config-select"
                   value={selectedDesignId}
@@ -794,13 +806,39 @@ interface AddressModalProps {
   onClose: () => void;
 }
 
-function validateNamePart(value: string, label: string): string {
+type NameErrorCode = '' | 'required' | 'digits' | 'tooShort';
+
+// Ne: Ad/soyad alanindaki hatayi hazir metin yerine kod olarak dondurur.
+// Neden: Mesaj eskiden `${label} is required` seklinde birlestiriliyordu. Ukraynacada alan
+//        adi cumle icinde cekime giriyor ("Вкажіть ім'я" / "Ім'я не може містити цифри"),
+//        yani parca birlestirme cevrilemiyor; her alan+durum kombinasyonu tam cumle olarak
+//        NAME_ERRORS icinde duruyor.
+function validateNamePart(value: string): NameErrorCode {
   const trimmed = value.trim();
-  if (!trimmed) return `${label} is required`;
-  if (/\d/.test(trimmed)) return `${label} must not contain numbers`;
-  if (trimmed.length < 2) return `${label} must be at least 2 characters`;
+  if (!trimmed) return 'required';
+  if (/\d/.test(trimmed)) return 'digits';
+  if (trimmed.length < 2) return 'tooShort';
   return '';
 }
+
+const NAME_ERRORS: Record<'firstName' | 'lastName', Record<Exclude<NameErrorCode, ''>, { key: string; en: string; uk: string }>> = {
+  firstName: {
+    required: { key: 'checkout.shipping.firstNameRequired', en: 'First name is required', uk: "Вкажіть ім'я" },
+    digits: { key: 'checkout.shipping.firstNameDigits', en: 'First name must not contain numbers', uk: "Ім'я не може містити цифри" },
+    tooShort: { key: 'checkout.shipping.firstNameTooShort', en: 'First name must be at least 2 characters', uk: "Ім'я має містити щонайменше 2 символи" },
+  },
+  lastName: {
+    required: { key: 'checkout.shipping.lastNameRequired', en: 'Last name is required', uk: 'Вкажіть прізвище' },
+    digits: { key: 'checkout.shipping.lastNameDigits', en: 'Last name must not contain numbers', uk: 'Прізвище не може містити цифри' },
+    tooShort: { key: 'checkout.shipping.lastNameTooShort', en: 'Last name must be at least 2 characters', uk: 'Прізвище має містити щонайменше 2 символи' },
+  },
+};
+
+const nameErrorText = (field: 'firstName' | 'lastName', code: NameErrorCode): string => {
+  if (!code) return '';
+  const entry = NAME_ERRORS[field][code];
+  return textOr(entry.key, entry.en, entry.uk);
+};
 
 function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
   const nameParts = initial?.full_name?.trim().split(/\s+/) || [];
@@ -860,19 +898,23 @@ function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
   };
 
   // Derived errors — only shown after first submit attempt
-  const firstNameError = submitted ? validateNamePart(firstName, 'First name') : '';
-  const lastNameError = submitted ? validateNamePart(lastName, 'Last name') : '';
-  const phoneError = submitted && !isPhoneValid(phone)
-    ? 'Enter a valid Ukrainian mobile number (e.g. +380 99 123 45 67)' : '';
+  const phoneInvalidText = () => textOr(
+    'checkout.shipping.phoneInvalid',
+    'Enter a valid Ukrainian mobile number (e.g. +380 99 123 45 67)',
+    'Введіть коректний український номер (наприклад, +380 99 123 45 67)',
+  );
+
+  const firstNameError = submitted ? nameErrorText('firstName', validateNamePart(firstName)) : '';
+  const lastNameError = submitted ? nameErrorText('lastName', validateNamePart(lastName)) : '';
+  const phoneError = submitted && !isPhoneValid(phone) ? phoneInvalidText() : '';
   const cityError = submitted && !selectedCity
-    ? 'Select a city from the dropdown' : '';
+    ? textOr('checkout.shipping.cityRequired', 'Select a city from the dropdown', 'Оберіть місто зі списку') : '';
   const warehouseError = submitted && selectedCity && !selectedWarehouse
-    ? 'Select a Nova Poshta branch' : '';
+    ? textOr('checkout.shipping.branchRequired', 'Select a Nova Poshta branch', 'Оберіть відділення Нової Пошти') : '';
 
   // Also show phone error while typing (after first interaction)
   const [phoneTouched, setPhoneTouched] = useState(false);
-  const phoneInlineError = phoneTouched && phone && !isPhoneValid(phone)
-    ? 'Enter a valid Ukrainian mobile number (e.g. +380 99 123 45 67)' : '';
+  const phoneInlineError = phoneTouched && phone && !isPhoneValid(phone) ? phoneInvalidText() : '';
 
   const searchCities = (q: string) => {
     setCityQuery(q);
@@ -936,7 +978,7 @@ function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    if (validateNamePart(firstName, 'First name') || validateNamePart(lastName, 'Last name')) return;
+    if (validateNamePart(firstName) || validateNamePart(lastName)) return;
     if (!isPhoneValid(phone)) return;
     if (!selectedCity) return;
     if (!selectedWarehouse) return;
@@ -954,17 +996,21 @@ function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
     <div className="addr-modal-overlay" onClick={onClose}>
       <div className="addr-modal" onClick={e => e.stopPropagation()}>
         <div className="addr-modal-header">
-          <h3 className="addr-modal-title">Shipping Address</h3>
+          <h3 className="addr-modal-title">{textOr('checkout.shipping.addressTitle', 'Shipping Address', 'Адреса доставки')}</h3>
           <button className="addr-modal-close" onClick={onClose} type="button">✕</button>
         </div>
         <div className="addr-np-notice">
           <i className="fa-solid fa-truck-fast" />
-          <span>Delivery via Nova Poshta — you will pick up the order from the nearest branch.</span>
+          <span>{textOr(
+            'checkout.shipping.npNotice',
+            'Delivery via Nova Poshta — you will pick up the order from the nearest branch.',
+            'Доставка Новою Поштою — ви заберете замовлення у найближчому відділенні.',
+          )}</span>
         </div>
         <form className="addr-modal-form" onSubmit={handleSubmit}>
           <div className="addr-field-row">
             <div className="addr-field-group">
-              <label className="addr-label">FIRST NAME</label>
+              <label className="addr-label">{textOr('checkout.shipping.firstName', 'FIRST NAME', "ІМ'Я")}</label>
               <input
                 className={`addr-input${firstNameError ? ' addr-input--error' : ''}`}
                 value={firstName}
@@ -974,7 +1020,7 @@ function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
               {firstNameError && <span className="addr-field-error">{firstNameError}</span>}
             </div>
             <div className="addr-field-group">
-              <label className="addr-label">LAST NAME</label>
+              <label className="addr-label">{textOr('checkout.shipping.lastName', 'LAST NAME', 'ПРІЗВИЩЕ')}</label>
               <input
                 className={`addr-input${lastNameError ? ' addr-input--error' : ''}`}
                 value={lastName}
@@ -986,7 +1032,7 @@ function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
           </div>
 
           <div className="addr-field-group">
-            <label className="addr-label">PHONE</label>
+            <label className="addr-label">{textOr('checkout.shipping.phone', 'PHONE', 'ТЕЛЕФОН')}</label>
             <input
               className={`addr-input${(phoneError || phoneInlineError) ? ' addr-input--error' : ''}`}
               value={phone}
@@ -1000,21 +1046,26 @@ function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
           </div>
 
           <div className="addr-field-group" style={{ position: 'relative' }}>
-            <label className="addr-label">CITY</label>
+            <label className="addr-label">{textOr('checkout.shipping.city', 'CITY', 'МІСТО')}</label>
             <input
               className={`addr-input${cityError ? ' addr-input--error' : ''}`}
               value={cityQuery}
               onChange={e => searchCities(e.target.value)}
-              placeholder="Start typing a city..."
+              placeholder={textOr('checkout.shipping.cityPlaceholder', 'Start typing a city...', 'Почніть вводити місто...')}
               autoComplete="off"
             />
-            {cityLoading && <div className="addr-dropdown-hint">Searching...</div>}
+            {cityLoading && <div className="addr-dropdown-hint">{textOr('checkout.shipping.searching', 'Searching...', 'Пошук...')}</div>}
             {cityResults.length > 0 && (
               <ul className="addr-dropdown">
                 {cityResults.map(c => (
                   <li key={c.DeliveryCity} className="addr-dropdown-item" onClick={() => selectCity(c)}>
                     {c.Present || c.MainDescription}
-                    {c.Warehouses > 0 && <span className="addr-dropdown-sub"> · {c.Warehouses} branches</span>}
+                    {c.Warehouses > 0 && <span className="addr-dropdown-sub"> · {textOr(
+                      'checkout.shipping.branchCount',
+                      `${c.Warehouses} branches`,
+                      `відділень: ${c.Warehouses}`,
+                      { count: c.Warehouses },
+                    )}</span>}
                   </li>
                 ))}
               </ul>
@@ -1024,16 +1075,16 @@ function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
 
           {selectedCity && (
             <div className="addr-field-group" style={{ position: 'relative' }}>
-              <label className="addr-label">NOVA POSHTA PICKUP BRANCH</label>
+              <label className="addr-label">{textOr('checkout.shipping.branch', 'NOVA POSHTA PICKUP BRANCH', 'ВІДДІЛЕННЯ НОВОЇ ПОШТИ')}</label>
               {warehousesLoading ? (
-                <div className="addr-dropdown-hint">Loading branches...</div>
+                <div className="addr-dropdown-hint">{textOr('checkout.shipping.loadingBranches', 'Loading branches...', 'Завантаження відділень...')}</div>
               ) : (
                 <>
                   <input
                     className={`addr-input${warehouseError ? ' addr-input--error' : ''}`}
                     value={branchQuery}
                     onChange={e => searchBranches(e.target.value)}
-                    placeholder="Search by branch number or address..."
+                    placeholder={textOr('checkout.shipping.branchPlaceholder', 'Search by branch number or address...', 'Пошук за номером відділення або адресою...')}
                     autoComplete="off"
                   />
                   {branchResults.length > 0 && (
@@ -1052,7 +1103,7 @@ function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
           )}
 
           <button type="submit" className="addr-confirm-btn">
-            Confirm Address
+            {textOr('checkout.shipping.confirm', 'Confirm Address', 'Підтвердити адресу')}
           </button>
         </form>
       </div>
