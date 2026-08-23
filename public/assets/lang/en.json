@@ -567,7 +567,6 @@
         "marqueeText": "your selection — review your order — ",
         "orderSummary": "Order Summary",
         "subtotal": "Subtotal",
-        "shipping": "Shipping",
         "free": "Free",
         "total": "Total",
         "deliveryEmail": "Delivery Email",
@@ -605,6 +604,7 @@
         "selectDesign": "Please select a design for \"{{product}}\".",
         "fillField": "Please fill \"{{field}}\" for \"{{product}}\".",
         "shipping": {
+            "label": "Shipping",
             "addressTitle": "Shipping Address",
             "edit": "Edit",
             "addAddress": "+ Add Shipping Address",

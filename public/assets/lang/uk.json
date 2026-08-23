@@ -567,7 +567,6 @@
         "marqueeText": "ваш вибір — перевірте замовлення — ",
         "orderSummary": "Підсумок замовлення",
         "subtotal": "Проміжний підсумок",
-        "shipping": "Доставка",
         "free": "Безкоштовно",
         "total": "Разом",
         "deliveryEmail": "Email для доставки",
@@ -605,6 +604,7 @@
         "selectDesign": "Будь ласка, оберіть дизайн для «{{product}}».",
         "fillField": "Будь ласка, заповніть «{{field}}» для «{{product}}».",
         "shipping": {
+            "label": "Доставка",
             "addressTitle": "Адреса доставки",
             "edit": "Редагувати",
             "addAddress": "+ Додати адресу доставки",

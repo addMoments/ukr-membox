@@ -417,7 +417,7 @@ function V2Checkout() {
                 <span className="checkout-summary-row-value">{formatMoney(appliedPromo?.gross_total ?? cart.total)}</span>
               </div>
               <div className="checkout-summary-row checkout-summary-row-divider">
-                <span className="checkout-summary-row-label">{t('checkout.shipping')}</span>
+                <span className="checkout-summary-row-label">{t('checkout.shipping.label')}</span>
                 <span className="checkout-summary-free-badge">{t('checkout.novaPoshtaRates')}</span>
               </div>
               {appliedPromo && (
