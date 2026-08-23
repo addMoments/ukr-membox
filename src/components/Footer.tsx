@@ -16,7 +16,8 @@ const withLangParam = (url: string, lang = "en") => {
 };
 
 const UK_FOOTER_LINKS: Record<string, string> = {
-  home: "https://addmoments.com.ua/uk/",
+  // Not: /uk/ blog sayfasina dusuyor; Ukraynaca ana sayfa /uk/home-ua/ (bkz. hfSetup.js).
+  home: "https://addmoments.com.ua/uk/home-ua/",
   how_it_works: "https://addmoments.com.ua/uk/how-it-works-addmoments/",
   faq: "https://addmoments.com.ua/uk/faq-addmoments/",
   blog: "https://addmoments.com.ua/uk/addmoments-blog/",

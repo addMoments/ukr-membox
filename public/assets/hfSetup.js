@@ -134,7 +134,9 @@
   };
 
   const UK_WORDPRESS_LINKS = {
-    home: "https://addmoments.com.ua/uk/",
+    // Not: /uk/ adresi WordPress'te blog sayfasini serviste ediyor (bkz. /uk/addmoments-blog/
+    // ile ayni <title>). Ukraynaca ana sayfa /uk/home-ua/ altinda; logo oraya gitmeli.
+    home: "https://addmoments.com.ua/uk/home-ua/",
     how_it_works: "https://addmoments.com.ua/uk/how-it-works-addmoments/",
     faq: "https://addmoments.com.ua/uk/faq-addmoments/",
     blog: "https://addmoments.com.ua/uk/addmoments-blog/",
