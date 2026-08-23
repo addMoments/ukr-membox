@@ -475,20 +475,6 @@ function EventSettingsInner({event}: {event: Event}) {
       </section> */}
 
       <ColoredSettingsBox
-        title={t('settings.removeData.title')}
-        descriptionS={[t('settings.removeData.description')]}
-        color="#DC2626"
-        buttonPropsS={[{ text: t('settings.removeData.deleteButton'), onClick: onDelClick }]}
-      />
-
-      <ColoredSettingsBox
-        title={eventDeleteTitle}
-        descriptionS={[eventDeleteDescription]}
-        color="#B91C1C"
-        buttonPropsS={[{ text: eventDeleteTitle, onClick: onDeleteEventClick }]}
-      />
-
-      <ColoredSettingsBox
         title={t('settings.export.title')}
         descriptionS={[
           t('settings.export.description'), 
@@ -514,6 +500,20 @@ function EventSettingsInner({event}: {event: Event}) {
               });
             } } : null,
         ]}
+      />
+
+      <ColoredSettingsBox
+        title={t('settings.removeData.title')}
+        descriptionS={[t('settings.removeData.description')]}
+        color="#DC2626"
+        buttonPropsS={[{ text: t('settings.removeData.deleteButton'), onClick: onDelClick }]}
+      />
+
+      <ColoredSettingsBox
+        title={eventDeleteTitle}
+        descriptionS={[eventDeleteDescription]}
+        color="#B91C1C"
+        buttonPropsS={[{ text: eventDeleteTitle, onClick: onDeleteEventClick }]}
       />
   </div>
 </>
