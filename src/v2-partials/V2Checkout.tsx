@@ -73,6 +73,16 @@ type BuyerConfigsState = Record<string, Record<string, string>>;
 
 const SINGLE_QUANTITY_ADDON_IDS = new Set(['audioGuestbook', 'audiobook', 'advertorial', 'sponsored']);
 
+// Paket sirasi ve premium kurallari Services & Prices sayfasindakiyle ayni olmali; yukseltme
+// teklifi (2.11) oradaki secim mantiginin aynisini uyguluyor.
+const CORE_PACKAGE_ORDER = ['standard', 'plus', 'premium'];
+const PREMIUM_PACKAGE_ID = 'premium';
+const SPONSORED_ADDON_ID = 'advertorial';
+
+const isSponsoredIncludedInPremium = (product?: { sponsored_included?: boolean; advertorial_included?: boolean }) => {
+  return product?.sponsored_included === true || product?.advertorial_included === true;
+};
+
 // Ne: Cart item listesinden Meta AddToCart icin tekrar kullanilabilir signature uretir.
 // Nasil: Quantity'si pozitif urunleri product_uid:quantity formatinda siralayip pipe ile birlestirir.
 // Neden: Ayni cart checkout refresh'lerinde ikinci kez AddToCart sayilmasin.
@@ -94,6 +104,13 @@ function V2Checkout() {
   const [buyerConfigs, setBuyerConfigs] = useState<BuyerConfigsState>({});
   const [userEmail, setUserEmail] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<PromoValidationResponse | null>(null);
+  // Ne: "Baska bir sey eklemek ister misiniz?" modali (2.11).
+  // Nasil: Odeme butonuna ilk basista, tum dogrulamalar gectikten sonra bir kez aciliyor;
+  //        upsellAskedRef ayni checkout'ta ikinci kez sorulmasini engelliyor.
+  // Neden: Musteri odemeden once yukseltme ve add-on'larin bir kez daha hatirlatilmasini istedi.
+  const [showUpsell, setShowUpsell] = useState(false);
+  const upsellAskedRef = useRef(false);
+  const pendingEmailRef = useRef('');
   const [promoApplying, setPromoApplying] = useState(false);
   const [promoMessage, setPromoMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -253,6 +270,99 @@ function V2Checkout() {
       ? (product.display_description_uk || product.display_description_en)
       : (product.display_description_en || product.display_description_uk);
     return { name, description };
+  };
+
+  // Ne: Odeme oncesi teklif edilebilecek yukseltme ve sepette olmayan add-on'lari hesaplar (2.11).
+  // Nasil: Ana paket siralamasi Services & Prices sayfasindakiyle ayni; sepetteki paketin bir ustu
+  //        teklif ediliyor. Premium'a dahil olan sponsorlu add-on listeye alinmiyor.
+  // Neden: Modalin ne gosterecegi ve hic acilip acilmayacagi tek kaynaktan gelsin.
+  const corePackagesSorted = cart.products
+    .filter(p => !p.is_add_on && p.is_enabled)
+    .sort((a, b) => {
+      const aIdx = CORE_PACKAGE_ORDER.indexOf(a.id);
+      const bIdx = CORE_PACKAGE_ORDER.indexOf(b.id);
+      if (aIdx === -1 && bIdx === -1) return a.priority - b.priority;
+      if (aIdx === -1) return 1;
+      if (bIdx === -1) return -1;
+      return aIdx - bIdx;
+    });
+  const currentCorePackage = displayItems.find(({ product }) => !product.is_add_on)?.product;
+  const currentCoreIndex = currentCorePackage
+    ? corePackagesSorted.findIndex(p => p.id === currentCorePackage.id)
+    : -1;
+  const nextCorePackage = currentCoreIndex >= 0 && currentCoreIndex < corePackagesSorted.length - 1
+    ? corePackagesSorted[currentCoreIndex + 1]
+    : null;
+  const premiumProduct = cart.products.find(p => p.id === PREMIUM_PACKAGE_ID);
+  const isPremiumInCart = cart.cartItems.some(item => item.product_uid === PREMIUM_PACKAGE_ID && item.quantity > 0);
+  const isInCart = (productId: string) => cart.cartItems.some(item => item.product_uid === productId && item.quantity > 0);
+
+  const upgradeOffer = nextCorePackage && currentCorePackage
+    ? {
+        id: nextCorePackage.id,
+        name: resolveDisplayTexts(nextCorePackage).name || nextCorePackage.id,
+        description: resolveDisplayTexts(nextCorePackage).description || '',
+        fromName: resolveDisplayTexts(currentCorePackage).name || currentCorePackage.id,
+        priceDiff: Math.max(0, nextCorePackage.price - currentCorePackage.price),
+      }
+    : null;
+
+  const upsellAddOns = cart.products
+    .filter(p =>
+      p.is_add_on
+      && p.is_enabled
+      && !isInCart(p.id)
+      && !(p.id === SPONSORED_ADDON_ID && isPremiumInCart && isSponsoredIncludedInPremium(premiumProduct))
+    )
+    .map(p => ({
+      id: p.id,
+      name: resolveDisplayTexts(p).name || p.id,
+      price: p.price,
+      icon: p.options?.icon as string | undefined,
+      image: p.options?.image as string | undefined,
+      qtyHint: getQtyRuleHint(p),
+    }));
+
+  const hasUpsellOffers = Boolean(upgradeOffer) || upsellAddOns.length > 0;
+
+  // Ne: Modaldan yukseltme secildiginde sepeti gunceller.
+  // Nasil: Diger ana paketleri sifirlar, secileni 1 adet yapar; premium'a gecildiginde ve
+  //        sponsorlu add-on pakete dahilse onu sepetten cikarir.
+  // Neden: Services & Prices sayfasindaki coreClick ile ayni kurallar gecerli olmali.
+  // Not: setCartQty sepeti IndexedDB'ye yaziyor ve async. Modaldan ekleme yapip hemen
+  //      "odemeye devam" denirse placeOrder'in okudugu cart_state eski kalmasin diye await ediliyor.
+  const applyUpgrade = async (packageId: string) => {
+    for (const pkg of corePackagesSorted) {
+      if (pkg.id !== packageId) await setCartQty(pkg.id, 0);
+    }
+    await setCartQty(packageId, 1);
+    if (packageId === PREMIUM_PACKAGE_ID && isSponsoredIncludedInPremium(premiumProduct)) {
+      await setCartQty(SPONSORED_ADDON_ID, 0);
+    }
+  };
+
+  // Add-on sepete 1 degil urunun min_qty degeriyle giriyor (2.16); QR Card icin bu 8.
+  const addUpsellAddOn = async (productId: string) => {
+    await setCartQty(productId, getQtyRule(cart.products.find(p => p.id === productId)).min);
+  };
+
+  // Ne: Dogrulamalar bittikten sonra asil odeme akisini calistirir.
+  // Neden: Upsell modali (2.11) araya girdigi icin gonderim, dogrulamadan ayri cagrilabilmeli;
+  //        modaldaki "odemeye devam et" ayni fonksiyonu tetikliyor.
+  const placeOrder = (email: string) => {
+    // Ne: Odemeye gitmeden once bir kez "eklemek istediginiz baska bir sey var mi?" diye sorar.
+    // Nasil: Yalnizca teklif edilecek bir sey varsa ve bu checkout'ta daha once sorulmadiysa acilir;
+    //        modal kapaninca ikinci basista dogrudan odemeye gidilir.
+    // Neden: 2.11 — musteri odeme oncesi yukseltme/add-on hatirlatmasi istedi, ama her basista
+    //        sormak odeme onunde engel olurdu.
+    if (!upsellAskedRef.current && hasUpsellOffers) {
+      upsellAskedRef.current = true;
+      pendingEmailRef.current = email;
+      setShowUpsell(true);
+      return;
+    }
+
+    placeOrder(email);
   };
 
   const handleCompleteOrder = (e: React.FormEvent) => {
@@ -534,6 +644,21 @@ function V2Checkout() {
       </main>
 
       <V2Footer />
+
+      {showUpsell && (
+        <UpsellModal
+          upgrade={upgradeOffer}
+          addOns={upsellAddOns}
+          total={formatMoney(cart.total)}
+          onUpgrade={applyUpgrade}
+          onAddAddOn={addUpsellAddOn}
+          onContinue={() => {
+            setShowUpsell(false);
+            placeOrder(pendingEmailRef.current);
+          }}
+          onClose={() => setShowUpsell(false)}
+        />
+      )}
 
       {showAddressModal && (
         <AddressModal
@@ -819,6 +944,126 @@ interface NPWarehouse {
   Description: string;
   ShortAddress: string;
   Number: string;
+}
+
+interface UpsellAddOnOffer {
+  id: string;
+  name: string;
+  price: number;
+  icon?: string;
+  image?: string;
+  qtyHint?: string;
+}
+
+interface UpsellModalProps {
+  upgrade: { id: string; name: string; description: string; fromName: string; priceDiff: number } | null;
+  addOns: UpsellAddOnOffer[];
+  total: string;
+  onUpgrade: (packageId: string) => void | Promise<void>;
+  onAddAddOn: (productId: string) => void | Promise<void>;
+  onContinue: () => void;
+  onClose: () => void;
+}
+
+// Ne: Odemeye gecmeden once yukseltme ve eksik add-on'lari bir kez hatirlatan modal (2.11).
+// Nasil: Teklifler prop olarak plain veri halinde geliyor; secim yapildiginda sepet aninda
+//        guncelleniyor ve modal kalan teklifleri yeniden hesaplayarak yeniden ciziliyor.
+// Neden: Musteri odeme oncesi "yukseltmek ya da add-on eklemek ister misiniz?" adimini istedi.
+//        Modal odemeyi engellemiyor: "odemeye devam et" her zaman bir tik uzakta.
+function UpsellModal({ upgrade, addOns, total, onUpgrade, onAddAddOn, onContinue, onClose }: UpsellModalProps) {
+  const nothingLeft = !upgrade && addOns.length === 0;
+
+  return (
+    <div className="upsell-backdrop" onClick={onClose}>
+      <div className="upsell-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
+        <button type="button" className="upsell-close" onClick={onClose} aria-label={t('guestGuestbook.cancel')}>
+          <i className="fa-solid fa-xmark" />
+        </button>
+
+        <div className="upsell-head">
+          <h3 className="upsell-title">
+            {textOr('checkout.upsell.title', 'Anything else for your event?', 'Щось іще для вашої події?')}
+          </h3>
+          <p className="upsell-subtitle">
+            {textOr(
+              'checkout.upsell.subtitle',
+              'You can still upgrade your package or add extras. Nothing is charged until you continue.',
+              'Ви ще можете підвищити пакет або додати додатки. Оплата відбудеться лише після переходу далі.',
+            )}
+          </p>
+        </div>
+
+        <div className="upsell-body">
+          {nothingLeft && (
+            <p className="upsell-empty">
+              <i className="fa-solid fa-circle-check" />
+              {textOr('checkout.upsell.allSet', 'You have everything we offer — you are all set.', 'У вас є все, що ми пропонуємо — усе готово.')}
+            </p>
+          )}
+
+          {upgrade && (
+            <div className="upsell-upgrade">
+              <span className="upsell-upgrade-tag">
+                {textOr('checkout.upsell.upgradeTag', 'Upgrade', 'Підвищення')}
+              </span>
+              <div className="upsell-upgrade-main">
+                <p className="upsell-upgrade-name">
+                  {upgrade.fromName} <i className="fa-solid fa-arrow-right" /> {upgrade.name}
+                </p>
+                {upgrade.description && (
+                  <p className="upsell-upgrade-desc">{upgrade.description}</p>
+                )}
+              </div>
+              <button type="button" className="upsell-upgrade-btn" onClick={() => onUpgrade(upgrade.id)}>
+                +₴{upgrade.priceDiff.toFixed(2)}
+              </button>
+            </div>
+          )}
+
+          {addOns.length > 0 && (
+            <>
+              <p className="upsell-section-label">
+                {textOr('checkout.upsell.addOnsLabel', 'Add-ons', 'Додатки')}
+              </p>
+              <ul className="upsell-addons">
+                {addOns.map(addOn => (
+                  <li key={addOn.id} className="upsell-addon">
+                    {addOn.image
+                      ? <div className="upsell-addon-thumb" style={{ backgroundImage: `url("${addOn.image}")` }} />
+                      : <div className="upsell-addon-thumb upsell-addon-thumb--icon">
+                          {addOn.icon ? <ProductIcon icon={addOn.icon} size={22} /> : <i className="fa-solid fa-gift" />}
+                        </div>
+                    }
+                    <div className="upsell-addon-info">
+                      <p className="upsell-addon-name">{addOn.name}</p>
+                      <p className="upsell-addon-price">
+                        ₴{addOn.price.toFixed(2)}{addOn.qtyHint ? ` · ${addOn.qtyHint}` : ''}
+                      </p>
+                    </div>
+                    <button type="button" className="upsell-addon-btn" onClick={() => onAddAddOn(addOn.id)}>
+                      <i className="fa-solid fa-plus" />
+                      {textOr('checkout.upsell.add', 'Add', 'Додати')}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+
+        <div className="upsell-foot">
+          <div className="upsell-total">
+            <span className="upsell-total-label">{t('checkout.total')}</span>
+            <span className="upsell-total-value">{total}</span>
+          </div>
+          <button type="button" className="upsell-continue" onClick={onContinue}>
+            {textOr('checkout.upsell.continue', 'Continue to payment', 'Перейти до оплати')}
+            <i className="fa-solid fa-arrow-right" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 interface AddressModalProps {

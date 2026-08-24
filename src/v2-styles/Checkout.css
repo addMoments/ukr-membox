@@ -846,3 +846,322 @@
     height: 32px;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Odeme oncesi yukseltme / add-on modali (2.11).
+   Renkler sayfanin mevcut token'lariyla ayni: lime #D2E823, koyu #191B0E.
+--------------------------------------------------------------------------- */
+.upsell-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(15, 17, 10, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: upsell-fade 180ms ease-out both;
+}
+
+.upsell-modal {
+  position: relative;
+  background: #fff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+  animation: upsell-rise 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.upsell-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #F0F0EC;
+  color: #191B0E;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.upsell-close:hover {
+  background: #D2E823;
+}
+
+.upsell-head {
+  padding: 28px 24px 16px;
+}
+
+.upsell-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #191B0E;
+  margin: 0 0 8px;
+  padding-right: 36px;
+  line-height: 1.25;
+}
+
+.upsell-subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #6b7280;
+  margin: 0;
+}
+
+.upsell-body {
+  padding: 0 24px 20px;
+  overflow-y: auto;
+}
+
+.upsell-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+  margin: 8px 0 0;
+}
+
+.upsell-empty i {
+  color: #22c55e;
+}
+
+.upsell-upgrade {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(210, 232, 35, 0.18);
+  border: 1px solid rgba(210, 232, 35, 0.6);
+  margin-top: 4px;
+}
+
+.upsell-upgrade-tag {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.upsell-upgrade-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.upsell-upgrade-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #191B0E;
+  margin: 0 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.upsell-upgrade-name i {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.upsell-upgrade-desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #4b5563;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.upsell-upgrade-btn {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 9999px;
+  background: #191B0E;
+  color: #D2E823;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.upsell-upgrade-btn:hover {
+  transform: translateY(-1px);
+}
+
+.upsell-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #9ca3af;
+  margin: 22px 0 10px;
+}
+
+.upsell-addons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upsell-addon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid #f0f0ec;
+  transition: border-color 0.15s;
+}
+
+.upsell-addon:hover {
+  border-color: #D2E823;
+}
+
+.upsell-addon-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background-color: #F0F0EC;
+  background-size: cover;
+  background-position: center;
+}
+
+.upsell-addon-thumb--icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #191B0E;
+}
+
+.upsell-addon-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.upsell-addon-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #191B0E;
+  margin: 0 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upsell-addon-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0;
+}
+
+.upsell-addon-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 9999px;
+  background: #F0F0EC;
+  color: #191B0E;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.upsell-addon-btn:hover {
+  background: #D2E823;
+}
+
+.upsell-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #f0f0ec;
+}
+
+.upsell-total {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.upsell-total-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+}
+
+.upsell-total-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #191B0E;
+}
+
+.upsell-continue {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: none;
+  border-radius: 9999px;
+  background: #D2E823;
+  color: #191B0E;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.upsell-continue:hover {
+  transform: translateY(-1px);
+}
+
+@keyframes upsell-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes upsell-rise {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upsell-backdrop,
+  .upsell-modal { animation: none; }
+  .upsell-continue:hover,
+  .upsell-upgrade-btn:hover { transform: none; }
+}

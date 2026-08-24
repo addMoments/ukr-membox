@@ -645,7 +645,16 @@
             "lastNameTooShort": "Last name must be at least 2 characters",
             "novaPoshtaNote": "If you order physical items, such as QR cards or welcome board, they will be shipped via Nova Poshta, and NP rates will be applied."
         },
-        "novaPoshtaRates": "At Nova Poshta rates"
+        "novaPoshtaRates": "At Nova Poshta rates",
+        "upsell": {
+            "title": "Anything else for your event?",
+            "subtitle": "You can still upgrade your package or add extras. Nothing is charged until you continue.",
+            "upgradeTag": "Upgrade",
+            "addOnsLabel": "Add-ons",
+            "add": "Add",
+            "continue": "Continue to payment",
+            "allSet": "You have everything we offer — you are all set."
+        }
     },
     "extendStorage": {
         "modalTitle": "Your event will be deleted in 14 days",
