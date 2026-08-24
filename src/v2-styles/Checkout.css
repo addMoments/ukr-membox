@@ -548,8 +548,21 @@
 /* Shipping Address Section */
 .checkout-shipping-section {
   margin-bottom: 32px;
-  padding-bottom: 32px;
-  border-bottom: 1px solid rgba(25, 27, 14, 0.1);
+  padding-top: 24px;
+  border-top: 1px solid rgba(25, 27, 14, 0.1);
+}
+
+/* Uzun aciklama cumlesi; eskiden rozet olan metnin yerini aliyor (2.9). */
+.checkout-shipping-note {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #4b5563;
+  margin: 0 0 16px;
+}
+
+.checkout-shipping-section .checkout-shipping-note:only-child {
+  margin-bottom: 0;
 }
 
 .checkout-shipping-header {

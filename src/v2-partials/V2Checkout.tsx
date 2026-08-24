@@ -415,16 +415,14 @@ function V2Checkout() {
             <h2 className="checkout-summary-title">{t('checkout.orderSummary')}</h2>
 
             <div className="checkout-summary-rows">
-              <div className="checkout-summary-row">
+              {/* Ayirici, Total'in hemen ustundeki satirda durmali: promo varsa indirim satiri,
+                  yoksa ara toplam. Onceden bu is "Shipping" satirindaydi, o satir asagi tasindi. */}
+              <div className={`checkout-summary-row${appliedPromo ? '' : ' checkout-summary-row-divider'}`}>
                 <span className="checkout-summary-row-label">{appliedPromo ? textOr('checkout.grossTotal', 'Gross total', 'Загальна сума') : t('checkout.subtotal')}</span>
                 <span className="checkout-summary-row-value">{formatMoney(appliedPromo?.gross_total ?? cart.total)}</span>
               </div>
-              <div className="checkout-summary-row checkout-summary-row-divider">
-                <span className="checkout-summary-row-label">{t('checkout.shipping.label')}</span>
-                <span className="checkout-summary-free-badge">{t('checkout.novaPoshtaRates')}</span>
-              </div>
               {appliedPromo && (
-                <div className="checkout-summary-row checkout-summary-discount-row">
+                <div className="checkout-summary-row checkout-summary-discount-row checkout-summary-row-divider">
                   <span className="checkout-summary-row-label">{textOr('checkout.promoDiscount', 'Promo discount', 'Знижка за промокодом')}</span>
                   <span className="checkout-summary-row-value">
                     -{formatMoney(appliedPromo.discount_amount)}
@@ -466,30 +464,6 @@ function V2Checkout() {
               )}
             </div>
 
-            {hasPhysical && (
-              <div className="checkout-shipping-section">
-                <div className="checkout-shipping-header">
-                  <span className="checkout-email-label">{textOr('checkout.shipping.addressTitle', 'Shipping Address', 'Адреса доставки')}</span>
-                  <button
-                    type="button"
-                    className="checkout-address-btn"
-                    onClick={() => setShowAddressModal(true)}
-                  >
-                    {shippingAddress
-                      ? textOr('checkout.shipping.edit', 'Edit', 'Редагувати')
-                      : textOr('checkout.shipping.addAddress', '+ Add Shipping Address', '+ Додати адресу доставки')}
-                  </button>
-                </div>
-                {shippingAddress && (
-                  <div className="checkout-address-preview">
-                    <div className="checkout-address-preview-name">{shippingAddress.full_name}</div>
-                    <div className="checkout-address-preview-line">{shippingAddress.city_name} — {shippingAddress.warehouse_name}</div>
-                    <div className="checkout-address-preview-line">{shippingAddress.phone}</div>
-                  </div>
-                )}
-              </div>
-            )}
-
             <form onSubmit={handleCompleteOrder}>
               <div className="checkout-email-group">
                 <label className="checkout-email-label">{t('checkout.deliveryEmail')}</label>
@@ -507,6 +481,46 @@ function V2Checkout() {
               <p className="checkout-info-text">
                 {t('checkout.emailInfo')}
               </p>
+
+              {/* Ne: Kargo aciklamasi ve adres bloğu, siparişi tamamlama butonunun hemen ustunde.
+                  Nasil: Aciklama her sepette gorunur ("fiziksel urun siparis ederseniz..." diye
+                  kosullu yazilmis); adres alani yalnizca sepette fiziksel urun varsa render edilir.
+                  Neden: Musteri 2.9 icin bu iki blogun ozet tablosundan alinip odeme butonunun
+                  hemen ustune tasinmasini istedi; boylece adres, ihtiyac duyuldugu anda goze
+                  carpiyor ve "Shipping / At Nova Poshta rates" satiri dijital-only sepetlerde
+                  yaniltici gorunmuyor. */}
+              <div className="checkout-shipping-section">
+                <p className="checkout-shipping-note">
+                  {textOr(
+                    'checkout.shipping.novaPoshtaNote',
+                    'If you order physical items, such as QR cards or welcome board, they will be shipped via Nova Poshta, and NP rates will be applied.',
+                    'Якщо ви замовите фізичні товари, як-от QR-картки чи вітальний банер, їх буде надіслано службою Nova Poshta, і буде застосовано її тарифи.',
+                  )}
+                </p>
+                {hasPhysical && (
+                  <>
+                    <div className="checkout-shipping-header">
+                      <span className="checkout-email-label">{textOr('checkout.shipping.addressTitle', 'Shipping Address', 'Адреса доставки')}</span>
+                      <button
+                        type="button"
+                        className="checkout-address-btn"
+                        onClick={() => setShowAddressModal(true)}
+                      >
+                        {shippingAddress
+                          ? textOr('checkout.shipping.edit', 'Edit', 'Редагувати')
+                          : textOr('checkout.shipping.addAddress', '+ Add Shipping Address', '+ Додати адресу доставки')}
+                      </button>
+                    </div>
+                    {shippingAddress && (
+                      <div className="checkout-address-preview">
+                        <div className="checkout-address-preview-name">{shippingAddress.full_name}</div>
+                        <div className="checkout-address-preview-line">{shippingAddress.city_name} — {shippingAddress.warehouse_name}</div>
+                        <div className="checkout-address-preview-line">{shippingAddress.phone}</div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
 
               <button type="submit" className="checkout-complete-btn">
                 <span className="checkout-complete-btn-text">{t('checkout.completeOrder')}</span>
