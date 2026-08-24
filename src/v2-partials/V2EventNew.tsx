@@ -3,7 +3,7 @@ import '../v2-styles/EventNew.css';
 import { t } from '../packages/i18n';
 import { S3_ROOT } from '../consts';
 import { Link } from 'react-router-dom';
-import { cartState, findProduct, getCartQty, getQtyRule, initCartState, setCartQty } from '../client/cart';
+import { cartState, findProduct, getCartQty, getQtyRule, getQtyRuleHint, initCartState, setCartQty } from '../client/cart';
 import { useSnapshot } from 'valtio';
 import ProductIcon from '../v2-components/ProductIcon';
 import V2SignInForm from './V2SignInForm';
@@ -194,6 +194,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
                     icon={addOn.options?.icon}
                     image={addOn.options?.image}
                     mobileImage={addOn.options?.mobile_image}
+                    qtyRuleHint={getQtyRuleHint(addOn)}
                     isSponsoredAdvertorial={isSponsoredAdvertorial}
                     isSelected={getCartQty(addOn.id) > 0}
                     isDisabled={isSponsoredAdvertorial && isPremiumSelected && isPremiumSponsoredIncluded}
@@ -326,13 +327,14 @@ interface AddOnCardProps {
   icon?: string;
   image?: string;
   mobileImage?: string;
+  qtyRuleHint?: string;
   isSponsoredAdvertorial?: boolean;
   isSelected: boolean;
   isDisabled?: boolean;
   onToggle: () => void;
 }
 
-function AddOnCard({ id, displayName, displayDescription, price, icon, image, mobileImage, isSponsoredAdvertorial = false, isSelected, isDisabled = false, onToggle }: AddOnCardProps) {
+function AddOnCard({ id, displayName, displayDescription, price, icon, image, mobileImage, qtyRuleHint = '', isSponsoredAdvertorial = false, isSelected, isDisabled = false, onToggle }: AddOnCardProps) {
   const cardClass = [
     'event-new-addon-card',
     image ? 'event-new-addon-card-image' : '',
@@ -387,7 +389,12 @@ function AddOnCard({ id, displayName, displayDescription, price, icon, image, mo
       <h3 className="event-new-addon-name">{resolvedName}</h3>
       <p className="event-new-addon-description">{resolvedDescription}</p>
       <div className="event-new-addon-footer">
-        <span className="event-new-addon-price">₴{price}</span>
+        {/* Not: Adet kurali olan add-on'da (QR Card) kutuyu isaretlemek sepete 1 degil min_qty
+            kadar ekliyor; fiyatin altindaki not olmadan toplam beklenmedik gorunuyor. */}
+        <div className="event-new-addon-price-block">
+          <span className="event-new-addon-price">₴{price}</span>
+          {qtyRuleHint && <span className="event-new-addon-qty-rule">{qtyRuleHint}</span>}
+        </div>
         <input
           type="checkbox"
           className="event-new-checkbox"

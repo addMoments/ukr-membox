@@ -5,7 +5,7 @@ import V2Footer from '../v2-components/V2Footer';
 import ProductIcon from '../v2-components/ProductIcon';
 import '../v2-styles/Checkout.css';
 import { SERV_ROOT } from '../consts';
-import { cartState, getQtyRule, initCartState, roundQtyToRule, setCartQty } from '../client/cart';
+import { cartState, getQtyRule, getQtyRuleHint, initCartState, roundQtyToRule, setCartQty } from '../client/cart';
 import { useSnapshot } from 'valtio';
 import { t } from '../packages/i18n';
 import { fetch } from '../client/core';
@@ -656,6 +656,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
   // Not: Adet kurallari urun kaydindan geliyor (options.min_qty / options.qty_step).
   // Kural tanimlanmamis urunlerde ikisi de 1 oldugu icin stepper eskisi gibi birer birer artar.
   const { min: minQty, step: qtyStep } = getQtyRule(product);
+  const qtyRuleHint = getQtyRuleHint(product);
   const designs: Design[] = product.options?.designs || [];
   const configFields: ConfigField[] = product.options?.config_fields || [];
 
@@ -762,18 +763,21 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
 
         <div className="checkout-item-footer">
           {showQuantityStepper ? (
-            <div className="checkout-item-stepper">
-              <button
-                type="button"
-                className="checkout-item-stepper-btn"
-                onClick={() => quantity - qtyStep >= minQty ? onQtyChange(quantity - qtyStep) : onRemove()}
-              >−</button>
-              <span className="checkout-item-stepper-count">{quantity}</span>
-              <button
-                type="button"
-                className="checkout-item-stepper-btn"
-                onClick={() => onQtyChange(quantity + qtyStep)}
-              >+</button>
+            <div className="checkout-item-stepper-group">
+              <div className="checkout-item-stepper">
+                <button
+                  type="button"
+                  className="checkout-item-stepper-btn"
+                  onClick={() => quantity - qtyStep >= minQty ? onQtyChange(quantity - qtyStep) : onRemove()}
+                >−</button>
+                <span className="checkout-item-stepper-count">{quantity}</span>
+                <button
+                  type="button"
+                  className="checkout-item-stepper-btn"
+                  onClick={() => onQtyChange(quantity + qtyStep)}
+                >+</button>
+              </div>
+              {qtyRuleHint && <span className="checkout-item-qty-rule">{qtyRuleHint}</span>}
             </div>
           ) : null}
           <button className="checkout-item-remove" onClick={onRemove}>{t('checkout.remove')}</button>

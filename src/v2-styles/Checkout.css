@@ -189,6 +189,19 @@
   color: #dc2626;
 }
 
+.checkout-item-stepper-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.checkout-item-qty-rule {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
 .checkout-item-stepper {
   display: flex;
   align-items: center;

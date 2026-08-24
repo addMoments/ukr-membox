@@ -427,6 +427,18 @@
   border-top: 1px solid #f3f4f6;
 }
 
+.event-new-addon-price-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.event-new-addon-qty-rule {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
 .event-new-addon-price {
   font-size: 24px;
   font-weight: 800;

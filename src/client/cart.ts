@@ -3,6 +3,7 @@ import { CartItem } from "../types/carts";
 import { Product } from "../types/products";
 import {proxy} from "valtio"
 import { SERV_ROOT } from "../consts";
+import { textOr } from "../utils/admin_i18n";
 
 const cartState = proxy({
     products: [] as Product[],
@@ -48,6 +49,22 @@ const roundQtyToRule = (quantity: number, product?: Pick<Product, 'options'> | n
     const { min, step } = getQtyRule(product);
     if (quantity <= min) return min;
     return min + Math.round((quantity - min) / step) * step;
+};
+
+// Ne: Adet kurali tanimli urunler icin kullaniciya gosterilecek kisa uyari metnini uretir.
+// Nasil: getQtyRule sonucundan okur; kural yoksa (min ve step 1) bos string doner, boylece
+//        cagiran taraf ekstra kosul yazmadan render edebilir.
+// Neden: QR Card sepete 1 degil 8 adet giriyor ve "-" tusu 8'in altinda urunu siliyor (2.16);
+//        bunu soylemeyen bir stepper kullaniciya bozuk gorunuyor.
+const getQtyRuleHint = (product?: Pick<Product, 'options'> | null): string => {
+    const { min, step } = getQtyRule(product);
+    if (min <= 1 && step <= 1) return '';
+    return textOr(
+        'common.qtyRule',
+        `Minimum ${min}, in multiples of ${step}`,
+        `Мінімум ${min}, кратно ${step}`,
+        { min, step },
+    );
 };
 
 const findProduct = (productId: string) => cartState.products.find(product => product.id === productId);
@@ -141,6 +158,7 @@ export {
     setCartQty,
     getCartQty,
     getQtyRule,
+    getQtyRuleHint,
     roundQtyToRule,
     findProduct
 }

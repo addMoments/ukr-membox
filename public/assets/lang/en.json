@@ -27,7 +27,8 @@
         "retry": "Retry",
         "uploaded": "Uploaded",
         "failed": "Failed",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "qtyRule": "Minimum {{min}}, in multiples of {{step}}"
     },
     "errors": {
         "forbidden": "This action is not allowed right now.",
