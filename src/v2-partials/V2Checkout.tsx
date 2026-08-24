@@ -350,19 +350,62 @@ function V2Checkout() {
   // Neden: Upsell modali (2.11) araya girdigi icin gonderim, dogrulamadan ayri cagrilabilmeli;
   //        modaldaki "odemeye devam et" ayni fonksiyonu tetikliyor.
   const placeOrder = (email: string) => {
-    // Ne: Odemeye gitmeden once bir kez "eklemek istediginiz baska bir sey var mi?" diye sorar.
-    // Nasil: Yalnizca teklif edilecek bir sey varsa ve bu checkout'ta daha once sorulmadiysa acilir;
-    //        modal kapaninca ikinci basista dogrudan odemeye gidilir.
-    // Neden: 2.11 — musteri odeme oncesi yukseltme/add-on hatirlatmasi istedi, ama her basista
-    //        sormak odeme onunde engel olurdu.
-    if (!upsellAskedRef.current && hasUpsellOffers) {
-      upsellAskedRef.current = true;
-      pendingEmailRef.current = email;
-      setShowUpsell(true);
-      return;
-    }
+    (async () => {
+      const cartStateData = await get_key("cart_state");
+      if (!cartStateData) {
+        alert(t('checkout.cartNotFound'));
+        return;
+      }
 
-    placeOrder(email);
+      // Ne: Checkout state'ini backend'in bekledigi buyer_configs payload formatina cevirir.
+      // Nasil: Her fiziksel urun icin kullanici degerlerini JSON string yapar; design secimi varsa dokunulmamis default design_id'yi de ekler.
+      // Neden: Event add-on detayinda secilen statik tasarim, kullanici dropdown'a hic dokunmasa bile bulunabilsin.
+      const serializedConfigs: Record<string, string> = {};
+      for (const { product } of displayItems) {
+        const cfg = buyerConfigs[product.id] || {};
+        const designs: Design[] = product.options?.designs || [];
+        const normalizedCfg = {
+          ...(designs.length > 0 ? { design_id: cfg.design_id || designs[0]?.id || '' } : {}),
+          ...cfg,
+        };
+        if (Object.keys(normalizedCfg).length > 0) {
+          serializedConfigs[product.id] = JSON.stringify(normalizedCfg);
+        }
+      }
+
+      fetch(`${SERV_ROOT}/api/purchase`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider_id: "liqpay",
+          purchase_info: cartStateData,
+          email: email,
+          buyer_configs: serializedConfigs,
+          ...(appliedPromo ? { promo_code: appliedPromo.promo_code_text_snapshot } : {}),
+          ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
+        }),
+      }).then(res => res.json()).then(data => {
+        if (data.type === 'liqpay_form') {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = 'https://www.liqpay.ua/api/3/checkout';
+          form.acceptCharset = 'utf-8';
+          ['data', 'signature'].forEach(k => {
+            const inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = k;
+            inp.value = data[k];
+            form.appendChild(inp);
+          });
+          document.body.appendChild(form);
+          form.submit();
+        } else if (data.url) {
+          window.location.href = data.url;
+        }
+      }).catch(err => {
+        alert(err.message);
+      });
+    })();
   };
 
   const handleCompleteOrder = (e: React.FormEvent) => {
@@ -420,62 +463,19 @@ function V2Checkout() {
       }
     }
 
-    (async () => {
-      const cartStateData = await get_key("cart_state");
-      if (!cartStateData) {
-        alert(t('checkout.cartNotFound'));
-        return;
-      }
+    // Ne: Odemeye gitmeden once bir kez "eklemek istediginiz baska bir sey var mi?" diye sorar.
+    // Nasil: Yalnizca teklif edilecek bir sey varsa ve bu checkout'ta daha once sorulmadiysa acilir;
+    //        modal kapatilinca ikinci basista dogrudan odemeye gidilir.
+    // Neden: 2.11 — musteri odeme oncesi yukseltme/add-on hatirlatmasi istedi, ama her basista
+    //        sormak odeme onunde engel olurdu.
+    if (!upsellAskedRef.current && hasUpsellOffers) {
+      upsellAskedRef.current = true;
+      pendingEmailRef.current = email;
+      setShowUpsell(true);
+      return;
+    }
 
-      // Ne: Checkout state'ini backend'in bekledigi buyer_configs payload formatina cevirir.
-      // Nasil: Her fiziksel urun icin kullanici degerlerini JSON string yapar; design secimi varsa dokunulmamis default design_id'yi de ekler.
-      // Neden: Event add-on detayinda secilen statik tasarim, kullanici dropdown'a hic dokunmasa bile bulunabilsin.
-      const serializedConfigs: Record<string, string> = {};
-      for (const { product } of displayItems) {
-        const cfg = buyerConfigs[product.id] || {};
-        const designs: Design[] = product.options?.designs || [];
-        const normalizedCfg = {
-          ...(designs.length > 0 ? { design_id: cfg.design_id || designs[0]?.id || '' } : {}),
-          ...cfg,
-        };
-        if (Object.keys(normalizedCfg).length > 0) {
-          serializedConfigs[product.id] = JSON.stringify(normalizedCfg);
-        }
-      }
-
-      fetch(`${SERV_ROOT}/api/purchase`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider_id: "liqpay",
-          purchase_info: cartStateData,
-          email: email,
-          buyer_configs: serializedConfigs,
-          ...(appliedPromo ? { promo_code: appliedPromo.promo_code_text_snapshot } : {}),
-          ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
-        }),
-      }).then(res => res.json()).then(data => {
-        if (data.type === 'liqpay_form') {
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = 'https://www.liqpay.ua/api/3/checkout';
-          form.acceptCharset = 'utf-8';
-          ['data', 'signature'].forEach(k => {
-            const inp = document.createElement('input');
-            inp.type = 'hidden';
-            inp.name = k;
-            inp.value = data[k];
-            form.appendChild(inp);
-          });
-          document.body.appendChild(form);
-          form.submit();
-        } else if (data.url) {
-          window.location.href = data.url;
-        }
-      }).catch(err => {
-        alert(err.message);
-      });
-    })();
+    placeOrder(email);
   };
 
   const scrollToCheckoutSummaryOnMobile = () => {
