@@ -303,7 +303,10 @@ function V2Checkout() {
         name: resolveDisplayTexts(nextCorePackage).name || nextCorePackage.id,
         description: resolveDisplayTexts(nextCorePackage).description || '',
         fromName: resolveDisplayTexts(currentCorePackage).name || currentCorePackage.id,
-        priceDiff: Math.max(0, nextCorePackage.price - currentCorePackage.price),
+        // Not: API price'i STRING dondururken ("1790.00") Product tipi number diyor. Aritmetik
+        //      calisiyor (JS coercion) ama .toFixed() cagirmak patlar; bu yuzden fiyatlar
+        //      modala formatMoney'den gecmis metin olarak veriliyor.
+        priceDiffLabel: formatMoney(Math.max(0, Number(nextCorePackage.price) - Number(currentCorePackage.price))),
       }
     : null;
 
@@ -317,7 +320,7 @@ function V2Checkout() {
     .map(p => ({
       id: p.id,
       name: resolveDisplayTexts(p).name || p.id,
-      price: p.price,
+      priceLabel: formatMoney(Number(p.price)),
       icon: p.options?.icon as string | undefined,
       image: p.options?.image as string | undefined,
       qtyHint: getQtyRuleHint(p),
@@ -949,14 +952,14 @@ interface NPWarehouse {
 interface UpsellAddOnOffer {
   id: string;
   name: string;
-  price: number;
+  priceLabel: string;
   icon?: string;
   image?: string;
   qtyHint?: string;
 }
 
 interface UpsellModalProps {
-  upgrade: { id: string; name: string; description: string; fromName: string; priceDiff: number } | null;
+  upgrade: { id: string; name: string; description: string; fromName: string; priceDiffLabel: string } | null;
   addOns: UpsellAddOnOffer[];
   total: string;
   onUpgrade: (packageId: string) => void | Promise<void>;
@@ -1015,7 +1018,7 @@ function UpsellModal({ upgrade, addOns, total, onUpgrade, onAddAddOn, onContinue
                 )}
               </div>
               <button type="button" className="upsell-upgrade-btn" onClick={() => onUpgrade(upgrade.id)}>
-                +₴{upgrade.priceDiff.toFixed(2)}
+                +{upgrade.priceDiffLabel}
               </button>
             </div>
           )}
@@ -1037,7 +1040,7 @@ function UpsellModal({ upgrade, addOns, total, onUpgrade, onAddAddOn, onContinue
                     <div className="upsell-addon-info">
                       <p className="upsell-addon-name">{addOn.name}</p>
                       <p className="upsell-addon-price">
-                        ₴{addOn.price.toFixed(2)}{addOn.qtyHint ? ` · ${addOn.qtyHint}` : ''}
+                        {addOn.priceLabel}{addOn.qtyHint ? ` · ${addOn.qtyHint}` : ''}
                       </p>
                     </div>
                     <button type="button" className="upsell-addon-btn" onClick={() => onAddAddOn(addOn.id)}>
