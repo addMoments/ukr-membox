@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import '../v2-styles/EventNew.css';
 import { t } from '../packages/i18n';
+import { textOr } from '../utils/admin_i18n';
 import { S3_ROOT } from '../consts';
 import { Link } from 'react-router-dom';
 import { cartState, findProduct, getCartQty, getQtyRule, getQtyRuleHint, initCartState, setCartQty } from '../client/cart';
@@ -136,12 +137,63 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
       .filter(Boolean);
   };
 
+  // Ne: Giris bloğundaki uc adim — kullanicinin bu sayfada ne yapmasi gerektigini anlatir (2.4).
+  // Neden: Musteri sayfanin ne ise yaradigini ve hangi adimlarin atilacagini anlatan bir
+  //        baslik/aciklama istedi. Metinler i18n anahtarindan geliyor, JSON gecikirse
+  //        textOr EN/UK karsiligina duser.
+  const introSteps = [
+    {
+      title: textOr('paywall.intro.step1Title', 'Choose a package', 'Оберіть пакет'),
+      text: textOr('paywall.intro.step1Text', 'Pick the one that fits the size of your event.', 'Той, що відповідає масштабу вашої події.'),
+    },
+    {
+      title: textOr('paywall.intro.step2Title', 'Add extras (optional)', 'Додайте додатки (за бажанням)'),
+      text: textOr('paywall.intro.step2Text', 'QR cards, welcome board, audio guestbook and more.', 'QR-картки, вітальний банер, аудіо гостьова книга та інше.'),
+    },
+    {
+      title: textOr('paywall.intro.step3Title', 'Complete your order', 'Оформіть замовлення'),
+      text: textOr('paywall.intro.step3Text', 'Pay once and your event is ready to share with guests.', 'Один платіж — і ваша подія готова до поширення серед гостей.'),
+    },
+  ];
+
   return (
     <>
       {showSignInSection && <V2SignInForm onSubmit={handleSignIn} compact />}
       <div className="event-new-page">
       {/* Hero Section */}
       <main className="event-new-main">
+        {/* Ne: Sayfanin ne oldugunu ve kullanicinin ne yapmasi gerektigini anlatan giris bloğu (2.4).
+            Nasil: Tek seferlik odeme rozeti + baslik + aciklama + uc adimlik sira.
+            Neden: Musteri sayfada aciklama olmadigini bildirdi. Hero bloğu DOM'da bu sayfanin
+                   *altinda* durdugu icin kullanici sayfayi dogrudan fiyat kartlariyla aciyordu;
+                   baslik h1 degil h2, cunku belgenin h1'i hero'daki basliktir. */}
+        <section className="event-new-intro">
+          <span className="event-new-intro-badge">
+            {textOr('paywall.intro.badge', 'One-time payment · No subscriptions', 'Одноразовий платіж · Без підписок')}
+          </span>
+          <h2 className="event-new-intro-title">
+            {textOr('paywall.intro.title', 'Everything your event needs, in one place', 'Усе для вашої події в одному місці')}
+          </h2>
+          <p className="event-new-intro-text">
+            {textOr(
+              'paywall.intro.description',
+              'Choose one core package for your event, then add any extras you like. You pay once — nothing renews and there is no subscription.',
+              'Оберіть один основний пакет для вашої події, а потім додайте будь-які додатки. Ви платите один раз — нічого не поновлюється і жодних підписок немає.',
+            )}
+          </p>
+          <ol className="event-new-intro-steps">
+            {introSteps.map((step, index) => (
+              <li key={step.title} className="event-new-intro-step">
+                <span className="event-new-intro-step-num">{index + 1}</span>
+                <div>
+                  <p className="event-new-intro-step-title">{step.title}</p>
+                  <p className="event-new-intro-step-text">{step.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
         {/* Core Packages Section */}
         <section className="event-new-section">
           <div className="event-new-section-header">

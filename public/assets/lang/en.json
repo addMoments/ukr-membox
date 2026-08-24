@@ -426,7 +426,18 @@
         "currency": "UAH",
         "selectPackage": "Select Package",
         "addOns": "Add-Ons",
-        "addOnsSubtitle": "Enhance your experience with these modular extras."
+        "addOnsSubtitle": "Enhance your experience with these modular extras.",
+        "intro": {
+            "badge": "One-time payment · No subscriptions",
+            "title": "Everything your event needs, in one place",
+            "description": "Choose one core package for your event, then add any extras you like. You pay once — nothing renews and there is no subscription.",
+            "step1Title": "Choose a package",
+            "step1Text": "Pick the one that fits the size of your event.",
+            "step2Title": "Add extras (optional)",
+            "step2Text": "QR cards, welcome board, audio guestbook and more.",
+            "step3Title": "Complete your order",
+            "step3Text": "Pay once and your event is ready to share with guests."
+        }
     },
     "addons": {
         "purchasedTitle": "Your Shipments",

@@ -100,6 +100,101 @@
   padding: 0 24px;
 }
 
+/* Giris bloğu (2.4): sayfanin amaci + atilacak adimlar.
+   Renk ve olculer sayfanin mevcut token'lariyla ayni (#D2E823 lime, #1A1D21 koyu, #6b7280 gri). */
+.event-new-intro {
+  padding: 56px 0 0;
+}
+
+.event-new-intro-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(210, 232, 35, 0.2);
+  color: #1A1D21;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border-radius: 9999px;
+  margin-bottom: 20px;
+}
+
+.event-new-intro-title {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #1A1D21;
+  margin: 0 0 14px;
+  max-width: 760px;
+}
+
+.event-new-intro-text {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.7;
+  color: #6b7280;
+  margin: 0 0 32px;
+  max-width: 760px;
+}
+
+.event-new-intro-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 20px;
+}
+
+.event-new-intro-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.event-new-intro-step-num {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #D2E823;
+  color: #191B0E;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-new-intro-step-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1D21;
+  margin: 0 0 4px;
+}
+
+.event-new-intro-step-text {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #6b7280;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .event-new-intro {
+    padding-top: 72px;
+  }
+
+  .event-new-intro-title {
+    font-size: 40px;
+  }
+
+  .event-new-intro-steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+}
+
 /* Section Styles */
 .event-new-section {
   padding: 64px 0;
