@@ -19,6 +19,7 @@ import { pgREST } from '../client/postgrest';
 import { get_key, set_key } from '../utils/persistence';
 import PurchasedAddonsBox from '../v2-components/PurchasedAddonsBox';
 import BuyerConfigPanel from '../v2-components/BuyerConfigPanel';
+import { localizedLabel } from '../utils/product_i18n';
 import { Product } from '../types/products';
 import { CartItem } from '../types/carts';
 import { FEATURE_QR, FEATURE_POSTER } from '../utils/features';
@@ -93,7 +94,7 @@ function EventHomeContent({
   // Neden: Statik tasarimli add-on detayinda genel add-on banner'i yerine satin alinan tasarim gosterilmeli.
   const resolveSelectedAddonDesign = (product: Product, cartItem: CartItem) => {
     const designs = product.options?.designs || [];
-    return designs.find((design: { id: string }) => design.id === cartItem.buyer_config?.design_id);
+    return designs.find((design: { id: string; label?: string; label_uk?: string }) => design.id === cartItem.buyer_config?.design_id);
   };
 
   // Ne: buyer_config icindeki kullanici girdilerini okunabilir etiket/deger satirlarina cevirir.
@@ -106,9 +107,9 @@ function EventHomeContent({
       return fields
         // footer_text bilgisini panel detayinda gecici olarak gizliyoruz.
         .filter((field: { key: string }) => field.key !== 'footer_text')
-        .map((field: { key: string; label: string }) => ({
+        .map((field: { key: string; label: string; label_uk?: string }) => ({
           key: field.key,
-          label: field.label,
+          label: localizedLabel(field),
           value: config[field.key],
         }))
         .filter((row: { value: unknown }) => String(row.value || '').trim());
@@ -126,10 +127,10 @@ function EventHomeContent({
     const rows = resolveAddonConfigRows(product, cartItem);
     return (
       <div className="addon-modal-config">
-        {selectedDesign?.label && (
+        {localizedLabel(selectedDesign) && (
           <div className="addon-modal-config-row">
             <span className="addon-modal-config-label">Design</span>
-            <span className="addon-modal-config-value">{selectedDesign.label}</span>
+            <span className="addon-modal-config-value">{localizedLabel(selectedDesign)}</span>
           </div>
         )}
         {rows.length > 0 ? rows.map((row: { key: string; label: string; value: unknown }) => (

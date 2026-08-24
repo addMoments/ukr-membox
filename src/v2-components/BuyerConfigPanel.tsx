@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Product } from '../types/products';
 import { CartItem } from '../types/carts';
 import { t } from '../packages/i18n';
+import { localizedLabel } from '../utils/product_i18n';
 import '../v2-styles/BuyerConfigPanel.css';
 
 interface ConfigField {
   key: string;
   label: string;
+  label_uk?: string;
   type?: string;
   maxLength?: number;
 }
@@ -14,6 +16,7 @@ interface ConfigField {
 interface Design {
   id: string;
   label: string;
+  label_uk?: string;
   image: string;
 }
 
@@ -87,7 +90,7 @@ function BuyerConfigPanel({ product, cartItem, onSubmit, onClose }: BuyerConfigP
                 onChange={e => setSelectedDesign(e.target.value)}
               >
                 {designs.map(d => (
-                  <option key={d.id} value={d.id}>{d.label}</option>
+                  <option key={d.id} value={d.id}>{localizedLabel(d)}</option>
                 ))}
               </select>
             </div>
@@ -98,7 +101,7 @@ function BuyerConfigPanel({ product, cartItem, onSubmit, onClose }: BuyerConfigP
             if (field.key === 'footer_text') return null;
             return (
               <div key={field.key} className="bcp-field">
-                <label className="bcp-label">{field.label}</label>
+                <label className="bcp-label">{localizedLabel(field)}</label>
                 <textarea
                   className="bcp-textarea"
                   value={fieldValues[field.key] || ''}

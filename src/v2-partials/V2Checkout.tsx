@@ -15,6 +15,7 @@ import { get_key } from '../utils/persistence';
 import { Product } from '../types/products';
 import { getPromoErrorMessage, validatePromoCode } from '../client/promo';
 import { textOr } from '../utils/admin_i18n';
+import { localizedLabel } from '../utils/product_i18n';
 import { PromoValidationResponse } from '../types/promo';
 import { markMetaEventOnce, trackMetaAddToCart } from '../client/meta-pixel';
 
@@ -30,6 +31,7 @@ interface ShippingAddress {
 interface ConfigField {
   key: string;
   label: string;
+  label_uk?: string;
   type?: string;
   maxLength?: number;
 }
@@ -53,6 +55,7 @@ interface Overlay {
 interface Design {
   id: string;
   label: string;
+  label_uk?: string;
   image: string;
   overlays?: Overlay[];
 }
@@ -298,9 +301,9 @@ function V2Checkout() {
           const resolvedName = resolveDisplayTexts(product).name || product.id;
           alert(textOr(
             'checkout.fillField',
-            `Please fill "${field.label}" for "${resolvedName}".`,
-            `Будь ласка, заповніть «${field.label}» для «${resolvedName}».`,
-            { field: field.label, product: resolvedName },
+            `Please fill "${localizedLabel(field)}" for "${resolvedName}".`,
+            `Будь ласка, заповніть «${localizedLabel(field)}» для «${resolvedName}».`,
+            { field: localizedLabel(field), product: resolvedName },
           ));
           return;
         }
@@ -692,7 +695,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
         <img
           className="checkout-item-design-preview"
           src={selectedDesign.image}
-          alt={selectedDesign.label || displayName}
+          alt={localizedLabel(selectedDesign) || displayName}
         />
       ) : previewImage ? (
         <div
@@ -722,7 +725,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
                   onChange={e => onConfigChange('design_id', e.target.value)}
                 >
                   {designs.map(d => (
-                    <option key={d.id} value={d.id}>{d.label}</option>
+                    <option key={d.id} value={d.id}>{localizedLabel(d)}</option>
                   ))}
                 </select>
               </div>
@@ -732,7 +735,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
               if (field.key === 'footer_text') return null;
               return (
                 <div key={field.key} className="checkout-item-config-field">
-                  <label className="checkout-item-config-label">{field.label}</label>
+                  <label className="checkout-item-config-label">{localizedLabel(field)}</label>
                   {field.key === 'event_date' ? (
                     <input
                       type="date"
@@ -747,7 +750,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
                       onChange={e => onConfigChange(field.key, e.target.value)}
                       maxLength={field.maxLength}
                       rows={2}
-                      placeholder={overlayPlaceholders[field.key] || field.label}
+                      placeholder={overlayPlaceholders[field.key] || localizedLabel(field)}
                     />
                   )}
                   {field.maxLength && field.key !== 'event_date' && (
