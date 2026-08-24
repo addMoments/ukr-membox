@@ -15,6 +15,7 @@ import { fonts } from '../types/fonts';
 // import MediaCard from '../v2-components/MediaCard';
 import PhotoViewerModal from '../partials/PhotoViewerModal';
 import { t } from '../packages/i18n';
+import { textOr } from '../utils/admin_i18n';
 import { whoAmI } from '../client/auth';
 import { pgREST } from '../client/postgrest';
 import { isContributorLimitReachedError, isForbiddenError } from '../utils/guestInitError';
@@ -114,6 +115,10 @@ function V2GuestHome({
   const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0, totalBytes: 0 });
   const [modalOpen, setModalOpen] = useState(false);
   const [uploadErrorMessage, setUploadErrorMessage] = useState('');
+  // Ne: Yukleme basariyla bitince gosterilecek onay ekraninin verisi (null = gosterme).
+  // Neden: 2.6 — misafir mobilden yukleyince modal 1 saniyede sessizce kapaniyordu ve
+  //        hicbir onay gormuyordu.
+  const [uploadDone, setUploadDone] = useState<{ count: number; bytes: number } | null>(null);
 
   const getLocalizedText = (key: string, fallback: string) => {
     const value = t(key);
@@ -139,6 +144,7 @@ function V2GuestHome({
     elemRef.entries = [];
     setFileEntries([]);
     setModalOpen(false);
+    setUploadDone(null);
   };
 
   const handleUpload = async () => {
@@ -157,6 +163,7 @@ function V2GuestHome({
     );
 
     setUploadErrorMessage('');
+    setUploadDone(null);
     setIsUploading(true);
     const totalBytes = pendingEntries.reduce((s, e) => s + e.file.size, 0);
     setUploadProgress({ done: 0, total: pendingEntries.length, totalBytes });
@@ -216,11 +223,22 @@ function V2GuestHome({
 
       const hasFailedEntries = pendingEntries.some(e => e.failed);
       if (!hasFailedEntries) {
+        // Ne: Once "yukleme tamamlandi" ekranini goster, sonra modali kapat.
+        // Nasil: Sure 1sn'den 2.6sn'ye cikarildi; 1 saniye mesaji okumaya yetmiyordu.
+        //        Erken kapatmak isteyen backdrop'a dokunabilir, handleCancel devrede.
+        // Neden: 2.6 — tum dosyalar yuklendiginde misafire acik bir onay verilmeli.
+        setUploadDone({
+          count: successCount,
+          bytes: pendingEntries.reduce((sum, entry) => sum + entry.file.size, 0),
+        });
         setTimeout(() => {
+          // Onizleme URL'leri bu yolda serbest birakilmiyordu; iptal akisiyla ayni hale getirildi.
+          elemRef.entries.forEach(entry => URL.revokeObjectURL(entry.previewUrl));
           elemRef.entries = [];
           setFileEntries([]);
           setModalOpen(false);
-        }, 1000);
+          setUploadDone(null);
+        }, 2600);
       }
     } finally {
       setIsUploading(false);
@@ -269,6 +287,20 @@ function V2GuestHome({
       {modalOpen && (
         <div className="upload-modal-backdrop" onClick={!isUploading ? handleCancel : undefined}>
           <div className="upload-modal" onClick={e => e.stopPropagation()}>
+            {uploadDone ? (
+              <div className="upload-modal-success" role="status">
+                <div className="upload-modal-success-badge">
+                  <i className="fa-solid fa-check" />
+                </div>
+                <p className="upload-modal-success-title">
+                  {textOr('guest.uploadCompleted', 'Upload completed', 'Завантаження завершено')}
+                </p>
+                <p className="upload-modal-success-sub">
+                  {uploadDone.count} {t('common.files')} · {formatBytes(uploadDone.bytes)}
+                </p>
+              </div>
+            ) : (
+            <>
             <h3 className="upload-modal-title">{t('guest.photosAndVideos')}</h3>
             {uploadErrorMessage ? (
               <div className="upload-modal-error" role="alert">
@@ -344,6 +376,8 @@ function V2GuestHome({
                 {t('guest.uploadFiles')}
               </button>
             </div>
+            </>
+            )}
           </div>
         </div>
       )}

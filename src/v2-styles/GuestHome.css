@@ -558,6 +558,73 @@
   box-shadow: 0 24px 64px rgba(0,0,0,0.22);
 }
 
+/* Yukleme tamamlandi ekrani (2.6). Modal 1 saniyede sessizce kapanmak yerine once bunu
+   gosteriyor; renkler dosyadaki mevcut basari tonuyla (#22c55e) ayni. */
+.upload-modal-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 24px 36px;
+  gap: 4px;
+}
+
+.upload-modal-success-badge {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 16px;
+  animation: upload-modal-success-pop 320ms cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+/* Rozetin arkasindan bir kez genisleyip sonen halka. */
+.upload-modal-success-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid #22c55e;
+  animation: upload-modal-success-ring 900ms ease-out 200ms both;
+}
+
+.upload-modal-success-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.upload-modal-success-sub {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+@keyframes upload-modal-success-pop {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes upload-modal-success-ring {
+  from { transform: scale(1);   opacity: 0.55; }
+  to   { transform: scale(1.7); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upload-modal-success-badge,
+  .upload-modal-success-badge::after {
+    animation: none;
+  }
+  .upload-modal-success-badge::after { opacity: 0; }
+}
+
 .upload-modal-title {
   font-size: 18px;
   font-weight: 700;

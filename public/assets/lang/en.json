@@ -480,7 +480,8 @@
         "uploadFiles": "Upload Files",
         "uploadingProgress": "{{done}} of {{total}} files uploaded · {{size}}",
         "limitReachedTitle": "Participant limit reached",
-        "limitReachedDescription": "This event has reached the new participant limit."
+        "limitReachedDescription": "This event has reached the new participant limit.",
+        "uploadCompleted": "Upload completed"
     },
     "guestGuestbook": {
         "voiceMessage": "Voice Message",

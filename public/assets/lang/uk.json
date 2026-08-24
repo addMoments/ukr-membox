@@ -480,7 +480,8 @@
         "uploadFiles": "Завантажити файли",
         "uploadingProgress": "{{done}} з {{total}} файлів завантажено · {{size}}",
         "limitReachedTitle": "Ліміт учасників вичерпано",
-        "limitReachedDescription": "Для цієї події вичерпано ліміт нових учасників."
+        "limitReachedDescription": "Для цієї події вичерпано ліміт нових учасників.",
+        "uploadCompleted": "Завантаження завершено"
     },
     "guestGuestbook": {
         "voiceMessage": "Голосове повідомлення",
