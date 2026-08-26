@@ -46,3 +46,7 @@ node_modules/
 # Task files
 # tasks.json
 # tasks/ 
+
+# Deploy yedekleri: canli reactApp.html, S3 envanteri ve DB oncesi urun dump'lari.
+# Rollback icin lokalde tutuluyor, repoya girmesi gerekmiyor.
+deploy/backups/
