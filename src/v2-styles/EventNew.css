@@ -133,8 +133,12 @@
   font-weight: 500;
   line-height: 1.7;
   color: #6b7280;
-  margin: 0 0 32px;
+  margin: 0 0 20px;
   max-width: 760px;
+}
+
+.event-new-intro-text + .event-new-intro-badge {
+  margin-bottom: 32px;
 }
 
 .event-new-intro-steps {
@@ -233,6 +237,20 @@
   margin: 0;
 }
 
+.event-new-section-subtitle-emphasis {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #1A1D21;
+  max-width: 640px;
+}
+
+@media (min-width: 768px) {
+  .event-new-section-subtitle-emphasis {
+    font-size: 20px;
+  }
+}
+
 /* Billing Toggle */
 .event-new-billing-toggle {
   display: flex;
@@ -295,6 +313,7 @@
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.3s;
+  position: relative;
 }
 
 .event-new-package-card:hover {
@@ -334,6 +353,7 @@
 
 .event-new-package-header {
   margin-bottom: 32px;
+  text-align: left;
 }
 
 .event-new-package-name {
@@ -343,11 +363,31 @@
   margin: 0 0 4px;
 }
 
+.event-new-package-price-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
 .event-new-package-price {
   display: flex;
   align-items: baseline;
+  justify-content: flex-start;
   gap: 4px;
-  margin-bottom: 16px;
+  margin: 0;
+}
+
+.event-new-package-fee {
+  display: block;
+  margin: 2px 0 0;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  color: #c5c9ce;
 }
 
 .event-new-package-price-amount {

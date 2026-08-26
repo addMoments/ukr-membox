@@ -50,3 +50,8 @@ node_modules/
 # Deploy yedekleri: canli reactApp.html, S3 envanteri ve DB oncesi urun dump'lari.
 # Rollback icin lokalde tutuluyor, repoya girmesi gerekmiyor.
 deploy/backups/
+
+# Local dev backend config (ukr-membox-serv .env kopyasi). 2.4-fix'te yanlislikla
+# commit edilmisti; kural o branchte .env.ukr-membox-deploy adiyla ve UTF-16 yazildigi
+# icin calismiyordu.
+.env.ukr-membox-serv

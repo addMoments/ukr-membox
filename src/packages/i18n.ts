@@ -1,7 +1,7 @@
 import i18n, { InitOptions } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { get_key, set_key } from '../utils/persistence';
-import { S3_ROOT } from '../consts';
+import { is_live, S3_ROOT } from '../consts';
 
 declare global {
   interface Window {
@@ -28,13 +28,13 @@ const lang_list: LangList = [
     flag: "https://upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/80px-Flag_of_the_United_Kingdom.svg.png",
     code: "en",
     display_name: "English",
-    translation: S3_ROOT + "/ui/assets/lang/en.json"
+    translation: is_live ? S3_ROOT + "/ui/assets/lang/en.json" : "/assets/lang/en.json"
   },
   {
     flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/250px-Flag_of_Ukraine.svg.png",
     code: "uk",
     display_name: "Ukrainian",
-    translation: S3_ROOT + "/ui/assets/lang/uk.json"
+    translation: is_live ? S3_ROOT + "/ui/assets/lang/uk.json" : "/assets/lang/uk.json"
   }
 ];
 

@@ -172,15 +172,18 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
             {textOr('paywall.intro.badge', 'One-time payment · No subscriptions', 'Одноразовий платіж · Без підписок')}
           </span>
           <h2 className="event-new-intro-title">
-            {textOr('paywall.intro.title', 'Everything your event needs, in one place', 'Усе для вашої події в одному місці')}
+            {textOr('paywall.intro.title', 'Your Day. Your Guests. Every Moment.', 'Ваш день. Ваші гості. Кожна мить.')}
           </h2>
           <p className="event-new-intro-text">
             {textOr(
               'paywall.intro.description',
-              'Choose one core package for your event, then add any extras you like. You pay once — nothing renews and there is no subscription.',
-              'Оберіть один основний пакет для вашої події, а потім додайте будь-які додатки. Ви платите один раз — нічого не поновлюється і жодних підписок немає.',
+              'Choose the perfect package for your celebration and keep all those unforgettable moments together.',
+              'Оберіть ідеальний пакет для вашого свята та збережіть усі незабутні миті в одному місці.',
             )}
           </p>
+          <span className="event-new-intro-badge">
+            {textOr('paywall.intro.badgeAfter', 'Purchase now, use anytime', 'Купуйте зараз, користуйтесь будь-коли')}
+          </span>
           <ol className="event-new-intro-steps">
             {introSteps.map((step, index) => (
               <li key={step.title} className="event-new-intro-step">
@@ -199,7 +202,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
           <div className="event-new-section-header">
             <div>
               <h2 className="event-new-section-title">{t('paywall.corePackages')}</h2>
-              <p className="event-new-section-subtitle">{t('paywall.corePackagesSubtitle')}</p>
+              <p className="event-new-section-subtitle event-new-section-subtitle-emphasis">{t('paywall.corePackagesSubtitle')}</p>
             </div>
           </div>
 
@@ -342,9 +345,14 @@ function PackageCard({ id, displayName, displayDescription, displayBullets, pric
       )}
       <div className="event-new-package-header">
         <h3 className="event-new-package-name">{resolvedName}</h3>
-        <div className="event-new-package-price">
-          <span className="event-new-package-price-amount">₴{price}</span>
-          <span className="event-new-package-price-unit">{"UAH"}</span>
+        <div className="event-new-package-price-block">
+          <div className="event-new-package-price">
+            <span className="event-new-package-price-amount">₴{price}</span>
+            <span className="event-new-package-price-unit">{"UAH"}</span>
+          </div>
+          <p className="event-new-package-fee">
+            {textOr('paywall.oneTimeFee', 'One time fee', 'Разовий платіж')}
+          </p>
         </div>
         <p className="event-new-package-description">{resolvedDescription}</p>
       </div>

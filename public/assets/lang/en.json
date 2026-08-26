@@ -413,8 +413,8 @@
         }
     },
     "paywall": {
-        "corePackages": "Core Packages",
-        "corePackagesSubtitle": "The essential foundation for your digital memories.",
+        "corePackages": "Choose Your Package",
+        "corePackagesSubtitle": "Simple options for every celebration — from intimate gatherings to unforgettable big days.",
         "heroBadge": "Your Experience",
         "heroTitle": "Tailored Services for Every Event",
         "heroSubtitle": "Elevate your special moments with our premium digital gallery and custom physical event assets.",
@@ -425,12 +425,14 @@
         "proceedToCheckout": "Proceed to Checkout",
         "currency": "UAH",
         "selectPackage": "Select Package",
+        "oneTimeFee": "One time fee",
         "addOns": "Add-Ons",
         "addOnsSubtitle": "Enhance your experience with these modular extras.",
         "intro": {
             "badge": "One-time payment · No subscriptions",
-            "title": "Everything your event needs, in one place",
-            "description": "Choose one core package for your event, then add any extras you like. You pay once — nothing renews and there is no subscription.",
+            "title": "Your Day. Your Guests. Every Moment.",
+            "description": "Choose the perfect package for your celebration and keep all those unforgettable moments together.",
+            "badgeAfter": "Purchase now, use anytime",
             "step1Title": "Choose a package",
             "step1Text": "Pick the one that fits the size of your event.",
             "step2Title": "Add extras (optional)",
