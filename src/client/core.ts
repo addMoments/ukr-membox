@@ -87,8 +87,24 @@ export const fetch = async (url: string, options: RequestInit = {}, config: { bl
     
     options.headers = headers;
 
-    const res = await window.fetch(url, options);
-    
+    let res = await window.fetch(url, options);
+
+    // Ne: Misafir sayfasinda event'e ozel saklanmis token gecersizse token'i silip
+    //     istegi bir kez tokensiz tekrarlar.
+    // Nasil: serv tokensiz misafir istegine yeni bir token uretiyor (AuthMiddleware
+    //        "webanon.no-token" yolu), gecersiz token'a ise 401 donuyor.
+    // Neden: Misafir token'inin omru 7 gun, event ise ~30 gun acik kaliyor. Token'i
+    //        bayatlayan misafir her ziyarette 401 aliyordu; participant bootstrap bunu
+    //        navigate("/404")'e cevirdigi icin link kalici olarak kirikmis gorunuyordu.
+    // Not: Hesap token'i ("tkn") bu yolda silinmez -- oturumu sessizce kapatmamak icin.
+    if (res.status === 401 && isGuestVar && headers["Authorization"] && currKey !== "tkn") {
+        await clearAuthToken().catch(() => {});
+        keyinitPromise = null;
+        delete headers["Authorization"];
+        options.headers = headers;
+        res = await window.fetch(url, options);
+    }
+
     if (!res.ok) {
         const bodyText = await res.text();
         let body: ErrorBody = null;
