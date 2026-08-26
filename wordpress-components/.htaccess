@@ -1,3 +1,5 @@
+
+RewriteOptions inherit
 # BEGIN LSCACHE
 ## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
 <IfModule mod_rewrite.c>
@@ -49,19 +51,35 @@ RewriteRule ^events/services-and-prices(?:/(.*))?$ /events/services-and-prices/ 
 # 3. React SPA fallback (internal rewrite, no redirect)
 RewriteCond %{QUERY_STRING} !(^|&)rnf=1(&|$)
 RewriteRule ^(event|events|guest|checkout|payment|signin|recover|notice|signup|signout|reset-password)(?:/(.*))?$ /reactApp.html [L]
+# 3.a React admin panel rotalari (bare /admin ve /admin/ WordPress'te /wp-admin/ kisayolu, dokunulmuyor)
+RewriteCond %{QUERY_STRING} !(^|&)rnf=1(&|$)
+RewriteRule ^admin/(orders|products|panel-admins|promos|partnerships|no-access)(?:/(.*))?$ /reactApp.html [L]
 # 4. Trailing slash redirect for WordPress (excludes React routes and error docs)
-RewriteCond %{REQUEST_URI} !/$
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
 # Generic trailing-slash redirect (excludes React routes and error docs)
 RewriteCond %{REQUEST_URI} !/$
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !/$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/(event|events|guest|checkout|payment|recover|notice|signup|signout|reset-password)
+RewriteCond %{REQUEST_URI} !^/admin/(orders|products|panel-admins|promos|partnerships|no-access)
 RewriteCond %{REQUEST_URI} !^/404\.shtml
 RewriteRule ^(.+)$ /$1/ [R=301,L]
 </IfModule>
 # END Addmoments
+
+# BEGIN AddmomentsCache
+<IfModule mod_headers.c>
+# React app shell'i cache'leme: her deploy'dan sonra herkes yeni build'i alsin.
+# SPA fallback (RewriteRule -> /reactApp.html) sonrasi da bu dosya adi gecerli oldugu
+# icin /event/... gibi rotalar da kapsanir.
+<FilesMatch "^reactApp\.html$">
+Header set Cache-Control "private, no-cache, must-revalidate"
+Header set Pragma "no-cache"
+</FilesMatch>
+</IfModule>
+# END AddmomentsCache
 
 # BEGIN WordPress
 # The directives (lines) between "BEGIN WordPress" and "END WordPress" are
