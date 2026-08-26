@@ -2,16 +2,8 @@ import { useState } from 'react';
 import { Product } from '../types/products';
 import { CartItem } from '../types/carts';
 import { t } from '../packages/i18n';
-import { localizedLabel } from '../utils/product_i18n';
+import { displayConfigFieldLabel, localizedLabel, sortConfigFieldsLikeQrCard } from '../utils/product_i18n';
 import '../v2-styles/BuyerConfigPanel.css';
-
-interface ConfigField {
-  key: string;
-  label: string;
-  label_uk?: string;
-  type?: string;
-  maxLength?: number;
-}
 
 interface Design {
   id: string;
@@ -30,7 +22,7 @@ interface BuyerConfigPanelProps {
 function BuyerConfigPanel({ product, cartItem, onSubmit, onClose }: BuyerConfigPanelProps) {
   const options = product.options || {};
   const designs: Design[] = options.designs || [];
-  const configFields: ConfigField[] = options.config_fields || [];
+  const configFields = sortConfigFieldsLikeQrCard(options.config_fields || []);
 
   const existingConfig = cartItem.buyer_config || {};
 
@@ -101,7 +93,7 @@ function BuyerConfigPanel({ product, cartItem, onSubmit, onClose }: BuyerConfigP
             if (field.key === 'footer_text') return null;
             return (
               <div key={field.key} className="bcp-field">
-                <label className="bcp-label">{localizedLabel(field)}</label>
+                <label className="bcp-label">{displayConfigFieldLabel(field)}</label>
                 <textarea
                   className="bcp-textarea"
                   value={fieldValues[field.key] || ''}

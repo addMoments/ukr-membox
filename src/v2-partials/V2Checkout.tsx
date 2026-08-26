@@ -15,7 +15,7 @@ import { get_key } from '../utils/persistence';
 import { Product } from '../types/products';
 import { getPromoErrorMessage, validatePromoCode } from '../client/promo';
 import { textOr } from '../utils/admin_i18n';
-import { localizedLabel } from '../utils/product_i18n';
+import { displayConfigFieldLabel, localizedLabel, sortConfigFieldsLikeQrCard } from '../utils/product_i18n';
 import { PromoValidationResponse } from '../types/promo';
 import { markMetaEventOnce, trackMetaAddToCart } from '../client/meta-pixel';
 
@@ -344,7 +344,7 @@ function V2Checkout() {
     }
   };
 
-  // Add-on sepete 1 degil urunun min_qty degeriyle giriyor (2.16); QR Card icin bu 8.
+  // Add-on sepete 1 degil urunun min_qty degeriyle giriyor; paket add-on icin bu 4.
   const addUpsellAddOn = async (productId: string) => {
     await setCartQty(productId, getQtyRule(cart.products.find(p => p.id === productId)).min);
   };
@@ -455,11 +455,12 @@ function V2Checkout() {
       for (const field of fieldsToValidate) {
         if (!cfg[field.key]?.trim()) {
           const resolvedName = resolveDisplayTexts(product).name || product.id;
+          const fieldLabel = displayConfigFieldLabel(field);
           alert(textOr(
             'checkout.fillField',
-            `Please fill "${localizedLabel(field)}" for "${resolvedName}".`,
-            `Будь ласка, заповніть «${localizedLabel(field)}» для «${resolvedName}».`,
-            { field: localizedLabel(field), product: resolvedName },
+            `Please fill "${fieldLabel}" for "${resolvedName}".`,
+            `Будь ласка, заповніть «${fieldLabel}» для «${resolvedName}».`,
+            { field: fieldLabel, product: resolvedName },
           ));
           return;
         }
@@ -798,8 +799,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
   const isPhysical = product.fullfillment_type === 'physical';
   const isAddOn = !!product.is_add_on;
   const showQuantityStepper = isAddOn && !SINGLE_QUANTITY_ADDON_IDS.has(product.id);
-  // Not: Adet kurallari urun kaydindan geliyor (options.min_qty / options.qty_step).
-  // Kural tanimlanmamis urunlerde ikisi de 1 oldugu icin stepper eskisi gibi birer birer artar.
+  // Not: Paket add-on'lar (QR Card, Welcome Board) 4'er 4'er artar; satir fiyati adet * birim.
   const { min: minQty, step: qtyStep } = getQtyRule(product);
   const qtyRuleHint = getQtyRuleHint(product);
   const designs: Design[] = product.options?.designs || [];
@@ -825,9 +825,11 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
   // Ne: Checkout'ta kullanicidan istenecek urun konfigurasyon alanlarini belirler.
   // Nasil: Overlay'li eski tasarimlarda sadece preview'da kullanilan alanlari gosterir; overlay yoksa backend config_fields listesinin tamamini kullanir.
   // Neden: Yeni statik fiziksel add-on akislarinda gorsel sabit kalir ama form alanlari buyer_config olarak saklanmaya devam etmelidir.
-  const visibleConfigFields = designUsesOverlayPreview(selectedDesign)
-    ? configFields.filter(f => activeFieldKeys.has(f.key))
-    : configFields;
+  const visibleConfigFields = sortConfigFieldsLikeQrCard(
+    designUsesOverlayPreview(selectedDesign)
+      ? configFields.filter(f => activeFieldKeys.has(f.key))
+      : configFields,
+  );
 
   return (
     <div className={`checkout-item${isPhysical && designs.length > 0 ? ' checkout-item--physical' : ''}`}>
@@ -877,7 +879,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
               if (field.key === 'footer_text') return null;
               return (
                 <div key={field.key} className="checkout-item-config-field">
-                  <label className="checkout-item-config-label">{localizedLabel(field)}</label>
+                  <label className="checkout-item-config-label">{displayConfigFieldLabel(field)}</label>
                   {field.key === 'event_date' ? (
                     <input
                       type="date"
@@ -892,7 +894,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
                       onChange={e => onConfigChange(field.key, e.target.value)}
                       maxLength={field.maxLength}
                       rows={2}
-                      placeholder={overlayPlaceholders[field.key] || localizedLabel(field)}
+                      placeholder={overlayPlaceholders[field.key] || displayConfigFieldLabel(field)}
                     />
                   )}
                   {field.maxLength && field.key !== 'event_date' && (

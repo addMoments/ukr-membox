@@ -102,8 +102,8 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
 
   const addonClick = (id: string) => {
     if (id === SPONSORED_ADDON_ID && isPremiumSelected && isPremiumSponsoredIncluded) return;
-    // Not: Add-on sepete 1 adet degil, urunun min_qty degeriyle giriyor. Kural tanimlanmamis
-    // urunlerde min_qty 1'e dustugu icin davranis degismiyor; QR Card'da ilk secim 8 oluyor.
+    // Not: Add-on sepete 1 adet degil, urunun min_qty degeriyle giriyor. Paket add-on'larda
+    // (QR Card, Welcome Board) ilk secim 4 oluyor.
     setCartQty(id, getCartQty(id) > 0 ? 0 : getQtyRule(findProduct(id)).min);
   };
 
@@ -243,6 +243,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
                     displayName={resolveDisplayTexts(addOn).name}
                     displayDescription={resolveDisplayTexts(addOn).description}
                     price={addOn.price}
+                    quantity={getCartQty(addOn.id)}
                     icon={addOn.options?.icon}
                     image={addOn.options?.image}
                     mobileImage={addOn.options?.mobile_image}
@@ -376,6 +377,7 @@ interface AddOnCardProps {
   displayName?: string;
   displayDescription?: string;
   price: number;
+  quantity?: number;
   icon?: string;
   image?: string;
   mobileImage?: string;
@@ -386,7 +388,7 @@ interface AddOnCardProps {
   onToggle: () => void;
 }
 
-function AddOnCard({ id, displayName, displayDescription, price, icon, image, mobileImage, qtyRuleHint = '', isSponsoredAdvertorial = false, isSelected, isDisabled = false, onToggle }: AddOnCardProps) {
+function AddOnCard({ id, displayName, displayDescription, price, quantity = 0, icon, image, mobileImage, qtyRuleHint = '', isSponsoredAdvertorial = false, isSelected, isDisabled = false, onToggle }: AddOnCardProps) {
   const cardClass = [
     'event-new-addon-card',
     image ? 'event-new-addon-card-image' : '',
@@ -441,10 +443,10 @@ function AddOnCard({ id, displayName, displayDescription, price, icon, image, mo
       <h3 className="event-new-addon-name">{resolvedName}</h3>
       <p className="event-new-addon-description">{resolvedDescription}</p>
       <div className="event-new-addon-footer">
-        {/* Not: Adet kurali olan add-on'da (QR Card) kutuyu isaretlemek sepete 1 degil min_qty
-            kadar ekliyor; fiyatin altindaki not olmadan toplam beklenmedik gorunuyor. */}
+        {/* Not: Adet kurali olan add-on'da kutuyu isaretlemek sepete 1 degil min_qty kadar
+            ekliyor; kart fiyati da adet * birim fiyat gosterir. */}
         <div className="event-new-addon-price-block">
-          <span className="event-new-addon-price">₴{price}</span>
+          <span className="event-new-addon-price">₴{(price * Math.max(quantity, 1)).toFixed(2)}</span>
           {qtyRuleHint && <span className="event-new-addon-qty-rule">{qtyRuleHint}</span>}
         </div>
         <input

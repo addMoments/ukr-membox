@@ -487,6 +487,13 @@ function AdminProducts() {
           <span className="admin-product-field-label">{at('admin.products.addonPrice', 'Add-On Package Price', 'Ціна додатка')}</span>
           <input name="price" type="number" min={0} step="0.01" className="admin-product-input" defaultValue={product.price} />
         </label>
+        <p className="admin-product-field-hint">
+          {at(
+            'admin.products.addonPriceHint',
+            'This is the unit price. Checkout quantity steps by 4; the line total is price × quantity (4, 8, 12…).',
+            'Це ціна за одиницю. Кількість на оформленні змінюється по 4; сума рядка = ціна × кількість (4, 8, 12…).',
+          )}
+        </p>
       </div>
 
       <div className="admin-product-form-footer">
