@@ -98,12 +98,20 @@ function AdminProducts() {
       errors.push(at('admin.products.errors.priceMin', 'Price must be greater than or equal to 0.', 'Ціна має бути більшою або дорівнювати 0.'));
     }
 
+    // Not: priority yalnizca siralama icindir. Backend 1'in altini reddediyor cunku public urun
+    // sorgusu `priority > 0` filtreliyor -- 0 yazmak urunu siteden sessizce kaldirirdi.
+    const priority = readNumber(formData.get('priority'));
+    if (priority === null || priority < 1) {
+      errors.push(at('admin.products.errors.priorityMin', 'Order must be 1 or greater.', 'Порядок має бути 1 або більше.'));
+    }
+
     const basePayload: UpdateAdminProductPayload = {
       ...(displayNameEn ? { display_name_en: displayNameEn } : {}),
       ...(displayNameUk ? { display_name_uk: displayNameUk } : {}),
       ...(displayDescriptionEn ? { display_description_en: displayDescriptionEn } : {}),
       ...(displayDescriptionUk ? { display_description_uk: displayDescriptionUk } : {}),
       price: price ?? undefined,
+      priority: priority ?? undefined,
     };
 
     if (product.is_add_on) {
@@ -401,6 +409,17 @@ function AdminProducts() {
           <input name="price" type="number" min={0} step="0.01" className="admin-product-input" defaultValue={product.price} />
         </label>
         <label className="admin-product-field">
+          <span className="admin-product-field-label">{at('admin.products.priority', 'Display order', 'Порядок відображення')}</span>
+          <input name="priority" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.priority} />
+        </label>
+        <p className="admin-product-field-hint">
+          {at(
+            'admin.products.priorityHint',
+            'Higher numbers come first on the Services & Prices page. Use the on/off switch to hide a product, not this field.',
+            'Більші числа показуються першими на сторінці «Послуги та ціни». Щоб приховати продукт, використовуйте перемикач, а не це поле.',
+          )}
+        </p>
+        <label className="admin-product-field">
           <span className="admin-product-field-label">{at('admin.products.numberOfGuests', 'Number of Guests', 'Кількість гостей')}</span>
           <input name="guest_count" type="number" min={-1} step="1" className="admin-product-input" defaultValue={product.options.guest_count} />
         </label>
@@ -492,6 +511,17 @@ function AdminProducts() {
             'admin.products.addonPriceHint',
             'This is the unit price. Checkout quantity steps by 4; the line total is price × quantity (4, 8, 12…).',
             'Це ціна за одиницю. Кількість на оформленні змінюється по 4; сума рядка = ціна × кількість (4, 8, 12…).',
+          )}
+        </p>
+        <label className="admin-product-field">
+          <span className="admin-product-field-label">{at('admin.products.priority', 'Display order', 'Порядок відображення')}</span>
+          <input name="priority" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.priority} />
+        </label>
+        <p className="admin-product-field-hint">
+          {at(
+            'admin.products.priorityHint',
+            'Higher numbers come first on the Services & Prices page. Use the on/off switch to hide a product, not this field.',
+            'Більші числа показуються першими на сторінці «Послуги та ціни». Щоб приховати продукт, використовуйте перемикач, а не це поле.',
           )}
         </p>
       </div>

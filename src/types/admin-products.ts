@@ -39,6 +39,7 @@ export interface UpdateAdminProductPayload {
   display_bullets_en?: string;
   display_bullets_uk?: string;
   price?: number;
+  priority?: number;
   guest_count?: number;
   media_count?: number;
   activation_period_days?: number;
