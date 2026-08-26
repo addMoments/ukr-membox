@@ -7,6 +7,7 @@ import { adminText } from '../../utils/admin_i18n';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
 import { t } from '../../packages/i18n';
+import { displayConfigFieldLabel, sortConfigFieldsLikeQrCard } from '../../utils/product_i18n';
 import '../../v2-styles/AdminPageHeader.css';
 import '../../v2-styles/AdminOrders.css';
 
@@ -211,7 +212,7 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
   const productName = resolveProductName();
   const showTracking = status === 'admin-action' || status === 'shipped' || status === 'fulfilled';
 
-  const configFields = item.product.options?.config_fields || [];
+  const configFields = sortConfigFieldsLikeQrCard(item.product.options?.config_fields || []);
   const designs = item.product.options?.designs || [];
   const hasBuyerConfig = Object.keys(item.buyer_config || {}).length > 0;
 
@@ -293,7 +294,7 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
               .filter(f => f.key !== 'footer_text')
               .map(f => (
               <div key={f.key} className="admin-item-buyer-config-row">
-                <span className="admin-item-buyer-config-key">{f.label}: </span>
+                <span className="admin-item-buyer-config-key">{displayConfigFieldLabel(f)}: </span>
                 {item.buyer_config[f.key] || '—'}
               </div>
             )) : Object.entries(item.buyer_config).filter(([k]) => k !== 'design_id' && k !== 'footer_text').map(([k, v]) => (

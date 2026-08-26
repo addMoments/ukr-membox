@@ -19,7 +19,7 @@ import { pgREST } from '../client/postgrest';
 import { get_key, set_key } from '../utils/persistence';
 import PurchasedAddonsBox from '../v2-components/PurchasedAddonsBox';
 import BuyerConfigPanel from '../v2-components/BuyerConfigPanel';
-import { localizedLabel } from '../utils/product_i18n';
+import { displayConfigFieldLabel, localizedLabel, sortConfigFieldsLikeQrCard } from '../utils/product_i18n';
 import { Product } from '../types/products';
 import { CartItem } from '../types/carts';
 import { FEATURE_QR, FEATURE_POSTER } from '../utils/features';
@@ -102,17 +102,17 @@ function EventHomeContent({
   // Neden: Event add-on detayinda Event Title, Event Date, Welcome Message gibi alanlar net sekilde gorunsun.
   const resolveAddonConfigRows = (product: Product, cartItem: CartItem) => {
     const config = cartItem.buyer_config || {};
-    const fields = product.options?.config_fields || [];
+    const fields = sortConfigFieldsLikeQrCard(product.options?.config_fields || []);
     if (fields.length > 0) {
       return fields
         // footer_text bilgisini panel detayinda gecici olarak gizliyoruz.
-        .filter((field: { key: string }) => field.key !== 'footer_text')
-        .map((field: { key: string; label: string; label_uk?: string }) => ({
+        .filter((field) => field.key !== 'footer_text')
+        .map((field) => ({
           key: field.key,
-          label: localizedLabel(field),
+          label: displayConfigFieldLabel(field),
           value: config[field.key],
         }))
-        .filter((row: { value: unknown }) => String(row.value || '').trim());
+        .filter((row) => String(row.value || '').trim());
     }
     return Object.entries(config)
       .filter(([key, value]) => key !== 'design_id' && key !== 'footer_text' && String(value || '').trim())

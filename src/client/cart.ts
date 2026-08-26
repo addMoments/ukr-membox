@@ -24,17 +24,23 @@ const setCartQty = async (productId: string, quantity: number) => {
     saveCartState();
 }
 
+// Adet stepper'i olmayan add-on'lar (sesli misafir defteri, advertorial). Bunlar tek adet satilir.
+const SINGLE_QUANTITY_ADDON_IDS = new Set(['audioGuestbook', 'audiobook', 'advertorial', 'sponsored']);
+const PACK_QTY_STEP = 4;
+
 // Ne: Bir urunun satis adedi kurallarini okur: en az kac adet ve kacar kacar artar.
-// Nasil: products.options.min_qty / qty_step alanlarindan okur; alan yoksa ikisi de 1 doner,
-//        yani kural tanimlanmamis urunler bugunku davranisini aynen korur.
-// Neden: QR Card (printedBanner) 8'li bloklar halinde basiliyor (2.16). Kural "fiziksel urun"
-//        olmaya baglanamaz - welcome_board ve aesel de fiziksel ama tek adet satiliyor - bu
-//        yuzden yalnizca urun kaydindaki bu iki alandan okunuyor.
-const getQtyRule = (product?: Pick<Product, 'options'> | null): { min: number; step: number } => {
+// Nasil: Stepper'i olan add-on'lar (QR Card, Welcome Board, easel) her zaman 4/4 doner.
+//        Diger urunler options.min_qty / qty_step okur, yoksa 1.
+// Neden: Fiziksel paket add-on adedi 4'luk bloklarla satiliyor; satir fiyati adet * birim fiyattir.
+const getQtyRule = (product?: Pick<Product, 'options' | 'is_add_on' | 'id'> | null): { min: number; step: number } => {
     const toPositiveInt = (value: unknown) => {
         const parsed = typeof value === 'number' ? value : Number(value);
         return Number.isFinite(parsed) && parsed >= 1 ? Math.floor(parsed) : 1;
     };
+    const isPackAddon = Boolean(product?.is_add_on) && !SINGLE_QUANTITY_ADDON_IDS.has(product?.id || '');
+    if (isPackAddon) {
+        return { min: PACK_QTY_STEP, step: PACK_QTY_STEP };
+    }
     return {
         min: toPositiveInt(product?.options?.min_qty),
         step: toPositiveInt(product?.options?.qty_step),
@@ -45,8 +51,9 @@ const getQtyRule = (product?: Pick<Product, 'options'> | null): { min: number; s
 // Nasil: min'in altini min'e cikarir, ustunu min + (step'in tam kati) degerine yuvarlar.
 // Neden: Yalnizca stepper degil, eski cart state'inden geri yuklenen adetler de ayni kuraldan
 //        gecsin; aksi halde kural eklenmeden once sepete atilmis 1 adet QR Card 1 olarak kalir.
-const roundQtyToRule = (quantity: number, product?: Pick<Product, 'options'> | null): number => {
+const roundQtyToRule = (quantity: number, product?: Pick<Product, 'options' | 'is_add_on' | 'id'> | null): number => {
     const { min, step } = getQtyRule(product);
+    if (quantity <= 0) return 0;
     if (quantity <= min) return min;
     return min + Math.round((quantity - min) / step) * step;
 };
@@ -54,9 +61,9 @@ const roundQtyToRule = (quantity: number, product?: Pick<Product, 'options'> | n
 // Ne: Adet kurali tanimli urunler icin kullaniciya gosterilecek kisa uyari metnini uretir.
 // Nasil: getQtyRule sonucundan okur; kural yoksa (min ve step 1) bos string doner, boylece
 //        cagiran taraf ekstra kosul yazmadan render edebilir.
-// Neden: QR Card sepete 1 degil 8 adet giriyor ve "-" tusu 8'in altinda urunu siliyor (2.16);
+// Neden: Paket add-on sepete 1 degil 4 adet giriyor ve "-" tusu 4'un altinda urunu siliyor;
 //        bunu soylemeyen bir stepper kullaniciya bozuk gorunuyor.
-const getQtyRuleHint = (product?: Pick<Product, 'options'> | null): string => {
+const getQtyRuleHint = (product?: Pick<Product, 'options' | 'is_add_on' | 'id'> | null): string => {
     const { min, step } = getQtyRule(product);
     if (min <= 1 && step <= 1) return '';
     return textOr(
@@ -97,7 +104,7 @@ const loadCartState = async () => {
         const quantity = state[productId];
         const product = cartState.products.find(product => product.id === productId);
         if (product) {
-            cartState.cartItems.push({product_uid: productId, quantity});
+            cartState.cartItems.push({product_uid: productId, quantity: roundQtyToRule(quantity, product)});
         }
     });
 };
