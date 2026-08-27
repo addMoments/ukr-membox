@@ -799,7 +799,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
   const isPhysical = product.fullfillment_type === 'physical';
   const isAddOn = !!product.is_add_on;
   const showQuantityStepper = isAddOn && !SINGLE_QUANTITY_ADDON_IDS.has(product.id);
-  // Not: Paket add-on'lar (QR Card, Welcome Board) 4'er 4'er artar; satir fiyati adet * birim.
+  // Not: QR Card 4'er 4'er artar, diger add-on'lar (Welcome Board dahil) birer birer; satir fiyati adet * birim.
   const { min: minQty, step: qtyStep } = getQtyRule(product);
   const qtyRuleHint = getQtyRuleHint(product);
   const designs: Design[] = product.options?.designs || [];

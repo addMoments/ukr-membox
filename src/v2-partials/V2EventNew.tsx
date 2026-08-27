@@ -102,8 +102,8 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
 
   const addonClick = (id: string) => {
     if (id === SPONSORED_ADDON_ID && isPremiumSelected && isPremiumSponsoredIncluded) return;
-    // Not: Add-on sepete 1 adet degil, urunun min_qty degeriyle giriyor. Paket add-on'larda
-    // (QR Card, Welcome Board) ilk secim 4 oluyor.
+    // Not: Add-on sepete 1 adet degil, urunun min_qty degeriyle giriyor. QR Card'da
+    // ilk secim 4 oluyor, Welcome Board dahil digerlerinde 1.
     setCartQty(id, getCartQty(id) > 0 ? 0 : getQtyRule(findProduct(id)).min);
   };
 

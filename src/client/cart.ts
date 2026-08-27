@@ -26,18 +26,21 @@ const setCartQty = async (productId: string, quantity: number) => {
 
 // Adet stepper'i olmayan add-on'lar (sesli misafir defteri, advertorial). Bunlar tek adet satilir.
 const SINGLE_QUANTITY_ADDON_IDS = new Set(['audioGuestbook', 'audiobook', 'advertorial', 'sponsored']);
+// 4'luk bloklar halinde basilan add-on'lar. Yalnizca QR kart; Welcome Board birer birer satilir.
+const PACK_QTY_ADDON_IDS = new Set(['printedBanner']);
 const PACK_QTY_STEP = 4;
 
 // Ne: Bir urunun satis adedi kurallarini okur: en az kac adet ve kacar kacar artar.
-// Nasil: Stepper'i olan add-on'lar (QR Card, Welcome Board, easel) her zaman 4/4 doner.
+// Nasil: Yalnizca PACK_QTY_ADDON_IDS icindeki add-on'lar (QR Card) 4/4 doner.
 //        Diger urunler options.min_qty / qty_step okur, yoksa 1.
-// Neden: Fiziksel paket add-on adedi 4'luk bloklarla satiliyor; satir fiyati adet * birim fiyattir.
+// Neden: QR kart tek sayfaya 4 adet basildigi icin 4'luk bloklarla satiliyor; Welcome Board
+//        gibi tek parca basilan add-on'larda boyle bir kisit yok, 1 adet de satilabiliyor.
 const getQtyRule = (product?: Pick<Product, 'options' | 'is_add_on' | 'id'> | null): { min: number; step: number } => {
     const toPositiveInt = (value: unknown) => {
         const parsed = typeof value === 'number' ? value : Number(value);
         return Number.isFinite(parsed) && parsed >= 1 ? Math.floor(parsed) : 1;
     };
-    const isPackAddon = Boolean(product?.is_add_on) && !SINGLE_QUANTITY_ADDON_IDS.has(product?.id || '');
+    const isPackAddon = Boolean(product?.is_add_on) && PACK_QTY_ADDON_IDS.has(product?.id || '');
     if (isPackAddon) {
         return { min: PACK_QTY_STEP, step: PACK_QTY_STEP };
     }
