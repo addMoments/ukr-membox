@@ -722,7 +722,10 @@
   color: #1A1D21;
 }
 
-/* Aciklama admin panelinde satir sonlariyla yazilabiliyor; pre-line onlari koruyor. */
+/* Aciklama admin panelinde satir sonlariyla yazilabiliyor; pre-line onlari koruyor.
+   text-align App.css'teki global `p { text-align: center }` kuralini eziyor:
+   dar kartlarda ortalama dogru duruyor ama tam genislik seritte satirlar
+   ortadan dagiliyor. */
 .event-new-sponsored-description {
   margin: 0;
   max-width: 62ch;
@@ -731,6 +734,7 @@
   line-height: 1.65;
   color: #6b7280;
   white-space: pre-line;
+  text-align: left;
 }
 
 .event-new-sponsored-bullets {
