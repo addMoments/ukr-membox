@@ -439,7 +439,10 @@
             "step2Text": "QR cards, welcome board, audio guestbook and more.",
             "step3Title": "Complete your order",
             "step3Text": "Pay once and your event is ready to share with guests."
-        }
+        },
+        "sponsoredHeading": "For professionals and event organizers",
+        "sponsoredAdd": "Add to order",
+        "sponsoredAdded": "Added"
     },
     "addons": {
         "purchasedTitle": "Your Shipments",

@@ -80,7 +80,14 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
       }
       return aIdx - bIdx;
     });
-  const addOns = cart.products.filter(p => p.is_add_on && p.is_enabled);
+  // Ne: Reklam alanini diger add-on'lardan ayirir.
+  // Nasil: Grid yalnizca kalan add-on'lari basar; reklam blogu kendi basligi
+  //        altinda, grid'in altinda tam genislikte render edilir.
+  // Neden: Yeri API'nin dondurdugu siraya birakilmisti; ayri tutmak bolumun
+  //        listenin sonunda kalmasini garanti ediyor.
+  const allAddOns = cart.products.filter(p => p.is_add_on && p.is_enabled);
+  const addOns = allAddOns.filter(p => p.id !== SPONSORED_ADDON_ID);
+  const sponsoredAddOn = allAddOns.find(p => p.id === SPONSORED_ADDON_ID);
 
   const { total, itemCount } = cart;
 
@@ -237,28 +244,45 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
             </div>
 
             <div className="event-new-addons-grid">
-              {addOns.map((addOn) => {
-                const isSponsoredAdvertorial = addOn.id === SPONSORED_ADDON_ID;
-                return (
-                  <AddOnCard
-                    key={addOn.id}
-                    id={addOn.id}
-                    displayName={resolveDisplayTexts(addOn).name}
-                    displayDescription={resolveDisplayTexts(addOn).description}
-                    price={addOn.price}
-                    quantity={getCartQty(addOn.id)}
-                    icon={addOn.options?.icon}
-                    image={addOn.options?.image}
-                    mobileImage={addOn.options?.mobile_image}
-                    qtyRuleHint={getQtyRuleHint(addOn)}
-                    isSponsoredAdvertorial={isSponsoredAdvertorial}
-                    isSelected={getCartQty(addOn.id) > 0}
-                    isDisabled={isSponsoredAdvertorial && isPremiumSelected && isPremiumSponsoredIncluded}
-                    onToggle={() => addonClick(addOn.id)}
-                  />
-                );
-              })}
+              {addOns.map((addOn) => (
+                <AddOnCard
+                  key={addOn.id}
+                  id={addOn.id}
+                  displayName={resolveDisplayTexts(addOn).name}
+                  displayDescription={resolveDisplayTexts(addOn).description}
+                  price={addOn.price}
+                  quantity={getCartQty(addOn.id)}
+                  icon={addOn.options?.icon}
+                  image={addOn.options?.image}
+                  mobileImage={addOn.options?.mobile_image}
+                  qtyRuleHint={getQtyRuleHint(addOn)}
+                  isSelected={getCartQty(addOn.id) > 0}
+                  onToggle={() => addonClick(addOn.id)}
+                />
+              ))}
             </div>
+          </section>
+        )}
+
+        {sponsoredAddOn && (
+          <section className="event-new-section event-new-section-border">
+            <p className="event-new-sponsored-heading">
+              {textOr(
+                'paywall.sponsoredHeading',
+                'For professionals and event organizers',
+                'Для професіоналів та організаторів подій',
+              )}
+            </p>
+            <SponsoredAddOnBand
+              displayName={resolveDisplayTexts(sponsoredAddOn).name}
+              displayDescription={resolveDisplayTexts(sponsoredAddOn).description}
+              displayBullets={resolveDisplayBullets(sponsoredAddOn)}
+              price={sponsoredAddOn.price}
+              icon={sponsoredAddOn.options?.icon}
+              isSelected={getCartQty(SPONSORED_ADDON_ID) > 0}
+              isDisabled={isPremiumSelected && isPremiumSponsoredIncluded}
+              onToggle={() => addonClick(SPONSORED_ADDON_ID)}
+            />
           </section>
         )}
       </main>
@@ -380,6 +404,76 @@ function PackageCard({ id, displayName, displayDescription, displayBullets, pric
   );
 }
 
+interface SponsoredAddOnBandProps {
+  displayName?: string;
+  displayDescription?: string;
+  displayBullets?: string[];
+  price: number;
+  icon?: string;
+  isSelected: boolean;
+  isDisabled?: boolean;
+  onToggle: () => void;
+}
+
+// Ne: Reklam alani add-on'unu tam genislikte, metne dayali bir seritte gosterir.
+// Nasil: Basligi, aciklamayi ve maddeleri urun kaydindaki display_* alanlarindan
+//        alir; hicbir gorsel kullanmaz.
+// Neden: Blok eskiden tek bir PNG'ydi. Metin gorselin icine gomulu oldugu icin
+//        Ukraynaca yazi Ingilizce ziyaretciye de gorunuyordu ve tek kelime
+//        degistirmek tasarimci gerektiriyordu. Alanlar zaten iki dilde tutuluyor.
+function SponsoredAddOnBand({ displayName, displayDescription, displayBullets = [], price, icon, isSelected, isDisabled = false, onToggle }: SponsoredAddOnBandProps) {
+  const bandClass = [
+    'event-new-sponsored-band',
+    isSelected ? 'selected' : '',
+    isDisabled ? 'disabled' : '',
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div className={bandClass} onClick={isDisabled ? undefined : onToggle}>
+      <div className="event-new-sponsored-mark" aria-hidden="true">
+        {icon ? <ProductIcon icon={icon} /> : <i className="fa-solid fa-bullhorn" />}
+      </div>
+
+      <div className="event-new-sponsored-body">
+        <h3 className="event-new-sponsored-name">{displayName}</h3>
+        {displayDescription && (
+          <p className="event-new-sponsored-description">{displayDescription}</p>
+        )}
+        {displayBullets.length > 0 && (
+          <ul className="event-new-sponsored-bullets">
+            {displayBullets.map((bullet, index) => (
+              <li key={index}>
+                <span className="event-new-sponsored-tick" aria-hidden="true">✓</span>
+                {bullet}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="event-new-sponsored-side">
+        {/* Not: price API'den string gelebiliyor, bu yuzden bicimlendirilmeden basiliyor. */}
+        <span className="event-new-sponsored-price">₴{price}</span>
+        <span className="event-new-sponsored-action">
+          <span className="event-new-sponsored-action-label">
+            {isSelected
+              ? textOr('paywall.sponsoredAdded', 'Added', 'Додано')
+              : textOr('paywall.sponsoredAdd', 'Add to order', 'Додати до замовлення')}
+          </span>
+          <input
+            type="checkbox"
+            className="event-new-checkbox"
+            checked={isSelected}
+            onChange={isDisabled ? undefined : onToggle}
+            disabled={isDisabled}
+            style={{ pointerEvents: 'none' }}
+          />
+        </span>
+      </div>
+    </div>
+  );
+}
+
 interface AddOnCardProps {
   id: string;
   displayName?: string;
@@ -390,60 +484,21 @@ interface AddOnCardProps {
   image?: string;
   mobileImage?: string;
   qtyRuleHint?: string;
-  isSponsoredAdvertorial?: boolean;
   isSelected: boolean;
   isDisabled?: boolean;
   onToggle: () => void;
 }
 
-function AddOnCard({ id, displayName, displayDescription, price, quantity = 0, icon, image, mobileImage, qtyRuleHint = '', isSponsoredAdvertorial = false, isSelected, isDisabled = false, onToggle }: AddOnCardProps) {
+function AddOnCard({ id, displayName, displayDescription, price, quantity = 0, icon, image, mobileImage, qtyRuleHint = '', isSelected, isDisabled = false, onToggle }: AddOnCardProps) {
   const cardClass = [
     'event-new-addon-card',
     image ? 'event-new-addon-card-image' : '',
-    isSponsoredAdvertorial ? 'event-new-addon-card-sponsored' : '',
     isSelected ? 'selected' : '',
     isDisabled ? 'disabled' : '',
   ].filter(Boolean).join(' ');
   const resolvedName = displayName || id;
   const resolvedDescription = displayDescription || '';
   const hasMobileImage = Boolean(mobileImage);
-
-  // Ne: Sponsored Ad Slot add-on'u icin desktop'ta banner'a donusecek ozel markup'u render eder.
-  // Nasil: Desktop icin options.image, mobil icin varsa options.mobile_image yoksa image fallback'ini picture ile kullanir.
-  // Neden: Admin panelden web ve mobil gorseller ayri yonetilebilirken advertorial add-on'u webde tum satiri kaplayabilsin.
-  if (isSponsoredAdvertorial) {
-    return (
-      <div className={cardClass} onClick={isDisabled ? undefined : onToggle}>
-        {image ? (
-          <div className="event-new-sponsored-addon-image">
-            <picture>
-              {hasMobileImage && <source media="(max-width: 767px)" srcSet={mobileImage} />}
-              <img src={image} alt={resolvedName} />
-            </picture>
-          </div>
-        ) : (
-          <div className="event-new-sponsored-addon-placeholder">
-            {icon ? <ProductIcon icon={icon} /> : <i className="fa-solid fa-bullhorn" />}
-            <div>
-              <h3 className="event-new-addon-name">{resolvedName}</h3>
-              <p className="event-new-addon-description">{resolvedDescription}</p>
-            </div>
-          </div>
-        )}
-        <div className="event-new-sponsored-addon-footer">
-          <span className="event-new-addon-price">₴{price}</span>
-          <input
-            type="checkbox"
-            className="event-new-checkbox"
-            checked={isSelected}
-            onChange={isDisabled ? undefined : onToggle}
-            disabled={isDisabled}
-            style={{ pointerEvents: 'none' }}
-          />
-        </div>
-      </div>
-    );
-  }
 
   const inner = (
     <>

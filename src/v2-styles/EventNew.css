@@ -626,78 +626,204 @@
   margin-top: auto;
 }
 
-/* Sponsored Ad Slot special add-on */
-.event-new-addon-card-sponsored {
-  padding: 0;
-  overflow: hidden;
+/* Reklam alani: kendi basligi altinda duran, metne dayali tam genislik serit.
+   Eskiden tek bir PNG basiliyordu; metin artik urun kaydindan geliyor. */
+.event-new-sponsored-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 20px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b7280;
 }
 
-.event-new-sponsored-addon-image {
-  width: 100%;
-  overflow: hidden;
-  background: transparent;
+.event-new-sponsored-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
 }
 
-.event-new-sponsored-addon-image picture,
-.event-new-sponsored-addon-image img {
-  width: 100%;
-  height: 100%;
+.event-new-sponsored-band {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 36px 40px;
+  background: white;
+  border: 1px solid #f0f1f3;
+  border-radius: 28px;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Sol ust kosede marka renginden gelen yumusak bir parlama; blogu diger
+   kartlardan ayiriyor ama karti sari bir bloga cevirmiyor. */
+.event-new-sponsored-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 150% at 0% 0%, rgba(210, 232, 35, 0.22) 0%, rgba(210, 232, 35, 0.06) 30%, rgba(210, 232, 35, 0) 55%);
+  pointer-events: none;
+}
+
+.event-new-sponsored-band > * {
+  position: relative;
+}
+
+.event-new-sponsored-band.selected {
+  border-color: #D2E823;
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
+}
+
+.event-new-sponsored-band.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Baslikla optik olarak hizalansin diye yukari sabitleniyor; ortalandiginda
+   uzun aciklamalarda isaret asagi kayip basliktan kopuyor. */
+.event-new-sponsored-mark {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: 2px;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: #D2E823;
+  color: #191B0E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.event-new-sponsored-mark img {
+  width: 30px;
+  height: 30px;
   display: block;
 }
 
-.event-new-sponsored-addon-image img {
-  object-fit: cover;
-  object-position: center top;
-  transform: translateY(-7%) scaleY(1.08);
-  transform-origin: center top;
+.event-new-sponsored-body {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.event-new-sponsored-addon-placeholder {
-  min-height: 180px;
-  padding: 32px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  background: #f8f7ea;
-}
-
-.event-new-sponsored-addon-placeholder > i {
-  font-size: 42px;
+.event-new-sponsored-name {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   color: #1A1D21;
 }
 
-.event-new-sponsored-addon-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 28px;
-  border-top: 1px solid rgba(26, 29, 33, 0.06);
-  background: #fff;
+/* Aciklama admin panelinde satir sonlariyla yazilabiliyor; pre-line onlari koruyor. */
+.event-new-sponsored-description {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.65;
+  color: #6b7280;
+  white-space: pre-line;
 }
 
-@media (min-width: 768px) {
-  .event-new-addon-card-sponsored {
-    grid-column: 1 / -1;
-    border-radius: 20px;
-  }
+.event-new-sponsored-bullets {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+}
 
-  .event-new-sponsored-addon-image {
-    height: auto;
-    aspect-ratio: 7 / 1;
-  }
+.event-new-sponsored-bullets li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1A1D21;
+}
+
+.event-new-sponsored-tick {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #D2E823;
+  color: #191B0E;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-new-sponsored-side {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.event-new-sponsored-price {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  color: #1A1D21;
+  font-variant-numeric: tabular-nums;
+}
+
+.event-new-sponsored-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.event-new-sponsored-action-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1D21;
+  white-space: nowrap;
 }
 
 @media (max-width: 767px) {
-  .event-new-addon-card-sponsored {
-    border-radius: 32px;
+  .event-new-sponsored-band {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 22px;
+    padding: 28px 24px;
+    border-radius: 24px;
   }
 
-  .event-new-sponsored-addon-image {
-    height: 192px;
+  .event-new-sponsored-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    font-size: 22px;
   }
 
-  .event-new-sponsored-addon-footer {
-    padding: 24px 32px;
+  .event-new-sponsored-name {
+    font-size: 22px;
+  }
+
+  .event-new-sponsored-side {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid #f3f4f6;
+  }
+
+  .event-new-sponsored-price {
+    font-size: 26px;
   }
 }
 
