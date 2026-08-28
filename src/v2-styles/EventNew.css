@@ -372,16 +372,23 @@
   margin: 0;
 }
 
+/* Kartin sag ust kosesinde duran serit. RECOMMENDED rozeti ust kenarda
+   ortalanmis oldugu icin ikisi cakismiyor; bu serit dolgusuz tonda kalarak
+   o rozetin onune gecmiyor. */
 .event-new-package-fee {
-  display: block;
-  margin: 2px 0 0;
-  padding: 0;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-align: left;
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: #f4f9dc;
+  border: 1px solid rgba(210, 232, 35, 0.6);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #c5c9ce;
+  white-space: nowrap;
+  color: #5b6b1f;
 }
 
 .event-new-package-price-amount {

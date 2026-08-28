@@ -367,6 +367,11 @@ function PackageCard({ id, displayName, displayDescription, displayBullets, pric
       {tagText && (
         <div className="event-new-package-badge">{tagText}</div>
       )}
+      {/* Fiyatin altindaki soluk etiket yerine kartin sag ust kosesinde serit:
+          musteri tek seferlik odemenin daha goz onunde olmasini istedi. */}
+      <span className="event-new-package-fee">
+        {textOr('paywall.oneTimeFee', 'One time fee', 'Разовий платіж')}
+      </span>
       <div className="event-new-package-header">
         <h3 className="event-new-package-name">{resolvedName}</h3>
         <div className="event-new-package-price-block">
@@ -374,9 +379,6 @@ function PackageCard({ id, displayName, displayDescription, displayBullets, pric
             <span className="event-new-package-price-amount">₴{price}</span>
             <span className="event-new-package-price-unit">{"UAH"}</span>
           </div>
-          <p className="event-new-package-fee">
-            {textOr('paywall.oneTimeFee', 'One time fee', 'Разовий платіж')}
-          </p>
         </div>
         <p className="event-new-package-description">{resolvedDescription}</p>
       </div>
