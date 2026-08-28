@@ -119,22 +119,10 @@
   margin-bottom: 20px;
 }
 
-.event-new-intro-title {
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1.2;
-  color: #1A1D21;
-  margin: 0 0 14px;
-  max-width: 760px;
-}
-
+/* Tipografisi asagidaki ortak baslik/alt baslik kuralindan geliyor;
+   burada yalnizca bu bloga ozel bosluk kaliyor. */
 .event-new-intro-text {
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.7;
-  color: #6b7280;
   margin: 0 0 20px;
-  max-width: 760px;
 }
 
 .event-new-intro-text + .event-new-intro-badge {
@@ -189,8 +177,14 @@
     padding-top: 72px;
   }
 
-  .event-new-intro-title {
+  .event-new-intro-title,
+  .event-new-section-title {
     font-size: 40px;
+  }
+
+  .event-new-intro-text,
+  .event-new-section-subtitle {
+    font-size: 18px;
   }
 
   .event-new-intro-steps {
@@ -223,32 +217,32 @@
   }
 }
 
+/* Sayfadaki uc bolum basligi (giris, paketler, ekstralar) tek tipografiyi
+   paylasiyor; alt basliklar da kendi aralarinda ayni. */
+.event-new-intro-title,
 .event-new-section-title {
   font-size: 32px;
   font-weight: 800;
+  line-height: 1.2;
   color: #1A1D21;
   margin: 0 0 12px;
+  max-width: 760px;
+  text-align: left;
+}
+
+/* text-align, App.css'teki global `p { text-align: center }` kuralini eziyor. */
+.event-new-intro-text,
+.event-new-section-subtitle {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.7;
+  color: #6b7280;
+  max-width: 760px;
+  text-align: left;
 }
 
 .event-new-section-subtitle {
-  font-size: 16px;
-  color: #6b7280;
-  font-weight: 500;
   margin: 0;
-}
-
-.event-new-section-subtitle-emphasis {
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.5;
-  color: #1A1D21;
-  max-width: 640px;
-}
-
-@media (min-width: 768px) {
-  .event-new-section-subtitle-emphasis {
-    font-size: 20px;
-  }
 }
 
 /* Billing Toggle */

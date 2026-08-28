@@ -209,7 +209,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
           <div className="event-new-section-header">
             <div>
               <h2 className="event-new-section-title">{t('paywall.corePackages')}</h2>
-              <p className="event-new-section-subtitle event-new-section-subtitle-emphasis">{t('paywall.corePackagesSubtitle')}</p>
+              <p className="event-new-section-subtitle">{t('paywall.corePackagesSubtitle')}</p>
             </div>
           </div>
 
