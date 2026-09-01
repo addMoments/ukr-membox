@@ -20,7 +20,7 @@ function Recover() {
           <div style={{ maxWidth: 480, margin: '80px auto', textAlign: 'center', fontFamily: 'Poppins, sans-serif', padding: '0 24px' }}>
             <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12 }}>Check your email</h2>
             <p style={{ color: '#555', lineHeight: 1.6 }}>
-              If an account exists for that email address, we've sent a password reset link. It expires in 15 minutes.
+              If an account exists for that email address, we've sent a password reset link. It expires in 60 minutes.
             </p>
           </div>
         ) : (
