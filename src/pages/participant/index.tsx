@@ -32,6 +32,9 @@ function Participant() {
   const [participantName, setParticipantName] = useState('');
   const [showPackageLimitError, setShowPackageLimitError] = useState(false);
   const [eventClosedMessage, setEventClosedMessage] = useState('');
+  // Beklenmeyen bootstrap hatasi: eskiden /404'e yonlendiriliyordu, artik tekrar
+  // denenebilir bir hata ekrani gosterilir. Bkz. asagidaki catch blogu.
+  const [bootstrapFailed, setBootstrapFailed] = useState(false);
   const [advertorial, setAdvertorial] = useState<AdvertorialResponse | null>(null);
   const langCode = t('lang_code');
   const resolveFallback = (rawValue: string, key: string, enText: string, ukText: string) => {
@@ -64,12 +67,31 @@ function Participant() {
     'Для цієї події вичерпано ліміт нових учасників.'
   );
   const packageLimitActionText = langCode === 'uk' ? 'Звʼязатися з підтримкою' : 'Contact help center';
+  const loadFailedTitle = resolveFallback(
+    t('guestAccessError.loadFailedTitle'),
+    'guestAccessError.loadFailedTitle',
+    'Could not load the event',
+    'Не вдалося завантажити подію'
+  );
+  const loadFailedMessage = resolveFallback(
+    t('guestAccessError.loadFailedMessage'),
+    'guestAccessError.loadFailedMessage',
+    'Something went wrong while loading this page. Please check your connection and try again.',
+    'Під час завантаження сторінки сталася помилка. Перевірте зʼєднання та спробуйте ще раз.'
+  );
+  const loadFailedAction = resolveFallback(
+    t('guestAccessError.loadFailedAction'),
+    'guestAccessError.loadFailedAction',
+    'Try again',
+    'Спробувати ще раз'
+  );
 
   const navigate = useNavigate();
 
   const runBootstrap = useCallback(async () => {
       setShowPackageLimitError(false);
       setEventClosedMessage('');
+      setBootstrapFailed(false);
 
       try {
         if (!packedUid) {
@@ -110,10 +132,17 @@ function Participant() {
           setEventClosedMessage(getEventClosedMessage(err) || eventClosedDefaultMessage);
           return;
         }
-        // Ne: Beklenmeyen bootstrap hatalarini konsola yazar.
-        // Neden: Backend 500'leri sessizce 404 sayfasina donusup teshisi imkansiz kiliyordu.
+        // Ne: Beklenmeyen bootstrap hatalarinda tekrar denenebilir bir hata ekrani gosterir.
+        // Nasil: navigate("/404") yerine bootstrapFailed state'i set edilir; ekrandaki
+        //        buton runBootstrap'i yeniden calistirir.
+        // Neden: Eskiden her hata /404'e gidiyordu; NotFound da URL'e rnf=1 ekleyip tam
+        //        sayfa reload yaptigi icin .htaccess SPA fallback'ini atliyor ve kullanici
+        //        gercek WordPress 404'unde kaliyordu. Gecici bir ag/backend hatasi boylece
+        //        kalici "sayfa yok" gibi gorunuyor, kullanici da geri donemiyordu.
+        //        Event'in gercekten bulunmadigi durum yukarida ayrica ele aliniyor ve
+        //        orada /404 dogru davranis oldugu icin oldugu gibi birakildi.
         console.error('[guest-bootstrap] failed', err);
-        navigate("/404");
+        setBootstrapFailed(true);
       }
     }, [eventClosedDefaultMessage, navigate, packedUid, uid]);
 
@@ -164,6 +193,18 @@ function Participant() {
     const theme = event.settings?.colors;
     if (now < start) return <V2GuestGate state="not-started" event={event} theme={theme} />;
     if (now >= end)  return <V2GuestGate state="ended"       event={event} theme={theme} />;
+  }
+
+  if (bootstrapFailed) {
+    return (
+      <GuestAccessErrorScreen
+        title={loadFailedTitle}
+        message={loadFailedMessage}
+        actionText={loadFailedAction}
+        onActionClick={() => { runBootstrap(); }}
+        theme={event.settings?.colors || defaultGuestTheme}
+      />
+    );
   }
 
   if (showPackageLimitError) {
