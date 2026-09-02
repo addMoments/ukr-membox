@@ -97,6 +97,7 @@ export default function CheckoutPending() {
             message: `A signup link has been sent to ${data.email}`,
             subtext: 'Click the link in your inbox or the button below to sign up.',
             buttons: [{ text: 'Sign up now', href: data.signup_url }],
+            link: data.signup_url,
             image: 'https://addmoments.com.ua/ui/assets/checkmark.svg',
           });
         }

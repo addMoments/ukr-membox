@@ -10,6 +10,10 @@ export interface MessageScreen {
   buttons?: MessageScreenButton[] | null;
   image?: string | null;
   warning?: string | null;
+  // Ne: Ekranda kopyalanabilir metin ve QR kod olarak gosterilecek kisisel link.
+  // Nasil: NoticeScreen bu degerden QR'i tarayicida uretir, payload'a data-URI konmaz.
+  // Neden: Aktivasyon maili gelmeyen musteri linke ekrandan da ulasabilsin.
+  link?: string | null;
 };
 
 export const sendToMsg = (msg: MessageScreen) => {

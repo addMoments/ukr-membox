@@ -661,6 +661,13 @@
             "allSet": "You have everything we offer — you are all set."
         }
     },
+    "notice": {
+        "linkTitle": "Your personal link",
+        "linkDesc": "Email not arrived? Open this link, or scan the QR code with your phone.",
+        "qrAlt": "QR code for your personal link",
+        "copy": "Copy",
+        "copied": "Copied"
+    },
     "extendStorage": {
         "modalTitle": "Your event will be deleted in 14 days",
         "modalMessage": "After the storage period ends, the event and all of its data will be removed from the system. You can extend it for one more month using the button below. NOTE: Extension is a one-time only option.",
