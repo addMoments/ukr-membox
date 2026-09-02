@@ -48,6 +48,21 @@ const updateCurrKey = async ()=>{
     }
 
     keyinitPromise = (async () => {
+        // Ne: /guest/... altinda hesap token'i ("tkn") olsa bile her zaman event'e ozel
+        //     misafir token'i kullanilir.
+        // Neden: Giris yapmis biri QR okuttugunda tum pgREST istekleri role=auth ile
+        //        gidiyordu. uploads/participants RLS politikalari role=auth icin
+        //        "event admini ol" sarti aradigindan sorgular hata vermeden bos donuyor,
+        //        participant bootstrap de bos yaniti navigate("/404")'e ceviriyordu --
+        //        yani QR'i okutan uye gercek WordPress 404'unu goruyordu. Misafir yuzeyi
+        //        misafir kimligiyle konusmali; hesap token'i silinmez, sadece bu sayfada
+        //        kullanilmaz.
+        const guestKey = isGuest() ? guestPackedEventUid() : "";
+        if (guestKey) {
+            currKey = guestKey;
+            return;
+        }
+
         let hasAuthToken = false;
         let tkn = null;
         try {
@@ -129,7 +144,12 @@ export const fetch = async (url: string, options: RequestInit = {}, config: { bl
         }
         // Reset the key cache so the next request re-reads the stored token
         keyinitPromise = null;
-        currKey = "tkn";
+        // Misafir sayfasinda token event anahtarina yazildi; currKey'i kosulsuz "tkn"
+        // yapmak hem yanlis anahtari isaret ediyor hem de yukaridaki 401-tokensiz-tekrar
+        // dusumunu (currKey !== "tkn") sessizce devre disi birakiyordu.
+        if (!isGuestVar) {
+            currKey = "tkn";
+        }
     }
 
     // Handle goto redirects
