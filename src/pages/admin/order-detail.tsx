@@ -396,6 +396,61 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
   );
 }
 
+// Ne: Siparisin aktivasyon (signup) mailini yeniden gonderen kart.
+// Nasil: Admin ucuna POST atar, sonucu satir ici bir mesajla gosterir.
+// Neden: Mail alicinin tarafinda kaybolabiliyor; destegin elinde baska bir yol yoktu.
+function ResendActivationCard({ purchaseUid, buyerEmail }: { purchaseUid: string; buyerEmail: string }) {
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const resend = async () => {
+    setSending(true);
+    setResult(null);
+    try {
+      const res = await authFetch(`${SERV_ROOT}/api/admin/orders/${purchaseUid}/resend-activation`, { method: 'POST' });
+      if (!res.ok) {
+        // Backend kisa ve okunabilir bir sebep donduruyor (odeme onaylanmadi, mail yok, vb).
+        const reason = (await res.text()).trim();
+        setResult({ ok: false, text: reason || at('admin.orderDetail.resendFailed', 'Could not send', 'Не вдалося надіслати') });
+        return;
+      }
+      setResult({
+        ok: true,
+        text: at('admin.orderDetail.resendSent', 'Sent to', 'Надіслано на') + ' ' + buyerEmail,
+      });
+    } catch {
+      setResult({ ok: false, text: at('admin.orderDetail.resendFailed', 'Could not send', 'Не вдалося надіслати') });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="admin-resend-activation">
+      <div className="admin-resend-activation-text">
+        <div className="admin-order-account-title">
+          {at('admin.orderDetail.resendTitle', 'Activation email', 'Лист активації')}
+        </div>
+        <p className="admin-resend-activation-hint">
+          {at(
+            'admin.orderDetail.resendHint',
+            'Sends the account setup link to the buyer again. Use it when the original email never arrived.',
+            'Повторно надсилає покупцю посилання для створення облікового запису. Скористайтеся, якщо початковий лист не надійшов.',
+          )}
+        </p>
+        {result && (
+          <p className={result.ok ? 'admin-resend-activation-ok' : 'admin-resend-activation-err'}>{result.text}</p>
+        )}
+      </div>
+      <button type="button" className="admin-save-btn" onClick={resend} disabled={sending || !purchaseUid}>
+        {sending
+          ? at('admin.orderDetail.resendSending', 'Sending…', 'Надсилання…')
+          : at('admin.orderDetail.resend', 'Resend', 'Надіслати ще раз')}
+      </button>
+    </div>
+  );
+}
+
 function AdminOrderDetail() {
   const { uid } = useParams<{ uid: string }>();
   const [order, setOrder] = useState<OrderDetail | null>(null);
@@ -473,6 +528,8 @@ function AdminOrderDetail() {
                 </div>
               )}
             </div>
+
+            <ResendActivationCard purchaseUid={uid || ''} buyerEmail={order.buyer_email} />
 
             {isSuperAdmin && order.payment_summary && <PaymentSummaryCard summary={order.payment_summary} />}
 

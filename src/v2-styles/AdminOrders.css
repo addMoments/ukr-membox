@@ -752,3 +752,42 @@
     width: 100%;
   }
 }
+
+/* Aktivasyon mailini yeniden gonderme karti */
+.admin-resend-activation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.admin-resend-activation-text {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.admin-resend-activation-hint {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.admin-resend-activation-ok {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1A7F37;
+}
+
+.admin-resend-activation-err {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b42318;
+}
