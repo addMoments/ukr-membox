@@ -56,6 +56,7 @@ const AdminOrders = lazy(() => import('./pages/admin/orders'));
 const AdminOrderDetail = lazy(() => import('./pages/admin/order-detail'));
 const AdminProducts = lazy(() => import('./pages/admin/products'));
 const AdminPanelAdmins = lazy(() => import('./pages/admin/panel-admins'));
+const AdminEvents = lazy(() => import('./pages/admin/events'));
 const AdminPromos = lazy(() => import('./pages/admin/promos'));
 const AdminPromoReport = lazy(() => import('./pages/admin/promo-report'));
 const AdminPartnerships = lazy(() => import('./pages/admin/partnerships'));
@@ -135,6 +136,7 @@ function AppContent() {
           <Route path="/admin/orders/:uid" element={<AdminRouteGuard><AdminOrderDetail /></AdminRouteGuard>} />
           <Route path="/admin/products" element={<AdminRouteGuard requireSuperAdmin><AdminProducts /></AdminRouteGuard>} />
           <Route path="/admin/panel-admins" element={<AdminRouteGuard requireSuperAdmin><AdminPanelAdmins /></AdminRouteGuard>} />
+          <Route path="/admin/events" element={<AdminRouteGuard requireSuperAdmin><AdminEvents /></AdminRouteGuard>} />
           <Route path="/admin/promos" element={<AdminRouteGuard requireSuperAdmin><AdminPromos /></AdminRouteGuard>} />
           <Route path="/admin/promos/report" element={<AdminRouteGuard requireSuperAdmin><AdminPromoReport /></AdminRouteGuard>} />
           <Route path="/admin/partnerships" element={<AdminRouteGuard requireSuperAdmin><AdminPartnerships /></AdminRouteGuard>} />

@@ -53,7 +53,7 @@ RewriteCond %{QUERY_STRING} !(^|&)rnf=1(&|$)
 RewriteRule ^(event|events|guest|checkout|payment|signin|recover|notice|signup|signout|reset-password)(?:/(.*))?$ /reactApp.html [L]
 # 3.a React admin panel rotalari (bare /admin ve /admin/ WordPress'te /wp-admin/ kisayolu, dokunulmuyor)
 RewriteCond %{QUERY_STRING} !(^|&)rnf=1(&|$)
-RewriteRule ^admin/(orders|products|panel-admins|promos|partnerships|no-access)(?:/(.*))?$ /reactApp.html [L]
+RewriteRule ^admin/(orders|products|panel-admins|promos|partnerships|events|no-access)(?:/(.*))?$ /reactApp.html [L]
 # 4. Trailing slash redirect for WordPress (excludes React routes and error docs)
 # Generic trailing-slash redirect (excludes React routes and error docs)
 RewriteCond %{REQUEST_URI} !/$
@@ -63,7 +63,7 @@ RewriteCond %{REQUEST_URI} !/$
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/(event|events|guest|checkout|payment|recover|notice|signup|signout|reset-password)
-RewriteCond %{REQUEST_URI} !^/admin/(orders|products|panel-admins|promos|partnerships|no-access)
+RewriteCond %{REQUEST_URI} !^/admin/(orders|products|panel-admins|promos|partnerships|events|no-access)
 RewriteCond %{REQUEST_URI} !^/404\.shtml
 RewriteRule ^(.+)$ /$1/ [R=301,L]
 </IfModule>

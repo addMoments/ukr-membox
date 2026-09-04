@@ -183,6 +183,10 @@ function AdminOrders() {
                   <i className="fa-solid fa-user-shield" />
                   {at('admin.nav.panelAdmins', 'Panel Admins', 'Адміністратори панелі')}
                 </Link>
+                <Link to="/admin/events" className="admin-page-header-link">
+                  <i className="fa-solid fa-calendar-days" />
+                  {at('admin.nav.events', 'Events', 'Події')}
+                </Link>
                 <Link to="/admin/promos" className="admin-page-header-link">
                   <i className="fa-solid fa-ticket" />
                   {at('admin.nav.promos', 'Promos', 'Промокоди')}
