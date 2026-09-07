@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import '../styles/message.css';
-import { MessageScreen } from '../types/mesage-screen';
+import { decodeMessageScreen, MessageScreen } from '../types/mesage-screen';
 import V2Header from '../v2-components/V2Header';
 import V2Footer from '../v2-components/V2Footer';
 import NoticeScreen from '../v2-partials/notice';
@@ -17,7 +17,7 @@ export default function Message() {
 
     try {
       const b64Msg = token;
-      msgScreen = JSON.parse(atob(b64Msg || ""));
+      msgScreen = decodeMessageScreen(b64Msg || "");
       console.log(msgScreen, 'msgScreen');
     } catch (error) {
       console.log(error, 'error');
