@@ -1,18 +1,20 @@
+/* Bolum diger ayar bolumleriyle ayni hizada: baslik, alanlar ve buton sola yasli.
+   Onceden govde ortalanmis, baslik ortali, aciklama sola yasli kaliyordu. */
 .advertorial-settings {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
 }
 
 .advertorial-settings .settings-section-header {
   width: 100%;
-  text-align: center;
+  text-align: left;
 }
 
 .advertorial-layout-field {
   width: 100%;
   max-width: 360px;
-  margin: 0 auto 28px;
+  margin: 0 0 28px;
   text-align: left;
 }
 
@@ -22,7 +24,7 @@
   font-size: 13px;
   font-style: italic;
   line-height: 1.45;
-  text-align: center;
+  text-align: left;
 }
 
 .advertorial-cell-list {
@@ -31,7 +33,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
-  margin: 0 auto;
+  margin: 0;
 }
 
 @media (min-width: 900px) {
@@ -136,7 +138,7 @@
   margin-top: 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 12px;
 }
