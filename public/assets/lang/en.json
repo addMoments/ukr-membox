@@ -36,7 +36,11 @@
     "errors": {
         "forbidden": "This action is not allowed right now.",
         "packageLimitExceeded": "This event has reached the new participant limit.",
-        "contributorLimitReached": "Event sharing limit is full. New participant uploads are not accepted."
+        "contributorLimitReached": "Event sharing limit is full. New participant uploads are not accepted.",
+        "mediaLimitReached": "This event has reached its limit for photos and videos.",
+        "storageLimitReached": "This event has reached its storage limit.",
+        "guestMediaLimitReached": "You have reached the number of files you can upload to this event.",
+        "guestStorageLimitReached": "You have reached the total upload size allowed for this event."
     },
     "sidebar": {
         "dashboard": "Dashboard",

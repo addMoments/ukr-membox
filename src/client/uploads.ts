@@ -60,7 +60,10 @@ export const uploadFiles = async (
     files: File[]
 ): Promise<string[]> => {
     const filenames = files.map(f => f.name);
-    // 1. Request presigned URLs from the server
+    // Ne: Presign istegi dosya adiyla birlikte boyutu da tasir.
+    // Neden: Depolama limiti (paket basina GB, misafir basina GB) yalnizca boyut
+    //        bilinirse uygulanabilir; dosyanin kendisi tarayicidan dogrudan S3'e gidiyor,
+    //        sunucu baytlari hic gormuyor. Sunucu eski duz isim dizisini de kabul eder.
     const presignRes = await fetch(
         url,
         {
@@ -68,7 +71,7 @@ export const uploadFiles = async (
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(filenames),
+            body: JSON.stringify(files.map(f => ({ name: f.name, size: f.size }))),
         }
     );
 

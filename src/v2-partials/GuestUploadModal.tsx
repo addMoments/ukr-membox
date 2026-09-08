@@ -7,7 +7,7 @@ import { t } from '../packages/i18n';
 import { textOr } from '../utils/admin_i18n';
 import { whoAmI } from '../client/auth';
 import { pgREST } from '../client/postgrest';
-import { isContributorLimitReachedError, isForbiddenError } from '../utils/guestInitError';
+import { getUploadLimitCode, isContributorLimitReachedError, isForbiddenError, UploadLimitCode } from '../utils/guestInitError';
 import { GuestAlbum } from '../types/albums';
 import { getGuestAlbumErrorCode } from '../client/albums';
 import '../v2-styles/GuestHome.css';
@@ -122,6 +122,35 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
       'Uploads are closed for this album',
       'Завантаження в цей альбом закрито'
     );
+    // Limit mesajlari: sunucudan gelen koda gore hangi limitin dolduğunu soyler.
+    const limitMessage = (code: UploadLimitCode) => {
+      switch (code) {
+        case 'MEDIA_LIMIT_REACHED':
+          return textOr(
+            'errors.mediaLimitReached',
+            'This event has reached its limit for photos and videos.',
+            'Ця подія досягла ліміту фото та відео.'
+          );
+        case 'STORAGE_LIMIT_REACHED':
+          return textOr(
+            'errors.storageLimitReached',
+            'This event has reached its storage limit.',
+            'Ця подія досягла ліміту місця для зберігання.'
+          );
+        case 'GUEST_MEDIA_LIMIT_REACHED':
+          return textOr(
+            'errors.guestMediaLimitReached',
+            'You have reached the number of files you can upload to this event.',
+            'Ви досягли ліміту файлів, які можна завантажити для цієї події.'
+          );
+        case 'GUEST_STORAGE_LIMIT_REACHED':
+          return textOr(
+            'errors.guestStorageLimitReached',
+            'You have reached the total upload size allowed for this event.',
+            'Ви досягли ліміту загального розміру завантажень для цієї події.'
+          );
+      }
+    };
 
     setUploadErrorMessage('');
     setUploadDone(null);
@@ -151,6 +180,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
       let successCount = 0;
       let contributorLimitHit = false;
       let albumClosedHit = false;
+      let limitHit: UploadLimitCode | null = null;
 
       for (const entry of pendingEntries) {
         try {
@@ -164,6 +194,10 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
           entry.failed = true;
           if (isContributorLimitReachedError(err)) {
             contributorLimitHit = true;
+          } else if (getUploadLimitCode(err)) {
+            // Limit doldu: kalan dosyalar da ayni hatayi alacagi icin dongu devam etse de
+            // mesaj tek ve net kalir.
+            limitHit = getUploadLimitCode(err);
           } else if (getGuestAlbumErrorCode(err)) {
             // Album bu arada kapatilmis ya da silinmis olabilir.
             albumClosedHit = true;
@@ -179,6 +213,8 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
 
       if (contributorLimitHit) {
         setUploadErrorMessage(contributorLimitMessage);
+      } else if (limitHit) {
+        setUploadErrorMessage(limitMessage(limitHit));
       } else if (albumClosedHit) {
         setUploadErrorMessage(albumClosedMessage);
       }

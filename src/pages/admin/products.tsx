@@ -122,6 +122,9 @@ function AdminProducts() {
     const displayBulletsUk = (formData.get('display_bullets_uk') || '').toString().trim();
     const guestCount = readNumber(formData.get('guest_count'));
     const mediaCount = readNumber(formData.get('media_count'));
+    const storageGb = readNumber(formData.get('storage_gb'));
+    const guestMediaCount = readNumber(formData.get('guest_media_count'));
+    const guestStorageGb = readNumber(formData.get('guest_storage_gb'));
     const activationPeriod = readNumber(formData.get('activation_period_days'));
     const storagePeriod = readNumber(formData.get('storage_period_days'));
     const voiceIncluded = formData.get('voice_included') === 'on';
@@ -143,6 +146,9 @@ function AdminProducts() {
             ...(displayBulletsUk ? { display_bullets_uk: displayBulletsUk } : {}),
             guest_count: guestCount ?? undefined,
             media_count: mediaCount ?? undefined,
+            storage_gb: storageGb ?? undefined,
+            guest_media_count: guestMediaCount ?? undefined,
+            guest_storage_gb: guestStorageGb ?? undefined,
             activation_period_days: activationPeriod ?? undefined,
             storage_period_days: storagePeriod ?? undefined,
             voice_included: voiceIncluded,
@@ -427,6 +433,25 @@ function AdminProducts() {
           <span className="admin-product-field-label">{at('admin.products.numberOfMedia', 'Number of Pictures / Videos', 'Кількість фото / відео')}</span>
           <input name="media_count" type="number" min={-1} step="1" className="admin-product-input" defaultValue={product.options.media_count} />
         </label>
+        <label className="admin-product-field">
+          <span className="admin-product-field-label">{at('admin.products.storageGb', 'Storage for the event (GB)', 'Місце для події (ГБ)')}</span>
+          <input name="storage_gb" type="number" min={-1} step="1" className="admin-product-input" defaultValue={product.options.storage_gb} />
+        </label>
+        <label className="admin-product-field">
+          <span className="admin-product-field-label">{at('admin.products.guestMediaCount', 'Files per guest', 'Файлів на гостя')}</span>
+          <input name="guest_media_count" type="number" min={-1} step="1" className="admin-product-input" defaultValue={product.options.guest_media_count} />
+        </label>
+        <label className="admin-product-field">
+          <span className="admin-product-field-label">{at('admin.products.guestStorageGb', 'Storage per guest (GB)', 'Місце на гостя (ГБ)')}</span>
+          <input name="guest_storage_gb" type="number" min={-1} step="1" className="admin-product-input" defaultValue={product.options.guest_storage_gb} />
+        </label>
+        <p className="admin-product-field-hint">
+          {at(
+            'admin.products.limitsHint',
+            'Enter -1 for no limit. The three fields above cap the whole event and each single guest; a guest who reaches a limit is told which one.',
+            'Введіть -1, щоб зняти обмеження. Три поля вище обмежують усю подію та кожного окремого гостя; гість, який досягне ліміту, побачить, якого саме.',
+          )}
+        </p>
         <label className="admin-product-field">
           <span className="admin-product-field-label">{at('admin.products.activationPeriod', 'Activation Period', 'Період активації')}</span>
           <input name="activation_period_days" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.activation_days} />

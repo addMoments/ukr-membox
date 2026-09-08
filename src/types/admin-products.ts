@@ -1,6 +1,10 @@
 export interface AdminProductOptions {
   guest_count?: number;
   media_count?: number;
+  // Yukleme limitleri (Excel 2.17). -1 = sinirsiz.
+  storage_gb?: number;
+  guest_media_count?: number;
+  guest_storage_gb?: number;
   activation_days?: number;
   storage_days?: number;
   voice_included?: boolean;
@@ -42,6 +46,9 @@ export interface UpdateAdminProductPayload {
   priority?: number;
   guest_count?: number;
   media_count?: number;
+  storage_gb?: number;
+  guest_media_count?: number;
+  guest_storage_gb?: number;
   activation_period_days?: number;
   storage_period_days?: number;
   voice_included?: boolean;

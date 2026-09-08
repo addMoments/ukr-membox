@@ -18,11 +18,13 @@ import V2GuestGate from '../../v2-partials/V2GuestGate';
 import GuestAccessErrorScreen from '../../v2-partials/GuestAccessErrorScreen';
 import {
   getEventClosedMessage,
+  getUploadLimitCode,
   isContributorLimitReachedError,
   isEventClosedError,
   isForbiddenError,
   isPackageLimitExceededError
 } from '../../utils/guestInitError';
+import { textOr } from '../../utils/admin_i18n';
 
 function ParticipantGuestbook() {
   const { uid: packedUid } = useParams<{ uid: string }>();
@@ -291,6 +293,18 @@ function ParticipantGuestbook() {
     } catch (err) {
       if (isContributorLimitReachedError(err)) {
         alert(contributorLimitMessage);
+        return false;
+      }
+      // Yukleme limitleri (2.17): sesli mesaj da medya sayilir, ayni kodlar gelir.
+      const limitCode = getUploadLimitCode(err);
+      if (limitCode) {
+        alert(limitCode === 'GUEST_MEDIA_LIMIT_REACHED'
+          ? textOr('errors.guestMediaLimitReached', 'You have reached the number of files you can upload to this event.', 'Ви досягли ліміту файлів, які можна завантажити для цієї події.')
+          : limitCode === 'GUEST_STORAGE_LIMIT_REACHED'
+            ? textOr('errors.guestStorageLimitReached', 'You have reached the total upload size allowed for this event.', 'Ви досягли ліміту загального розміру завантажень для цієї події.')
+            : limitCode === 'STORAGE_LIMIT_REACHED'
+              ? textOr('errors.storageLimitReached', 'This event has reached its storage limit.', 'Ця подія досягла ліміту місця для зберігання.')
+              : textOr('errors.mediaLimitReached', 'This event has reached its limit for photos and videos.', 'Ця подія досягла ліміту фото та відео.'));
         return false;
       }
       if (isForbiddenError(err)) {

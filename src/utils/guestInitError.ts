@@ -26,6 +26,28 @@ export const isContributorLimitReachedError = (err: unknown): boolean => {
   return getErrorCode(err) === CONTRIBUTOR_LIMIT_REACHED_CODE;
 };
 
+// Yukleme limitleri (Excel 2.17). Sunucu her limit icin ayri bir kod donuyor;
+// misafir "paket doldu" ile "bir sey ters gitti" arasindaki farki gorsun diye
+// her koda ayri bir mesaj bagliyoruz.
+export type UploadLimitCode =
+  | 'MEDIA_LIMIT_REACHED'
+  | 'STORAGE_LIMIT_REACHED'
+  | 'GUEST_MEDIA_LIMIT_REACHED'
+  | 'GUEST_STORAGE_LIMIT_REACHED';
+
+const UPLOAD_LIMIT_CODES: UploadLimitCode[] = [
+  'MEDIA_LIMIT_REACHED',
+  'STORAGE_LIMIT_REACHED',
+  'GUEST_MEDIA_LIMIT_REACHED',
+  'GUEST_STORAGE_LIMIT_REACHED',
+];
+
+export const getUploadLimitCode = (err: unknown): UploadLimitCode | null => {
+  if (!isForbiddenError(err)) return null;
+  const code = getErrorCode(err);
+  return UPLOAD_LIMIT_CODES.find(c => c === code) || null;
+};
+
 export const isEventClosedError = (err: unknown): boolean => {
   if (!(err instanceof FetchHttpError)) return false;
   if (err.status !== 410) return false;
