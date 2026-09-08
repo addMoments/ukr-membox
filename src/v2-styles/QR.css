@@ -598,3 +598,80 @@
 
 
 
+
+/* Albumler (2026-09-08): QR hedef secici ve link kutusu */
+.qr-target-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #57534e;
+}
+
+.qr-target-select select {
+  padding: 10px 14px;
+  border-radius: 9999px;
+  border: 1px solid #e7e5e4;
+  background: white;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1c1917;
+  max-width: 220px;
+}
+
+.qr-link-box {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.qr-link-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #78716c;
+}
+
+.qr-link-row {
+  display: flex;
+  gap: 8px;
+}
+
+.qr-link-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  background: #fafaf9;
+  font-size: 12px;
+  color: #1c1917;
+  font-family: inherit;
+}
+
+.qr-link-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e7e5e4;
+  background: white;
+  color: #1c1917;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+@media print {
+  .qr-target-select,
+  .qr-link-box {
+    display: none;
+  }
+}

@@ -1,0 +1,287 @@
+/* Misafir album sayfasi (2026-09-08). Filtre/grid/load-more icin GuestUploads.css
+   siniflari yeniden kullanilir; burada yalnizca baslik bloğu ve kilit ekrani var. */
+
+.guest-album-header {
+  background: var(--base-card);
+  border-bottom: 1px solid var(--border);
+  padding: 32px 0 40px;
+}
+
+.guest-album-header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 1024px) {
+  .guest-album-header-container {
+    padding: 0 40px;
+  }
+}
+
+.guest-album-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.guest-album-back:hover {
+  color: var(--text);
+}
+
+.guest-album-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .guest-album-hero {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 32px;
+  }
+}
+
+.guest-album-cover {
+  width: 100%;
+  height: 200px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--base);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .guest-album-cover {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+.guest-album-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.guest-album-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 40px;
+}
+
+.guest-album-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.guest-album-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .guest-album-title {
+    font-size: 44px;
+  }
+}
+
+.guest-album-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.guest-album-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guest-album-desc {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.guest-album-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.guest-album-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.guest-album-btn:hover {
+  transform: scale(1.02);
+}
+
+.guest-album-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.guest-album-btn.primary {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+
+.guest-album-btn.secondary {
+  background: var(--base);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.guest-album-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--base);
+  border: 1px dashed var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.guest-album-sort {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.guest-album-sort button {
+  border: 1px solid var(--border);
+  background: var(--base-card);
+  color: var(--text-secondary);
+  border-radius: 9999px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.guest-album-sort button.active {
+  background: var(--text);
+  color: var(--base-card);
+  border-color: var(--text);
+}
+
+/* Passcode ekrani */
+.guest-album-lock {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--base);
+}
+
+.guest-album-lock-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.guest-album-lock-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--base-card);
+  border-radius: 28px;
+  padding: 36px 28px;
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.guest-album-lock-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto;
+  background: var(--base);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.guest-album-lock-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.guest-album-lock-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.guest-album-lock-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 18px;
+  text-align: center;
+  letter-spacing: 0.15em;
+  color: var(--text);
+  background: var(--base);
+  font-family: inherit;
+}
+
+.guest-album-lock-input:focus {
+  outline: none;
+  border-color: var(--text-tertiary);
+}
+
+.guest-album-lock-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 600;
+}

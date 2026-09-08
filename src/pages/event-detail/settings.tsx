@@ -16,6 +16,7 @@ import { saveUrl } from '../../utils/download';
 import { S3_ROOT, SERV_ROOT } from '../../consts';
 import { dbWhoAmI } from '../../client/auth';
 import { t } from '../../packages/i18n';
+import { textOr } from '../../utils/admin_i18n';
 import { sendToMsg } from '../../types/mesage-screen';
 import { fetch } from '../../client/core';
 import { rm_key } from '../../utils/persistence';
@@ -166,7 +167,8 @@ function EventSettingsInner({event}: {event: Event}) {
   }
 
   const fetchLatestExportJob = async () => {
-    const {res, err} = await pgErr(`/jobs?name=eq.s3_export&input->>event_uid=eq.${event.uid}&order=created_at.desc&limit=1`, {
+    // Album bazli export job'lari (input.album_uid dolu) etkinlik export'u sayilmaz; Albums sayfasi onlari ayrica listeler.
+    const {res, err} = await pgErr(`/jobs?name=eq.s3_export&input->>event_uid=eq.${event.uid}&input->>album_uid=is.null&order=created_at.desc&limit=1`, {
       method: 'GET',
     });
     if (err) {
@@ -402,6 +404,14 @@ function EventSettingsInner({event}: {event: Event}) {
           <p className="settings-section-description">{t('settings.privacy.description')}</p>
         </div>
         <div className="settings-toggle-list">
+          {/* Albumler: etkinlik duzeyi galeri anahtari. Anahtar yokken kapali sayilir
+              (RLS get_event_setting_bool FALSE doner); album duzeyinde ayrica guest_view var. */}
+          <SettingsToggle
+            name={textOr('settings.privacy.guestGallery', 'Guests can view the gallery', 'Гості можуть переглядати галерею')}
+            description={textOr('settings.privacy.guestGalleryDesc', 'When on, guests can see the photos and videos in albums that allow viewing. Each album can be limited separately on the Albums page.', 'Якщо увімкнено, гості бачать фото та відео в альбомах, де перегляд дозволено. Кожен альбом можна обмежити окремо на сторінці «Альбоми».')}
+            checked={!!settings.guest_gallery}
+            formName="guest_gallery"
+          />
           <SettingsToggle
             name={t('settings.privacy.multipleGuestbook')}
             description={t('settings.privacy.multipleGuestbookDesc')}

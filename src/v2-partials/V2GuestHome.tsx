@@ -1,13 +1,10 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import V2Header from '../v2-components/V2Header';
 import V2Footer from '../v2-components/V2Footer';
 import FileInput from '../components/FileInput';
 import '../v2-styles/GuestHome.css';
 import { UploadEntry } from '../types/uploads';
-import ActivityIndicator from '../v2-components/activity-indicator';
-import { guestUpload } from '../client/uploads';
-import { unpackUUID } from '../packages/uuid';
 // import { S3_ROOT } from '../consts';
 import { GuestTheme, defaultGuestTheme } from '../types/guestTheme';
 import { fonts } from '../types/fonts';
@@ -16,10 +13,10 @@ import { fonts } from '../types/fonts';
 import PhotoViewerModal from '../partials/PhotoViewerModal';
 import { t } from '../packages/i18n';
 import { textOr } from '../utils/admin_i18n';
-import { whoAmI } from '../client/auth';
-import { pgREST } from '../client/postgrest';
-import { isContributorLimitReachedError, isForbiddenError } from '../utils/guestInitError';
 import { AdvertorialCell, AdvertorialLayout, AdvertorialResponse } from '../types/advertorial';
+import { GuestAlbum, albumCoverUrl } from '../types/albums';
+import { packUUID as packedAlbumUid } from '../packages/uuid';
+import GuestUploadModal, { GuestUploadModalHandle } from './GuestUploadModal';
 
 export interface V2GuestHomeProps {
   bannerImageUrl: string | null;
@@ -39,9 +36,10 @@ export interface V2GuestHomeProps {
   theme?: GuestTheme;
   font?: string;
   advertorial?: AdvertorialResponse | null;
+  // Misafire gorunur albumler (RLS suzer: public + yukleme acik). Bos liste = yukleme kapali.
+  albums?: GuestAlbum[];
+  albumsLoaded?: boolean;
 }
-
-type FileEntry = { file: File; previewUrl: string; uploaded: boolean; failed: boolean };
 
 const ADVERTORIAL_CELL_COUNT: Record<AdvertorialLayout, number> = {
   none: 0,
@@ -107,160 +105,30 @@ function V2GuestHome({
   theme = defaultGuestTheme,
   font,
   advertorial,
+  albums = [],
+  albumsLoaded = false,
 }: V2GuestHomeProps) {
-  const elemRef = useRef({ entries: [] as FileEntry[] }).current;
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  const [fileEntries, setFileEntries] = useState<FileEntry[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0, totalBytes: 0 });
-  const [modalOpen, setModalOpen] = useState(false);
-  const [uploadErrorMessage, setUploadErrorMessage] = useState('');
-  // Ne: Yukleme basariyla bitince gosterilecek onay ekraninin verisi (null = gosterme).
-  // Neden: 2.6 — misafir mobilden yukleyince modal 1 saniyede sessizce kapaniyordu ve
-  //        hicbir onay gormuyordu.
-  const [uploadDone, setUploadDone] = useState<{ count: number; bytes: number } | null>(null);
-
-  const getLocalizedText = (key: string, fallback: string) => {
-    const value = t(key);
-    return value === key ? fallback : value;
-  };
-
-  const handleFileSelect = (file: File) => {
-    const previewUrl = URL.createObjectURL(file);
-    elemRef.entries.push({ file, previewUrl, uploaded: false, failed: false });
-    setFileEntries([...elemRef.entries]);
-    setModalOpen(true);
-  };
-
-  const handleRemoveFile = (index: number) => {
-    URL.revokeObjectURL(elemRef.entries[index].previewUrl);
-    elemRef.entries.splice(index, 1);
-    setFileEntries([...elemRef.entries]);
-    if (elemRef.entries.length === 0) setModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    elemRef.entries.forEach(e => URL.revokeObjectURL(e.previewUrl));
-    elemRef.entries = [];
-    setFileEntries([]);
-    setModalOpen(false);
-    setUploadDone(null);
-  };
-
-  const handleUpload = async () => {
-    const pendingEntries = elemRef.entries.filter(e => !e.uploaded);
-    if (!pendingEntries.length) return;
-
-    const eventUid = unpackUUID(packedUid);
-    const uploaderName = nameInputRef.current?.value?.trim() || '';
-    const contributorLimitMessage = getLocalizedText(
-      'errors.contributorLimitReached',
-      'Etkinlik paylaşım limiti doldu. Yeni katılımcı paylaşımı kabul edilmiyor.'
-    );
-    const genericForbiddenMessage = getLocalizedText(
-      'errors.forbidden',
-      'Bu işlem şu anda yapılamıyor.'
-    );
-
-    setUploadErrorMessage('');
-    setUploadDone(null);
-    setIsUploading(true);
-    const totalBytes = pendingEntries.reduce((s, e) => s + e.file.size, 0);
-    setUploadProgress({ done: 0, total: pendingEntries.length, totalBytes });
-    pendingEntries.forEach((entry) => {
-      entry.failed = false;
-    });
-    setFileEntries([...elemRef.entries]);
-
-    try {
-      if (uploaderName) {
-        const uploaderUid = participantUid || (await whoAmI()).ui;
-        try {
-          await pgREST(`/participants?uid=eq.${uploaderUid}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ name: uploaderName }),
-          });
-          onUploaderNameUpdate?.(uploaderName);
-        } catch {
-          // Keep upload flow running even if participant name update fails.
-        }
-      }
-
-      let doneCount = 0;
-      let successCount = 0;
-      let contributorLimitHit = false;
-
-      for (const entry of pendingEntries) {
-        try {
-          const uploadType = entry.file.type.startsWith('video/') ? 'video' : 'photo';
-          await guestUpload(eventUid, uploadType, [entry.file]);
-          entry.uploaded = true;
-          entry.failed = false;
-          successCount += 1;
-        } catch (err) {
-          entry.uploaded = false;
-          entry.failed = true;
-          if (isContributorLimitReachedError(err)) {
-            contributorLimitHit = true;
-          } else if (isForbiddenError(err) && !contributorLimitHit) {
-            setUploadErrorMessage(genericForbiddenMessage);
-          }
-        } finally {
-          doneCount += 1;
-          setUploadProgress({ done: doneCount, total: pendingEntries.length, totalBytes });
-          setFileEntries([...elemRef.entries]);
-        }
-      }
-
-      if (contributorLimitHit) {
-        setUploadErrorMessage(contributorLimitMessage);
-      }
-
-      setFileEntries([...elemRef.entries]);
-      if (successCount > 0) {
-        onUploadComplete?.();
-      }
-
-      const hasFailedEntries = pendingEntries.some(e => e.failed);
-      if (!hasFailedEntries) {
-        // Ne: Once "yukleme tamamlandi" ekranini goster, sonra modali kapat.
-        // Nasil: Sure 1sn'den 2.6sn'ye cikarildi; 1 saniye mesaji okumaya yetmiyordu.
-        //        Erken kapatmak isteyen backdrop'a dokunabilir, handleCancel devrede.
-        // Neden: 2.6 — tum dosyalar yuklendiginde misafire acik bir onay verilmeli.
-        setUploadDone({
-          count: successCount,
-          bytes: pendingEntries.reduce((sum, entry) => sum + entry.file.size, 0),
-        });
-        setTimeout(() => {
-          // Onizleme URL'leri bu yolda serbest birakilmiyordu; iptal akisiyla ayni hale getirildi.
-          elemRef.entries.forEach(entry => URL.revokeObjectURL(entry.previewUrl));
-          elemRef.entries = [];
-          setFileEntries([]);
-          setModalOpen(false);
-          setUploadDone(null);
-        }, 2600);
-      }
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const formatBytes = (bytes: number) => {
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const totalBytes = fileEntries.reduce((s, e) => s + e.file.size, 0);
-  const failedCount = fileEntries.filter(e => e.failed).length;
-  const uploadedCount = fileEntries.filter(e => e.uploaded).length;
+  // Yukleme modali ayri bilesende (GuestUploadModal); dosyalar ref uzerinden verilir.
+  const uploadModalRef = useRef<GuestUploadModalHandle>(null);
 
   const uploadPhotosAndVideosText = t('guest.uploadPhotosAndVideos');
   const uploadAudioMessageTextRaw = t('guest.uploadAudioMessage');
   const uploadAudioMessageText = uploadAudioMessageTextRaw === 'guest.uploadAudioMessage'
     ? (t('lang_code') === 'uk' ? 'Завантажити аудіо повідомлення' : 'Upload Audio Message')
     : uploadAudioMessageTextRaw;
-  const failedLabel = getLocalizedText('common.failed', 'Failed');
-  const uploadedLabel = getLocalizedText('common.uploaded', 'Uploaded');
+
+  // Ne: Gorunur album yoksa (liste yuklendi ve bos) yukleme kapali demektir: General dahil
+  //     her album misafire kapatilmis. Buton pasif, aciklama gosterilir.
+  // Neden: Karar 12 — yuklemesi kapali album misafire hic gorunmez; hepsi kapaliysa
+  //        misafirin yukleyecegi yer kalmaz.
+  const uploadsClosed = albumsLoaded && albums.length === 0;
+  const showAlbumCards = albums.length > 1;
+  const formatAlbumDate = (dateStr: string | null) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr.length <= 10 ? dateStr + 'T00:00:00' : dateStr);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(t('lang_code'), { year: 'numeric', month: 'long', day: 'numeric' });
+  };
 
   // const openPhotoViewer = (uploadUid: string) => {
   //   const index = recentUploads.findIndex(u => u.uid === uploadUid);
@@ -283,104 +151,15 @@ function V2GuestHome({
     <div className="guest-home" style={{ ...theme, fontFamily: fonts.find(f => f.id === font)?.fontFamily }}>
       <PhotoViewerModal />
 
-      {/* Upload Modal */}
-      {modalOpen && (
-        <div className="upload-modal-backdrop" onClick={!isUploading ? handleCancel : undefined}>
-          <div className="upload-modal" onClick={e => e.stopPropagation()}>
-            {uploadDone ? (
-              <div className="upload-modal-success" role="status">
-                <div className="upload-modal-success-badge">
-                  <i className="fa-solid fa-check" />
-                </div>
-                <p className="upload-modal-success-title">
-                  {textOr('guest.uploadCompleted', 'Upload completed', 'Завантаження завершено')}
-                </p>
-                <p className="upload-modal-success-sub">
-                  {uploadDone.count} {t('common.files')} · {formatBytes(uploadDone.bytes)}
-                </p>
-              </div>
-            ) : (
-            <>
-            <h3 className="upload-modal-title">{t('guest.photosAndVideos')}</h3>
-            {uploadErrorMessage ? (
-              <div className="upload-modal-error" role="alert">
-                <i className="fa-solid fa-circle-exclamation" />
-                <span>{uploadErrorMessage}</span>
-              </div>
-            ) : null}
-            <div className="upload-modal-name-wrap">
-              <input
-                ref={nameInputRef}
-                type="text"
-                className="upload-modal-name-input"
-                name="name"
-                placeholder={t('guestGuestbook.yourName')}
-                defaultValue={initialUploaderName || ''}
-                disabled={isUploading}
-              />
-            </div>
-
-            <div className="upload-modal-list-header">
-              <span>{fileEntries.length} {t('common.files')}</span>
-              {!isUploading && (
-                <FileInput onFile={handleFileSelect} multiple accept="image/*,video/*">
-                  <button type="button" className="upload-modal-add-btn">
-                    <i className="fa-solid fa-plus" />
-                  </button>
-                </FileInput>
-              )}
-            </div>
-
-            <div className="upload-modal-list">
-              {fileEntries.map((entry, index) => (
-                <div
-                  key={index}
-                  className={`upload-modal-item${entry.uploaded ? ' upload-modal-item--done' : ''}${entry.failed ? ' upload-modal-item--failed' : ''}`}
-                >
-                  <img className="upload-modal-thumb" src={entry.previewUrl} alt="" />
-                  <div className="upload-modal-item-info">
-                    <span className="upload-modal-item-name">{entry.file.name}</span>
-                    <span className="upload-modal-item-size">{formatBytes(entry.file.size)}</span>
-                    {entry.failed ? <span className="upload-modal-item-error">{failedLabel}</span> : null}
-                  </div>
-                  {entry.uploaded
-                    ? <i className="fa-solid fa-circle-check upload-modal-item-check" />
-                    : entry.failed
-                      ? <i className="fa-solid fa-circle-xmark upload-modal-item-fail" />
-                    : !isUploading && (
-                      <button type="button" className="upload-modal-item-remove" onClick={() => handleRemoveFile(index)}>
-                        <i className="fa-solid fa-xmark" />
-                      </button>
-                    )
-                  }
-                </div>
-              ))}
-            </div>
-
-            <div className="upload-modal-status">
-              {isUploading
-                ? <><ActivityIndicator color="var(--text-secondary)" style={{ width: 16, height: 16 }} /><span>{t('guest.uploadingProgress', { done: uploadProgress.done, total: uploadProgress.total, size: formatBytes(totalBytes) })}</span></>
-                : <><i className="fa-solid fa-circle-info" /><span>{fileEntries.length} {t('common.files')} · {formatBytes(totalBytes)} · {uploadedCount} {uploadedLabel} · {failedCount} {failedLabel}</span></>
-              }
-            </div>
-
-            <div className="upload-modal-actions">
-              <button className="upload-modal-cancel" onClick={handleCancel} disabled={isUploading}>
-                {t('guestGuestbook.cancel')}
-              </button>
-              <button className="upload-modal-submit" onClick={handleUpload} disabled={isUploading || fileEntries.every(e => e.uploaded)}>
-                {isUploading
-                  ? <ActivityIndicator color="#fff" style={{ width: 16, height: 16 }} />
-                  : <i className="fa-solid fa-arrow-up-from-bracket" />
-                }
-                {t('guest.uploadFiles')}
-              </button>
-            </div>
-            </>
-            )}
-          </div>
-        </div>
-      )}
+      <GuestUploadModal
+        ref={uploadModalRef}
+        packedUid={packedUid}
+        albums={albums}
+        participantUid={participantUid}
+        initialUploaderName={initialUploaderName}
+        onUploaderNameUpdate={onUploaderNameUpdate}
+        onUploadComplete={onUploadComplete}
+      />
 
       <V2Header />
 
@@ -415,12 +194,19 @@ function V2GuestHome({
             <section className="guest-home-upload">
               <div className="guest-home-upload-inner" style={{position: 'relative', zIndex: 1}}>
 
-              <FileInput onFile={handleFileSelect} multiple accept="image/*,video/*">
-              <button style={{marginBottom: '10px'}} className="guest-home-upload-btn">
-                <i className="fa-solid fa-camera-retro" />
-                <span>{uploadPhotosAndVideosText}</span>
-              </button>
-              </FileInput>
+              {uploadsClosed ? (
+                <div className="guest-home-uploads-closed" role="status">
+                  <i className="fa-solid fa-lock" />
+                  <span>{textOr('guest.album.noVisibleAlbums', 'Uploads are closed for this event right now.', 'Завантаження для цієї події зараз закрито.')}</span>
+                </div>
+              ) : (
+                <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
+                <button style={{marginBottom: '10px'}} className="guest-home-upload-btn">
+                  <i className="fa-solid fa-camera-retro" />
+                  <span>{uploadPhotosAndVideosText}</span>
+                </button>
+                </FileInput>
+              )}
 
               <Link style={{textDecoration: 'none'}} to={`/guest/${packedUid}/guestbook`}>
                 <button style={{marginBottom: '10px'}} className="guest-home-upload-btn" >
@@ -435,6 +221,51 @@ function V2GuestHome({
                   <span>{t('guest.signTheGuestbook')}</span>
                 </button>
               </Link>
+
+              {showAlbumCards && (
+                <section className="guest-home-albums" aria-label={textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}>
+                  <div className="guest-home-albums-header">
+                    <h2 className="guest-home-albums-title">
+                      <i className="fa-regular fa-folder-open" />
+                      {textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}
+                    </h2>
+                    <p className="guest-home-albums-hint">
+                      {textOr('guest.album.sectionHint', 'Choose an album to share your photos.', 'Оберіть альбом, щоб поділитися фото.')}
+                    </p>
+                  </div>
+                  <div className="guest-home-albums-grid">
+                    {albums.map((album) => {
+                      const cover = albumCoverUrl(album);
+                      const dateText = formatAlbumDate(album.album_date);
+                      return (
+                        <Link
+                          key={album.uid}
+                          to={`/guest/${packedUid}/album/${album.uid ? packedAlbumUid(album.uid) : ''}`}
+                          className="guest-home-album-card"
+                        >
+                          <div className="guest-home-album-cover">
+                            {cover
+                              ? <img src={cover} alt="" loading="lazy" />
+                              : <div className="guest-home-album-cover-placeholder"><i className="fa-regular fa-images" /></div>}
+                          </div>
+                          <div className="guest-home-album-body">
+                            <span className="guest-home-album-name">{album.name}</span>
+                            {(dateText || album.location) && (
+                              <span className="guest-home-album-meta">
+                                {dateText}{dateText && album.location ? ' · ' : ''}{album.location || ''}
+                              </span>
+                            )}
+                            {album.description && (
+                              <span className="guest-home-album-desc">{album.description}</span>
+                            )}
+                          </div>
+                          <span className="guest-home-album-arrow"><i className="fa-solid fa-chevron-right" /></span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
               <GuestAdvertorialGrid advertorial={advertorial} />
 
