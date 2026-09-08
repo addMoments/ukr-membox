@@ -32,7 +32,13 @@
   margin: 0 0 6px 0;
 }
 
-.settings-section.csbox p {
+/* App.css'teki global "p { text-align: center }" ayar ekranlarina sizmasin:
+   bolum aciklamasi, toggle aciklamasi ve alan notlari sola yasli. */
+.settings-section p,
+.settings-section.csbox p,
+.settings-main-content p,
+.album-form-default-note,
+.albums-notice {
   text-align: left;
 }
 

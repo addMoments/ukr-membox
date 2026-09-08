@@ -12,6 +12,7 @@
 
 .albums-header-subtitle {
   margin: 0;
+  text-align: left;
   font-size: 15px;
   color: #78716C;
   max-width: 560px;
@@ -209,6 +210,7 @@
 
 .album-card-desc {
   margin: 4px 0 0;
+  text-align: left;
   font-size: 13px;
   color: #78716C;
   display: -webkit-box;
@@ -308,6 +310,7 @@
 
 .album-modal-text {
   margin: 0;
+  text-align: left;
   font-size: 14px;
   color: #57534E;
   line-height: 1.5;
@@ -443,6 +446,7 @@
 
 .album-share-hint {
   margin: 0;
+  text-align: left;
   font-size: 13px;
   color: #78716C;
   display: flex;

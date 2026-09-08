@@ -121,6 +121,7 @@
 
 .guest-album-desc {
   margin: 0;
+  text-align: left;
   font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.5;
@@ -169,6 +170,7 @@
 }
 
 .guest-album-note {
+  text-align: left;
   display: flex;
   align-items: center;
   gap: 10px;
