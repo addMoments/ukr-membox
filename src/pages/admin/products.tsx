@@ -59,9 +59,16 @@ function AdminProducts() {
   const packageProducts = products.filter((p) => !p.is_add_on);
   const addOnProducts = products.filter((p) => p.is_add_on);
 
+  // Ne: Form alanindaki sayiyi okur; bos alan icin null doner.
+  // Neden: Number('') === 0 oldugu icin bos birakilan bir limit alani sessizce "0 limit"
+  //        olarak kaydediliyordu. 0 backend'de gercek bir limittir (Check_upload_limits),
+  //        yani plus/premium paketlerde tum misafir yuklemeleri kapaniyordu (2026-09-09).
+  //        Bos alan artik payload'a hic girmez; backend alani gormezse mevcut degeri korur.
   const readNumber = (value: FormDataEntryValue | null): number | null => {
     if (typeof value !== 'string') return null;
-    const parsed = Number(value);
+    const trimmed = value.trim();
+    if (trimmed === '') return null;
+    const parsed = Number(trimmed);
     return Number.isFinite(parsed) ? parsed : null;
   };
 
