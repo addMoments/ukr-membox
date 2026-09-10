@@ -53,13 +53,33 @@ function EventTrash() {
     return true;
   });
 
-  const handleRestore = (uploadUid: string) => {
-    pgREST(`/uploads?uid=eq.${uploadUid}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ trashed_at: null })
-    }).then(() => {
+  // Geri alma basarisiz olabilir: cope atilan medya artik paket kotasindan dusuyor, o yuzden
+  // geri almak etkinligi limitin ustune cikarabilir. Kontrol veritabaninda duruyor
+  // (uploads_restore_quota trigger'i, db-shell/misc/8-trash-quota.sql) cunku bu PATCH
+  // PostgREST'e dogrudan gidiyor ve backend'e hic ugramiyor.
+  // Onceki hali sonucu beklemeden karti listeden siliyordu: reddedilen bir geri almada
+  // dosya copte kaliyor ama ekrandan kayboluyordu, yani kullanici basarili sandi.
+  const handleRestore = async (uploadUid: string) => {
+    try {
+      await pgREST(`/uploads?uid=eq.${uploadUid}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ trashed_at: null })
+      });
       setUploads(prev => prev.filter(u => u.uid !== uploadUid));
-    });
+    } catch (error) {
+      const raw = error instanceof Error ? error.message : '';
+      showToast(raw.includes('RESTORE_QUOTA_EXCEEDED')
+        ? textOr(
+            'trash.restoreQuotaExceeded',
+            'Cannot restore: your event would go over its package limit. Permanently delete something first, or upgrade the package.',
+            'Не вдалося відновити: подія перевищить ліміт пакета. Спочатку видаліть щось назавжди або оновіть пакет.',
+          )
+        : textOr(
+            'trash.restoreError',
+            'Could not restore the file. Please try again.',
+            'Не вдалося відновити файл. Спробуйте ще раз.',
+          ));
+    }
   };
 
   const handleDeletePermanently = async (uploadUid: string) => {
