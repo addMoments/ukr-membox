@@ -709,7 +709,7 @@
             "lastNameRequired": "Last name is required",
             "lastNameDigits": "Last name must not contain numbers",
             "lastNameTooShort": "Last name must be at least 2 characters",
-            "novaPoshtaNote": "If you order physical items, such as QR cards or welcome board, they will be shipped via Nova Poshta, and NP rates will be applied."
+            "novaPoshtaNote": "If you order physical items, such as QR cards or welcome board, they will be shipped via Nova Poshta, and their rates will be applied. Due to size limitations, your order may be redirected to suitable branch."
         },
         "novaPoshtaRates": "At Nova Poshta rates",
         "upsell": {

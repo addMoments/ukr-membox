@@ -607,8 +607,8 @@ function V2Checkout() {
                 <p className="checkout-shipping-note">
                   {textOr(
                     'checkout.shipping.novaPoshtaNote',
-                    'If you order physical items, such as QR cards or welcome board, they will be shipped via Nova Poshta, and NP rates will be applied.',
-                    'Якщо ви замовите фізичні товари, як-от QR-картки чи вітальний банер, їх буде надіслано службою Nova Poshta, і буде застосовано її тарифи.',
+                    'If you order physical items, such as QR cards or welcome board, they will be shipped via Nova Poshta, and their rates will be applied. Due to size limitations, your order may be redirected to suitable branch.',
+                    'Якщо ви замовите фізичні товари, як-от QR-картки чи вітальний банер, їх буде надіслано службою Nova Poshta, і буде застосовано її тарифи. Великі замовлення можуть бути перенаправлені до відповідного відділення.',
                   )}
                 </p>
                 {hasPhysical && (
