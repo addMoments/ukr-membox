@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import QRCode from 'qrcode';
 import { fetch as authFetch } from '../../client/core';
 import { getAdminRole } from '../../client/admin';
 import { SERV_ROOT } from '../../consts';
@@ -78,6 +79,10 @@ interface OrderDetail {
   payment_summary?: PaymentSummary;
   items: OrderItem[];
   order_account: OrderAccount | null;
+  // Aktivasyon linki backend'de uretilir. Bos string = link uretilemiyor ve sebebi
+  // activation_blocked_reason'da yazar (odeme onaylanmamis, basarisiz, alici e-postasi yok).
+  activation_link?: string;
+  activation_blocked_reason?: string;
 }
 
 const STATUS_OPTIONS = ['purchased', 'client-action', 'admin-action', 'shipped', 'fulfilled', 'cancelled'];
@@ -399,9 +404,58 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
 // Ne: Siparisin aktivasyon (signup) mailini yeniden gonderen kart.
 // Nasil: Admin ucuna POST atar, sonucu satir ici bir mesajla gosterir.
 // Neden: Mail alicinin tarafinda kaybolabiliyor; destegin elinde baska bir yol yoktu.
-function ResendActivationCard({ purchaseUid, buyerEmail }: { purchaseUid: string; buyerEmail: string }) {
+function ResendActivationCard({
+  purchaseUid,
+  buyerEmail,
+  activationLink,
+  blockedReason,
+}: {
+  purchaseUid: string;
+  buyerEmail: string;
+  activationLink: string;
+  blockedReason: string;
+}) {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  // QR tarayicida uretilir; sunucudan data-URI tasimaya gerek yok.
+  useEffect(() => {
+    if (!activationLink) { setQrDataUrl(null); return; }
+    let cancelled = false;
+    QRCode.toDataURL(activationLink, { width: 220, margin: 1, color: { dark: '#1E2330', light: '#FFFFFF' } })
+      .then(url => { if (!cancelled) setQrDataUrl(url); })
+      .catch(() => { if (!cancelled) setQrDataUrl(null); });
+    return () => { cancelled = true; };
+  }, [activationLink]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  const copyLink = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(activationLink);
+      } else {
+        // http ve eski Safari yolu: clipboard API'si yoksa gecici textarea.
+        const ta = document.createElement('textarea');
+        ta.value = activationLink;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   const resend = async () => {
     setSending(true);
@@ -425,6 +479,30 @@ function ResendActivationCard({ purchaseUid, buyerEmail }: { purchaseUid: string
     }
   };
 
+  // Link uretilemiyorsa buton hic cizilmez, yalnizca sebep yazilir. Onceki hali butonu
+  // her sipariste gosteriyordu; odemesi tamamlanmamis bir siparis icin basildiginda
+  // sunucu 409 donuyordu. Musteri bunu bildirdi: "Resend is available although there is
+  // no purchase".
+  if (!activationLink) {
+    return (
+      <div className="admin-resend-activation">
+        <div className="admin-resend-activation-text">
+          <div className="admin-order-account-title">
+            {at('admin.orderDetail.resendTitle', 'Activation email', 'Лист активації')}
+          </div>
+          <p className="admin-resend-activation-hint">
+            {at(
+              'admin.orderDetail.resendUnavailable',
+              'There is no activation link for this order yet.',
+              'Для цього замовлення ще немає посилання для активації.',
+            )}
+            {blockedReason ? ` (${blockedReason})` : ''}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-resend-activation">
       <div className="admin-resend-activation-text">
@@ -438,15 +516,37 @@ function ResendActivationCard({ purchaseUid, buyerEmail }: { purchaseUid: string
             'Повторно надсилає покупцю посилання для створення облікового запису. Скористайтеся, якщо початковий лист не надійшов.',
           )}
         </p>
+
+        {/* Linkin kendisi ve QR'i: mail hic ulasmadiginda destek elemani linki ekrandan
+            okuyup musteriye verebilsin ya da QR'i telefona okutabilsin. */}
+        <div className="admin-activation-link-row">
+          <code className="admin-activation-link">{activationLink}</code>
+          <button type="button" className="admin-activation-copy-btn" onClick={copyLink}>
+            {copied
+              ? at('admin.orderDetail.linkCopied', 'Copied', 'Скопійовано')
+              : at('admin.orderDetail.linkCopy', 'Copy link', 'Копіювати')}
+          </button>
+        </div>
+
         {result && (
           <p className={result.ok ? 'admin-resend-activation-ok' : 'admin-resend-activation-err'}>{result.text}</p>
         )}
       </div>
-      <button type="button" className="admin-save-btn" onClick={resend} disabled={sending || !purchaseUid}>
-        {sending
-          ? at('admin.orderDetail.resendSending', 'Sending…', 'Надсилання…')
-          : at('admin.orderDetail.resend', 'Resend', 'Надіслати ще раз')}
-      </button>
+
+      <div className="admin-activation-actions">
+        {qrDataUrl && (
+          <img
+            className="admin-activation-qr"
+            src={qrDataUrl}
+            alt={at('admin.orderDetail.linkQrAlt', 'Activation link QR code', 'QR-код посилання для активації')}
+          />
+        )}
+        <button type="button" className="admin-save-btn" onClick={resend} disabled={sending || !purchaseUid}>
+          {sending
+            ? at('admin.orderDetail.resendSending', 'Sending…', 'Надсилання…')
+            : at('admin.orderDetail.resend', 'Resend', 'Надіслати ще раз')}
+        </button>
+      </div>
     </div>
   );
 }
@@ -529,7 +629,12 @@ function AdminOrderDetail() {
               )}
             </div>
 
-            <ResendActivationCard purchaseUid={uid || ''} buyerEmail={order.buyer_email} />
+            <ResendActivationCard
+              purchaseUid={uid || ''}
+              buyerEmail={order.buyer_email}
+              activationLink={order.activation_link || ''}
+              blockedReason={order.activation_blocked_reason || ''}
+            />
 
             {isSuperAdmin && order.payment_summary && <PaymentSummaryCard summary={order.payment_summary} />}
 
