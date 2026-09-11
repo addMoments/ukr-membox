@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { cartState, findProduct, getCartQty, getQtyRule, getQtyRuleHint, initCartState, setCartQty } from '../client/cart';
 import { useSnapshot } from 'valtio';
 import ProductIcon from '../v2-components/ProductIcon';
+import { localizedTagText } from '../utils/product_i18n';
 import V2SignInForm from './V2SignInForm';
 import { signInEmail } from '../client/auth';
 import { resolvePostSignInRedirect } from '../client/admin';
@@ -224,7 +225,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
                   displayDescription={resolveDisplayTexts(pkg).description}
                   displayBullets={resolveDisplayBullets(pkg)}
                   price={pkg.price}
-                  tagText={pkg.options.tagText}
+                  tagText={localizedTagText(pkg.options)}
                   isSelected={cartQty > 0}
                   onSelect={() => coreClick(pkg.id)}
                 />

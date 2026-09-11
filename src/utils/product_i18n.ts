@@ -14,6 +14,22 @@ export function localizedLabel(item?: { label?: string; label_uk?: string } | nu
   return item.label || '';
 }
 
+// Ne: Paket kartinin sag ust kosesindeki rozetin (ornegin "Popular") aktif dildeki
+//     karsiligini secer.
+// Nasil: Dil uk ise options.tagText_uk, yoksa options.tagText; uk alani bossa Ingilizceye duser.
+// Neden: Rozet products.options icinde TEK DILLI bir alanda duruyordu, bu yuzden Ukraynaca
+//        fiyat sayfasinda "RECOMMENDED" diye Ingilizce cikiyordu -- musteri 2.4 yorumunda
+//        bunu bildirdi. Etiket admin tarafindan degistirilebilen bir veri oldugu icin cozum
+//        anahtar bazli i18n degil, 2.13'teki gibi ceviriyi veriyle birlikte tasimak.
+// options tipi her yerde Record<string, any>; valtio snapshot'i readonly oldugu icin
+// dar bir obje tipi yapisal olarak eslesmiyor.
+export function localizedTagText(options?: Readonly<Record<string, any>> | null): string {
+  if (!options) return '';
+  const uk = typeof options.tagText_uk === 'string' ? options.tagText_uk.trim() : '';
+  if (uk && t('lang_code') === 'uk') return uk;
+  return typeof options.tagText === 'string' ? options.tagText : '';
+}
+
 // Ne: Checkout form etiketlerindeki soru isareti ve "What is your" on ekini temizler.
 // Nasil: Sondaki ? isaretini atar, Ingilizce "what is your" prefix'ini siler; kalan metin
 //        tamamen kucuk harfse kelime baslarini buyutur (Event Date).
