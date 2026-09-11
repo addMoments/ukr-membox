@@ -8,6 +8,4 @@ export interface UploadEntry {
   client_uid: string;
   created_at: string;
   trashed_at: string;
-  // photo/video icin zorunlu (DB CHECK), text/voice icin null
-  album_uid?: string | null;
 }

@@ -21,30 +21,20 @@ export const uploadQrLogo = async (
     return uploadFiles(url, [file]);
 };
 
-export const uploadAlbumCover = async (
-    file: File,
-) => {
-    const url = `${SERV_ROOT}/api/upload/album_cover`;
-    return uploadFiles(url, [file]);
-};
-
 /**
  * Upload files as a guest participant
  * @param eventUid - UID of the event
  * @param utype - Upload type: 'photo', 'video', or 'voice'
  * @param files - Array of File objects to upload
- * @param albumUid - Hedef album (photo/video). Verilmezse sunucu General'e yazar.
  * @returns Array of final S3 file paths
  */
 export const guestUpload = async (
     eventUid: string,
     utype: string,
-    files: File[],
-    albumUid?: string | null
+    files: File[]
 ) => {
     const eventPackedUid = packUUID(eventUid);
-    const albumParam = albumUid ? `?album=${packUUID(albumUid)}` : '';
-    const url = `${SERV_ROOT}/api/guest/upload/${eventPackedUid}/${utype}${albumParam}`;
+    const url = `${SERV_ROOT}/api/guest/upload/${eventPackedUid}/${utype}`;
 
     return uploadFiles(url, files);
 }

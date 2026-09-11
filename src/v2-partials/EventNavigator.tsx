@@ -55,7 +55,6 @@ function EventNavigator({
   const navItems: { path: string; icon: string; labelKey: string; exact?: boolean; featureId?: number }[] = [
     { path: `/event/${packedUid}`, icon: 'fa-solid fa-home', labelKey: 'sidebar.dashboard', exact: true },
     { path: `/event/${packedUid}/gallery`, icon: 'fa-solid fa-images', labelKey: 'sidebar.gallery' },
-    { path: `/event/${packedUid}/albums`, icon: 'fa-regular fa-folder-open', labelKey: 'sidebar.albums' },
     { path: `/event/${packedUid}/guestbook`, icon: 'fa-solid fa-book', labelKey: 'sidebar.guestbook' },
     { path: `/event/${packedUid}/theme`, icon: 'fa-solid fa-palette', labelKey: 'sidebar.theme' },
     { path: `/event/${packedUid}/qr`, icon: 'fa-solid fa-qrcode', labelKey: 'sidebar.qrCode' },

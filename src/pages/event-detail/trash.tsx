@@ -15,12 +15,9 @@ import { textOr } from '../../utils/admin_i18n';
 import { getAuthToken } from '../../client/core';
 import '../../v2-styles/Gallery.css';
 
-// Cop kartlarinda album adi (silinmis albumdekiler "Deleted album" etiketiyle).
-type TrashUpload = UploadType & { albums?: { name?: string; deleted_at?: string | null } | null };
-
 function EventTrash() {
   const { uid: packedUid } = useParams<{ uid: string }>();
-  const [uploads, setUploads] = useState<TrashUpload[]>([]);
+  const [uploads, setUploads] = useState<UploadType[]>([]);
   const [participants, setParticipants] = useState<ParticipantInfo[]>([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [toast, setToast] = useState<string | null>(null);
@@ -35,7 +32,7 @@ function EventTrash() {
     const uid = unpackUUID(packedUid);
     
     Promise.all([
-      pgREST(`/uploads?event_uid=eq.${uid}&upload_type=in.(photo,video)&trashed_at=not.is.null&order=trashed_at.desc&select=*,albums(name,deleted_at)`),
+      pgREST(`/uploads?event_uid=eq.${uid}&upload_type=in.(photo,video)&trashed_at=not.is.null&order=trashed_at.desc`),
       pgREST(`/participants?event_uid=eq.${uid}`)
     ]).then(([uploadsData, participantsData]) => {
       setUploads(uploadsData);
@@ -181,11 +178,6 @@ function EventTrash() {
                       key={upload.uid}
                       uploaderName={name}
                       uploadEntry={upload}
-                      badge={upload.albums
-                        ? (upload.albums.deleted_at
-                          ? textOr('trash.deletedAlbum', 'Deleted album', 'Видалений альбом')
-                          : upload.albums.name)
-                        : undefined}
                       actions={[
                         { variant: 'icontext', text: '', icon: 'fa-solid fa-magnifying-glass', onClick: () => openPhotoViewer(upload.uid) },
                         { variant: 'icontext', text: '', icon: 'fa-solid fa-rotate-left', onClick: () => handleRestore(upload.uid) },

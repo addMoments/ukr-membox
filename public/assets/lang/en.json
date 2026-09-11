@@ -28,10 +28,7 @@
         "uploaded": "Uploaded",
         "failed": "Failed",
         "loading": "Loading...",
-        "qtyRule": "Minimum {{min}}, in multiples of {{step}}",
-        "items": "items",
-        "selectAll": "Select all",
-        "deselectAll": "Deselect all"
+        "qtyRule": "Minimum {{min}}, in multiples of {{step}}"
     },
     "errors": {
         "forbidden": "This action is not allowed right now.",
@@ -53,8 +50,7 @@
         "settings": "Settings",
         "collaborators": "Collaborators",
         "untitled": "Untitled",
-        "changeEvent": "Click to change event",
-        "albums": "Albums"
+        "changeEvent": "Click to change event"
     },
     "gallery": {
         "title": "Media Gallery",
@@ -68,20 +64,7 @@
         "loadMore": "Load More Memories",
         "emptyTitle": "No media yet",
         "emptyText": "Photos and videos shared by guests will appear here.",
-        "mediaDeleted": "Media deleted successfully",
-        "tabAll": "All albums",
-        "select": "Select",
-        "cancelSelect": "Cancel",
-        "selectedCount": "{{count}} selected",
-        "selectAllLoaded": "Select all loaded",
-        "moveTo": "Move to album",
-        "moved": "{{count}} items moved to \"{{name}}\"",
-        "moveFailed": "Could not move the items",
-        "sortByDate": "By date",
-        "sortByType": "By type",
-        "setAsCover": "Set as album cover",
-        "coverSet": "Album cover updated",
-        "coverFailed": "Could not update the cover"
+        "mediaDeleted": "Media deleted successfully"
     },
     "poster": {
         "title": "Poster Designer",
@@ -130,13 +113,6 @@
             "qrCodePreview": "QR Code Preview",
             "downloadPng": "Download PNG",
             "printPdf": "Print PDF"
-        },
-        "target": {
-            "label": "QR code for",
-            "event": "Main event",
-            "link": "Guest link",
-            "copy": "Copy",
-            "copied": "Copied"
         }
     },
     "theme": {
@@ -188,9 +164,7 @@
             "publicTextGuestbook": "Guests can see each other's text entries",
             "publicTextGuestbookDesc": "When enabled, guests can read text messages left by other guests.",
             "publicAudioGuestbook": "Guests can see each other's audio entries",
-            "publicAudioGuestbookDesc": "When enabled, guests can listen to voice messages left by other guests.",
-            "guestGallery": "Guests can view the gallery",
-            "guestGalleryDesc": "When on, guests can see the photos and videos in albums that allow viewing. Each album can be limited separately on the Albums page."
+            "publicAudioGuestbookDesc": "When enabled, guests can listen to voice messages left by other guests."
         },
         "advertorial": {
             "title": "Advertising Area",
@@ -287,8 +261,7 @@
         "emptyText": "Items you delete will appear here for 30 days before being permanently removed.",
         "deleteConfirm": "Are you sure you want to permanently delete this item?",
         "deleteSuccess": "Item permanently deleted",
-        "deleteError": "Failed to delete item",
-        "deletedAlbum": "Deleted album"
+        "deleteError": "Failed to delete item"
     },
     "guestbook": {
         "title": "Guestbook",
@@ -528,36 +501,7 @@
         "uploadingProgress": "{{done}} of {{total}} files uploaded · {{size}}",
         "limitReachedTitle": "Participant limit reached",
         "limitReachedDescription": "This event has reached the new participant limit.",
-        "uploadCompleted": "Upload completed",
-        "album": {
-            "sectionTitle": "Albums",
-            "sectionHint": "Choose an album to share your photos.",
-            "pickAlbum": "Album",
-            "pickAlbumHint": "Where should these go?",
-            "open": "Open album",
-            "uploadHere": "Upload to this album",
-            "uploadsClosed": "Uploads are closed for this album",
-            "noVisibleAlbums": "Uploads are closed for this event right now.",
-            "viewOnlyHost": "Photos in this album are visible only to the host.",
-            "downloadAll": "Download all",
-            "downloading": "Preparing your download…",
-            "downloadFailed": "Download failed. Please try again.",
-            "itemsCount": "{{count}} items",
-            "backToEvent": "Back to event",
-            "closedTitle": "This album is not available",
-            "closedMessage": "The host has closed this album.",
-            "passcodeTitle": "Enter passcode",
-            "passcodeMessage": "This album is protected. Ask the host for the passcode.",
-            "passcodePlaceholder": "Passcode",
-            "passcodeSubmit": "Open album",
-            "passcodeWrong": "That passcode is not correct.",
-            "sortNewest": "Newest",
-            "sortOldest": "Oldest",
-            "sortByType": "Photos first",
-            "empty": "No photos yet. Be the first to share!",
-            "download": "Download",
-            "galleryTitle": "Gallery"
-        }
+        "uploadCompleted": "Upload completed"
     },
     "guestGuestbook": {
         "voiceMessage": "Voice Message",
@@ -594,8 +538,7 @@
         "selectMoment": "Select a moment to manage",
         "noUploadsYet": "No uploads yet",
         "startSharing": "Start sharing your memories with the event.",
-        "loadMoreMemories": "Load More Memories",
-        "inAlbum": "Album: {{name}}"
+        "loadMoreMemories": "Load More Memories"
     },
     "auth": {
         "eventMemories": "Event memories",
@@ -920,107 +863,5 @@
         "monthsOne": "{{n}} month",
         "monthsFew": "{{n}} months",
         "monthsMany": "{{n}} months"
-    },
-    "albums": {
-        "title": "Albums",
-        "breadcrumb": "Albums",
-        "subtitle": "Group your event’s photos into albums. Each album has its own link and QR code.",
-        "newAlbum": "New album",
-        "sortByName": "By name",
-        "sortByDate": "By date",
-        "itemsCount": "{{count}} items",
-        "defaultBadge": "Default",
-        "closedBadge": "Hidden from guests",
-        "viewOffBadge": "View off",
-        "privacyPublic": "Public",
-        "privacyPrivate": "Private",
-        "privacyProtected": "Protected",
-        "noDate": "No date",
-        "galleryOffNotice": "Guest viewing is off for the whole event. Guests can upload but not see the albums’ photos.",
-        "galleryOffAction": "Open Settings",
-        "actions": {
-            "edit": "Edit",
-            "share": "Share & QR",
-            "download": "Download",
-            "delete": "Delete",
-            "open": "Open gallery"
-        },
-        "empty": {
-            "title": "No albums yet",
-            "text": "Create albums like Ceremony, Reception or Party and share each one with its own QR code."
-        },
-        "form": {
-            "createTitle": "New album",
-            "editTitle": "Edit album",
-            "general": "General",
-            "generalDesc": "What guests see when they open this album.",
-            "nameLabel": "Album name",
-            "namePlaceholder": "Ceremony, Reception, Party…",
-            "dateLabel": "Album date",
-            "locationLabel": "Location",
-            "locationPlaceholder": "Venue or city",
-            "descriptionLabel": "Description",
-            "descriptionPlaceholder": "Share your best photos from the dance floor!",
-            "coverLabel": "Album cover",
-            "coverUpload": "Upload cover",
-            "coverChange": "Change cover",
-            "coverRemove": "Remove cover",
-            "coverHint": "JPG or PNG. You can also open the gallery and use “Set as album cover” on any photo.",
-            "privacy": "Privacy",
-            "privacyDesc": "Decide who can open this album.",
-            "privacyPublicDesc": "Listed on the event page. Available via the main QR code or the album’s own link.",
-            "privacyPrivateDesc": "Not listed on the event page. Only guests with this album’s link or QR code can open it.",
-            "privacyProtectedDesc": "Only guests who enter the passcode can open it.",
-            "passcodeLabel": "Passcode",
-            "passcodePlaceholder": "4–8 characters",
-            "passcodeHint": "Shown here in plain text so you can share it with your guests.",
-            "guestAccess": "Guest access",
-            "guestAccessDesc": "What guests can do in this album.",
-            "guestUpload": "Guest uploads",
-            "guestUploadDesc": "Guests can add photos and videos. When off, the album is hidden from guests entirely.",
-            "guestView": "Guests can view this album",
-            "guestViewDesc": "Guests see the photos and videos in this album. Also needs “Guests can view the gallery” in Settings.",
-            "guestDownloadAll": "Guests can download the whole album",
-            "guestDownloadAllDesc": "Shows a “Download all” button on the guest album page.",
-            "save": "Save album",
-            "create": "Create album",
-            "cancel": "Cancel",
-            "saved": "Album saved",
-            "saveFailed": "Could not save the album",
-            "nameRequired": "Please enter an album name.",
-            "passcodeRequired": "Protected albums need a passcode.",
-            "passcodeTooShort": "Passcode must be 4–8 characters.",
-            "defaultNote": "This is the default album. Uploads without an album go here, and it cannot be deleted."
-        },
-        "delete": {
-            "title": "Delete album",
-            "warning": "All {{count}} photos and videos in “{{name}}” will be moved to Trash together with the album.",
-            "warningEmpty": "“{{name}}” is empty and will be removed.",
-            "hint": "You can restore items from Trash before they are permanently deleted. Restored items go to the General album.",
-            "confirmCheckbox": "I understand the photos and videos will be moved to Trash",
-            "confirmButton": "Delete album",
-            "cancel": "Cancel",
-            "done": "Album deleted. {{count}} items moved to Trash.",
-            "failed": "Could not delete the album."
-        },
-        "share": {
-            "title": "Share “{{name}}”",
-            "link": "Album link",
-            "copy": "Copy link",
-            "copied": "Link copied",
-            "qr": "Album QR code",
-            "downloadQr": "Download QR (PNG)",
-            "customizeQr": "Customize QR",
-            "close": "Close",
-            "privateHint": "This album is not listed on the event page. Guests need this link or QR code.",
-            "protectedHint": "Guests will also need the passcode: {{passcode}}"
-        },
-        "download": {
-            "start": "Prepare ZIP",
-            "ready": "Download ZIP",
-            "preparing": "Preparing…",
-            "failed": "Export failed",
-            "latest": "Latest export: {{date}}"
-        }
     }
 }

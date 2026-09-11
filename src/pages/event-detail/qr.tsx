@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import EventDetailLayout from '../../v2-partials/EventDetailLayout';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import FileInput from '../../components/FileInput';
-import { eventGuestUrl, eventQrImageUrl, EventPublic } from '../../types/events';
-import { Album, albumGuestUrl, albumQrImageUrl, sortAlbums } from '../../types/albums';
-import { listAlbums } from '../../client/albums';
+import { eventQrImageUrl } from '../../types/events';
 import { uploadQrLogo } from '../../client/uploads';
 import { fetch } from '../../client/core';
 import { SERV_ROOT } from '../../consts';
@@ -13,10 +11,7 @@ import '../../v2-styles/QR.css';
 import '../../v2-styles/qrpageprint.css';
 import Button from '../../components/Button';
 import { saveUrl } from '../../utils/download';
-import { copyText } from '../../utils/clipboard';
 import { t } from '../../packages/i18n';
-import { textOr } from '../../utils/admin_i18n';
-import { packUUID, unpackUUID } from '../../packages/uuid';
 import { get_key, set_key } from '../../utils/persistence';
 
 type PatternType = 'circle' | 'liquidblock' | 'rectangle' | 'dots';
@@ -35,28 +30,12 @@ const DEFAULT_SETTINGS: QrSettings = {
   noLogo: false,
 };
 
-// Hedef basina ayri ayar: etkinlik QR'i eski anahtari korur, album QR'lari ":<packedAlbum>" ekiyle.
-function qrSettingsKey(packedUid: string, target: string) {
-  return target === EVENT_TARGET ? `qr-settings-${packedUid}` : `qr-settings-${packedUid}:${packUUID(target)}`;
+function qrSettingsKey(packedUid: string) {
+  return `qr-settings-${packedUid}`;
 }
-
-// Ne: QR sayfasi artik etkinlik QR'inin yaninda album QR'larini da uretir (albumler, 2026-09-08).
-// Nasil: "QR code for" secicisi hedefi belirler; hedef album ise endpoint
-//        /api/qr/<event>/album/<album>, onizleme albumQrImageUrl. ?album=<packed> ile acilirsa
-//        secici o albumle baslar (Albums sayfasindaki "Customize QR").
-const EVENT_TARGET = 'event';
 
 function EventQR() {
   const { uid: packedUid } = useParams<{ uid: string }>();
-  const [searchParams] = useSearchParams();
-  const [albums, setAlbums] = useState<Album[]>([]);
-  const [target, setTarget] = useState<string>(() => {
-    const p = searchParams.get('album');
-    return p ? (unpackUUID(p) || EVENT_TARGET) : EVENT_TARGET;
-  });
-  const [copied, setCopied] = useState(false);
-  const targetRef = useRef(target);
-  targetRef.current = target;
   const [file, setFile] = useState<File | null>(null);
   const [fgColor, setFgColor] = useState(DEFAULT_SETTINGS.fgColor);
   const [bgColor, setBgColor] = useState(DEFAULT_SETTINGS.bgColor);
@@ -69,17 +48,10 @@ function EventQR() {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const logoPathRef = useRef<string | null>(null);
 
+  // Restore saved settings on mount
   useEffect(() => {
     if (!packedUid) return;
-    listAlbums(unpackUUID(packedUid)).then(setAlbums).catch(() => setAlbums([]));
-  }, [packedUid]);
-
-  // Restore saved settings on mount (and whenever the QR target changes)
-  useEffect(() => {
-    if (!packedUid) return;
-    setSettingsLoaded(false);
-    setPreviewTimestamp(null);
-    get_key(qrSettingsKey(packedUid, target))
+    get_key(qrSettingsKey(packedUid))
       .then((saved: QrSettings) => {
         const settings = saved ? {
           fgColor: saved.fgColor ?? DEFAULT_SETTINGS.fgColor,
@@ -99,34 +71,10 @@ function EventQR() {
       .finally(() => setSettingsLoaded(true));
 
     return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
-  }, [packedUid, target]);
+  }, [packedUid]);
 
   const saveSettings = (settings: QrSettings) => {
-    if (packedUid) set_key(qrSettingsKey(packedUid, targetRef.current), settings).catch(() => {});
-  };
-
-  const qrEndpoint = () => {
-    const current = targetRef.current;
-    if (current === EVENT_TARGET) return `${SERV_ROOT}/api/qr/${packedUid}`;
-    return `${SERV_ROOT}/api/qr/${packedUid}/album/${packUUID(current)}`;
-  };
-
-  const qrImageUrl = (event: EventPublic) => {
-    if (target === EVENT_TARGET) return eventQrImageUrl(event);
-    return albumQrImageUrl(event.uid, target);
-  };
-
-  const guestLink = (event: EventPublic) => {
-    if (target === EVENT_TARGET) return eventGuestUrl(event);
-    return albumGuestUrl(target);
-  };
-
-  const handleCopyLink = async (event: EventPublic) => {
-    const ok = await copyText(guestLink(event));
-    if (ok) {
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    }
+    if (packedUid) set_key(qrSettingsKey(packedUid), settings).catch(() => {});
   };
 
   const generateQR = async (params: { fgColor: string; bgColor: string; shape: PatternType; noLogo: boolean }) => {
@@ -140,7 +88,7 @@ function EventQR() {
       if (logoPathRef.current && !params.noLogo) {
         body.logo = logoPathRef.current;
       }
-      await fetch(qrEndpoint(), {
+      await fetch(`${SERV_ROOT}/api/qr/${packedUid}`, {
         method: 'POST',
         body: JSON.stringify(body),
       });
@@ -190,20 +138,6 @@ function EventQR() {
           <div className="qr-header">
             <p className="qr-header-subtitle">{t('qr.subtitle')}</p>
             <div className="qr-header-actions">
-              {albums.length > 0 && (
-                <label className="qr-target-select">
-                  <span>{textOr('qr.target.label', 'QR code for', 'QR-код для')}</span>
-                  <select
-                    value={target}
-                    onChange={(e) => { setCopied(false); setTarget(e.target.value); }}
-                  >
-                    <option value={EVENT_TARGET}>{textOr('qr.target.event', 'Main event', 'Основна подія')}</option>
-                    {sortAlbums(albums, 'date').map((album) => (
-                      <option key={album.uid} value={album.uid}>{album.name}</option>
-                    ))}
-                  </select>
-                </label>
-              )}
               <Button
                 loading={loading}
                 icon="fa-solid fa-check"
@@ -385,8 +319,7 @@ function EventQR() {
                   <div className="qr-preview-code-container">
                     {event.uid ? (
                       <img
-                        key={target}
-                        src={qrImageUrl(event) + (previewTimestamp ? '?t=' + previewTimestamp : '')}
+                        src={eventQrImageUrl(event) + (previewTimestamp ? '?t=' + previewTimestamp : '')}
                         alt={t('qr.preview.qrCodePreview')}
                         id="qr-code-preview"
                       />
@@ -402,9 +335,8 @@ function EventQR() {
                       type="button"
                       className="qr-download-btn primary"
                       onClick={() => {
-                        const url = qrImageUrl(event) + (previewTimestamp ? '?t=' + previewTimestamp : '?t=' + Date.now());
-                        const albumName = albums.find(a => a.uid === target)?.name;
-                        saveUrl(url, albumName ? `qr-${albumName}.png` : 'qr-code.png').catch(() => {
+                        const url = eventQrImageUrl(event) + (previewTimestamp ? '?t=' + previewTimestamp : '?t=' + Date.now());
+                        saveUrl(url, 'qr-code.png').catch(() => {
                           window.open(url, '_blank');
                         });
                       }}
@@ -417,18 +349,6 @@ function EventQR() {
                       {t('qr.preview.printPdf')}
                     </button>
                   </div>
-                  {event.uid && (
-                    <div className="qr-link-box">
-                      <span className="qr-link-label">{textOr('qr.target.link', 'Guest link', 'Посилання для гостей')}</span>
-                      <div className="qr-link-row">
-                        <input type="text" readOnly value={guestLink(event)} onFocus={(e) => e.currentTarget.select()} />
-                        <button type="button" className="qr-link-copy" onClick={() => handleCopyLink(event)}>
-                          <i className={`fa-solid ${copied ? 'fa-check' : 'fa-copy'}`} />
-                          {copied ? textOr('qr.target.copied', 'Copied', 'Скопійовано') : textOr('qr.target.copy', 'Copy', 'Копіювати')}
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

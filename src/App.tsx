@@ -45,9 +45,6 @@ const EventPoster = lazy(() => import('./pages/event-detail/poster'));
 const Participant = lazy(() => import('./pages/participant/index'));
 const ParticipantUploads = lazy(() => import('./pages/participant/uploads'));
 const ParticipantGuestbook = lazy(() => import('./pages/participant/guestbook'));
-const ParticipantAlbum = lazy(() => import('./pages/participant/album'));
-const EventAlbums = lazy(() => import('./pages/event-detail/albums'));
-const EventAlbumEdit = lazy(() => import('./pages/event-detail/album-edit'));
 const Message = lazy(() => import('./pages/message'));
 const EventNew = lazy(() => import('./pages/event-new'));
 const EventCheckout = lazy(() => import('./pages/event-checkout'));
@@ -108,8 +105,6 @@ function AppContent() {
               login olduktan sonra orijinal URL (?prompt=extend gibi query'ler dahil) aynen acilir. */}
           <Route path="/event/:uid" element={<RequireAuth><EventDetail /></RequireAuth>} />
           <Route path="/event/:uid/gallery" element={<RequireAuth><EventGallery /></RequireAuth>} />
-          <Route path="/event/:uid/albums" element={<RequireAuth><EventAlbums /></RequireAuth>} />
-          <Route path="/event/:uid/albums/:albumUid" element={<RequireAuth><EventAlbumEdit /></RequireAuth>} />
           <Route path="/event/:uid/guestbook" element={<RequireAuth><EventGuestbook /></RequireAuth>} />
           <Route path="/event/:uid/trash" element={<RequireAuth><EventTrash /></RequireAuth>} />
           <Route path="/event/:uid/collaborators" element={<RequireAuth><EventCollaborators /></RequireAuth>} />
@@ -132,7 +127,6 @@ function AppContent() {
           <Route path="/guest/:uid" element={<Participant />} />
           <Route path="/guest/:uid/uploads" element={<ParticipantUploads />} />
           <Route path="/guest/:uid/guestbook" element={<ParticipantGuestbook />} />
-          <Route path="/guest/:uid/album/:albumUid" element={<ParticipantAlbum />} />
           <Route path="/notice/*" element={<Message />} />
 
 

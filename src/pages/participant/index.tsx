@@ -16,8 +16,6 @@ import GuestAccessErrorScreen from '../../v2-partials/GuestAccessErrorScreen';
 import { getEventClosedMessage, isEventClosedError, isPackageLimitExceededError } from '../../utils/guestInitError';
 import { getPublicAdvertorialConfig } from '../../client/advertorial';
 import { AdvertorialResponse } from '../../types/advertorial';
-import { guestListAlbums } from '../../client/albums';
-import { GuestAlbum } from '../../types/albums';
 
 
 const HeadlessParticipant = (props: V2GuestHomeProps) => {
@@ -38,10 +36,6 @@ function Participant() {
   // denenebilir bir hata ekrani gosterilir. Bkz. asagidaki catch blogu.
   const [bootstrapFailed, setBootstrapFailed] = useState(false);
   const [advertorial, setAdvertorial] = useState<AdvertorialResponse | null>(null);
-  // Misafire gorunur albumler. whoAmI'den SONRA cekilir: eski token'a "ev" claim'i
-  // whoami'de eklenir, PostgREST RLS'i o claim'e bakar.
-  const [albums, setAlbums] = useState<GuestAlbum[]>([]);
-  const [albumsLoaded, setAlbumsLoaded] = useState(false);
   const langCode = t('lang_code');
   const resolveFallback = (rawValue: string, key: string, enText: string, ukText: string) => {
     if (rawValue !== key) return rawValue;
@@ -106,14 +100,11 @@ function Participant() {
         const user = await whoAmI();
         setParticipantUid(user.ui);
 
-        const [eventData, uploadsData, participantData, advertorialData, albumsData] = await Promise.all([
+        const [eventData, uploadsData, participantData, advertorialData] = await Promise.all([
           pgREST(`/events_public?uid=eq.${uid}`),
           pgREST(`/uploads?event_uid=eq.${uid}&client_uid=eq.${user.ui}&upload_type=in.(photo,video)&trashed_at=is.null&order=created_at.desc&limit=3`),
           pgREST(`/participants?uid=eq.${user.ui}&select=name`),
           getPublicAdvertorialConfig(packedUid).catch(() => null),
-          // Album listesi hata verirse (ornegin migration heniz yoksa) sayfa yine acilir;
-          // albumsLoaded false kalir, yukleme butonu eski davranisla calisir.
-          guestListAlbums(uid).then((list) => ({ ok: true, list })).catch(() => ({ ok: false, list: [] as GuestAlbum[] })),
         ]);
 
         // Ne: Event kaydi gelmediyse erken cikar.
@@ -128,8 +119,6 @@ function Participant() {
         applyGuestFont(eventData[0].settings?.font);
         setRecentUploads(uploadsData as UploadEntry[]);
         setAdvertorial(advertorialData);
-        setAlbums(albumsData.list);
-        setAlbumsLoaded(albumsData.ok);
         const currentName = participantData?.[0]?.name || '';
         if (currentName && !currentName.startsWith('guest-')) {
           setParticipantName(currentName);
@@ -260,8 +249,6 @@ function Participant() {
       onUploaderNameUpdate={setParticipantName}
       theme={event.settings?.colors || defaultGuestTheme}
       advertorial={advertorial}
-      albums={albums}
-      albumsLoaded={albumsLoaded}
     />
   );
 }

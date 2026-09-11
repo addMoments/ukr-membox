@@ -64,7 +64,7 @@ function V2ParticipantUploads() {
 
         const [eventData, uploadsData] = await Promise.all([
           pgREST(`/events_public?uid=eq.${eventUid}`),
-          pgREST(`/uploads?event_uid=eq.${eventUid}&client_uid=eq.${uid}&upload_type=in.(photo,video)&trashed_at=is.null&order=created_at.desc&limit=${PAGE_SIZE}&offset=0&select=*,albums(name)`)
+          pgREST(`/uploads?event_uid=eq.${eventUid}&client_uid=eq.${uid}&upload_type=in.(photo,video)&trashed_at=is.null&order=created_at.desc&limit=${PAGE_SIZE}&offset=0`)
         ]);
 
         setEvent(eventData[0]);
@@ -89,7 +89,7 @@ function V2ParticipantUploads() {
     setLoadingMore(true);
     try {
       const more = await pgREST(
-        `/uploads?event_uid=eq.${eventUid}&client_uid=eq.${participantUid}&upload_type=in.(photo,video)&trashed_at=is.null&order=created_at.desc&limit=${PAGE_SIZE}&offset=${offset}&select=*,albums(name)`
+        `/uploads?event_uid=eq.${eventUid}&client_uid=eq.${participantUid}&upload_type=in.(photo,video)&trashed_at=is.null&order=created_at.desc&limit=${PAGE_SIZE}&offset=${offset}`
       );
       setUploads(prev => [...prev, ...more]);
       setOffset(prev => prev + PAGE_SIZE);
@@ -244,7 +244,6 @@ function V2ParticipantUploads() {
                   key={upload.uid}
                   uploaderName="guest-you"
                   uploadEntry={upload}
-                  badge={(upload as UploadEntry & { albums?: { name?: string } | null }).albums?.name || undefined}
                   onFullscreen={() => openPhotoViewer(upload.uid)}
                 />
               ))

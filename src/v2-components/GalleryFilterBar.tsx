@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { t } from '../packages/i18n';
 import '../v2-styles/GalleryFilterBar.css';
 
@@ -22,8 +21,6 @@ interface GalleryFilterBarProps {
   renderSearch?: boolean;
   sortOrder?: 'desc' | 'asc';
   onSortChange?: (order: 'desc' | 'asc') => void;
-  // Siralama butonunun soluna ek kontroller (albumler: tur siralamasi, secim modu).
-  extraControls?: ReactNode;
 }
 
 const defaultTabs: FilterTab[] = [
@@ -40,7 +37,6 @@ function GalleryFilterBar({
   renderSearch = true,
   sortOrder = 'desc',
   onSortChange,
-  extraControls,
 }: GalleryFilterBarProps) {
   return (
     <div className="gallery-filter-bar">
@@ -66,10 +62,9 @@ function GalleryFilterBar({
               placeholder={searchPlaceholder || t('gallery.searchPlaceholder')}
             />
           </div>}
-          {extraControls}
           <button
             className="gallery-sort-btn"
-            style={!renderSearch && !extraControls ? { marginLeft: 'auto' } : undefined}
+            style={!renderSearch ? { marginLeft: 'auto' } : undefined}
             onClick={() => onSortChange?.(sortOrder === 'desc' ? 'asc' : 'desc')}
           >
             <i className={`fa-solid fa-arrow-${sortOrder === 'desc' ? 'down' : 'up'}-wide-short`}></i>
