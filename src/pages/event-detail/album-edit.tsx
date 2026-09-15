@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import EventDetailLayout from '../../v2-partials/EventDetailLayout';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import SettingsFieldNote from '../../v2-components/SettingsFieldNote';
@@ -288,7 +288,7 @@ function EventAlbumEditInner({ event }: { event: Event }) {
             {([
               { value: 'public', icon: 'fa-solid fa-globe', title: textOr('albums.privacyPublic', 'Public', 'Публічний'), desc: textOr('albums.form.privacyPublicDesc', 'Listed on the event page. Available via the main QR code or the album’s own link.', 'Відображається на сторінці події. Доступний через основний QR-код або власне посилання альбому.') },
               { value: 'private', icon: 'fa-solid fa-link', title: textOr('albums.privacyPrivate', 'Private', 'Приватний'), desc: textOr('albums.form.privacyPrivateDesc', 'Not listed on the event page. Only guests with this album’s link or QR code can open it.', 'Не відображається на сторінці події. Відкрити можуть лише гості з посиланням або QR-кодом цього альбому.') },
-              { value: 'protected', icon: 'fa-solid fa-lock', title: textOr('albums.privacyProtected', 'Protected', 'З паролем'), desc: textOr('albums.form.privacyProtectedDesc', 'Only guests who enter the passcode can open it.', 'Відкрити можуть лише гості, які введуть пароль.') },
+              { value: 'protected', icon: 'fa-solid fa-lock', title: textOr('albums.privacyProtected', 'Protected', 'З паролем'), desc: textOr('albums.form.privacyProtectedDesc', 'Listed on the event page with a lock. Guests need the passcode to open it.', 'Відображається на сторінці події із замком. Щоб відкрити, гостям потрібен пароль.') },
             ] as { value: AlbumPrivacy; icon: string; title: string; desc: string }[]).map((opt) => (
               <label className="settings-radio-card" key={opt.value}>
                 <input
@@ -339,13 +339,13 @@ function EventAlbumEditInner({ event }: { event: Event }) {
           <div className="settings-toggle-list">
             <SettingsToggle
               name={textOr('albums.form.guestUpload', 'Guest uploads', 'Завантаження гостей')}
-              description={textOr('albums.form.guestUploadDesc', 'Guests can add photos and videos. When off, the album is hidden from guests entirely.', 'Гості можуть додавати фото та відео. Якщо вимкнено, альбом повністю прихований від гостей.')}
+              description={textOr('albums.form.guestUploadDesc', 'Guests can add photos and videos. When off, guests can still open the album to view it (if viewing is on), but cannot upload.', 'Гості можуть додавати фото та відео. Якщо вимкнено, гості все ще можуть відкрити альбом для перегляду (якщо перегляд увімкнено), але не можуть завантажувати.')}
               checked={album ? album.guest_upload : true}
               formName="guest_upload"
             />
             <SettingsToggle
               name={textOr('albums.form.guestView', 'Guests can view this album', 'Гості можуть переглядати цей альбом')}
-              description={textOr('albums.form.guestViewDesc', 'Guests see the photos and videos in this album. Also needs “Guests can view the gallery” in Settings.', 'Гості бачать фото та відео в цьому альбомі. Також потрібно увімкнути «Гості можуть переглядати галерею» у налаштуваннях.')}
+              description={textOr('albums.form.guestViewDesc', 'Guests see the photos and videos in this album. Also needs “Guests can view the gallery” in Settings. If both uploads and viewing are off, the album is hidden from guests.', 'Гості бачать фото та відео в цьому альбомі. Також потрібно увімкнути «Гості можуть переглядати галерею» у налаштуваннях. Якщо вимкнено і завантаження, і перегляд, альбом приховано від гостей.')}
               checked={album ? album.guest_view : true}
               formName="guest_view"
             />
@@ -360,6 +360,7 @@ function EventAlbumEditInner({ event }: { event: Event }) {
             <div className="albums-notice" style={{ marginTop: 20, marginBottom: 0 }}>
               <i className="fa-solid fa-eye-slash" />
               <span>{textOr('albums.galleryOffNotice', 'Guest viewing is off for the whole event. Guests can upload but not see the albums’ photos.', 'Перегляд для гостей вимкнено для всієї події. Гості можуть завантажувати, але не бачать фото в альбомах.')}</span>
+              <Link to={`/event/${packedUid}/settings#privacy`}>{textOr('albums.galleryOffAction', 'Open Settings', 'Відкрити налаштування')}</Link>
             </div>
           )}
         </section>

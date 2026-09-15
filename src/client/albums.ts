@@ -1,7 +1,7 @@
 import { SERV_ROOT } from '../consts';
 import { packUUID } from '../packages/uuid';
 import { Album, AlbumInput, GUEST_ALBUM_COLUMNS, GuestAlbum } from '../types/albums';
-import { fetch, FetchHttpError } from './core';
+import { fetch, FetchHttpError, getAuthToken } from './core';
 import { pgErr, pgREST } from './postgrest';
 import { saveBlob } from '../utils/download';
 
@@ -102,13 +102,49 @@ export const ensureAlbumQRs = async (eventUid: string): Promise<string[]> => {
 // Misafir (webanon)
 // ---------------------------------------------------------------------------
 
-// Ana sayfa listesi: yalnizca public. Private/protected albumler linkten acilir,
-// listede cikmaz (karar 11). RLS ayrica yuklemesi kapali albumleri gizler.
+// Ana sayfa listesi. Suzme RLS'te (11-albums-v2.sql albums_guest_select): public + protected
+// (kilitli gosterilir) + linkten acilmis private; misafire acik hicbir yani olmayan album
+// (yukleme kapali ve galeri gorunmuyor) listeye girmez.
+// 2026-09-15: eskiden buradaki privacy=eq.public suzgeci protected albumu de gizliyordu;
+// host passcode koyunca album misafir sayfasindan kayboluyor, "passcode calismiyor" saniliyordu.
 export const guestListAlbums = async (eventUid: string): Promise<GuestAlbum[]> => {
   const res = await pgREST(
-    `/albums?event_uid=eq.${eventUid}&privacy=eq.public&select=${GUEST_ALBUM_COLUMNS}&order=is_default.desc,sort_order.asc,created_at.asc`
+    `/albums?event_uid=eq.${eventUid}&select=${GUEST_ALBUM_COLUMNS}&order=is_default.desc,sort_order.asc,created_at.asc`
   );
   return Array.isArray(res) ? res : [];
+};
+
+// Ne: Misafirin acmis oldugu (passcode girdigi / linkten actigi) private-protected album
+//     UID'leri; misafir token'inin "al" claim'inden okunur.
+// Nasil: JWT govdesi base64url JSON'dur, imza dogrulamaya gerek yok — karar sunucuda ve
+//        RLS'te verilir, burasi yalnizca arayuzu (kilit ikonu, yukleme secicisi) sekillendirir.
+// Neden: Ana sayfada protected albumler artik listeleniyor; acilmamis olani yukleme
+//        hedefi olarak sunmamak ve kilitli gostermek icin token'daki listeye bakmak gerekir.
+export const guestOpenedAlbumUids = async (): Promise<Set<string>> => {
+  const opened = new Set<string>();
+  try {
+    const token = await getAuthToken();
+    const payload = token?.split('.')[1];
+    if (!payload) return opened;
+    const json = decodeURIComponent(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+        .split('')
+        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('')
+    );
+    const claims = JSON.parse(json) as { al?: unknown };
+    if (Array.isArray(claims.al)) {
+      claims.al.forEach((uid) => { if (typeof uid === 'string' && uid) opened.add(uid); });
+    }
+  } catch {
+    // Bozuk/eksik token: hicbir album acik sayilmaz; sunucu zaten kendi kararini verir.
+  }
+  return opened;
+};
+
+// Misafirin bir albume yukleme yapip yapamayacagi (arayuz karari; sunucu ayrica kontrol eder).
+export const guestCanUploadTo = (album: GuestAlbum, opened: Set<string>) => {
+  return album.guest_upload && (album.privacy === 'public' || opened.has(album.uid));
 };
 
 export const guestGetAlbum = async (albumUid: string): Promise<GuestAlbum | null> => {
@@ -116,12 +152,12 @@ export const guestGetAlbum = async (albumUid: string): Promise<GuestAlbum | null
   return Array.isArray(res) && res[0] ? res[0] : null;
 };
 
-export type GuestAlbumErrorCode = 'ALBUM_CLOSED' | 'PASSCODE_REQUIRED' | 'PASSCODE_INVALID' | 'ALBUM_NOT_OPENED';
+export type GuestAlbumErrorCode = 'ALBUM_CLOSED' | 'PASSCODE_REQUIRED' | 'PASSCODE_INVALID' | 'ALBUM_NOT_OPENED' | 'UPLOADS_CLOSED';
 
 export const getGuestAlbumErrorCode = (err: unknown): GuestAlbumErrorCode | null => {
   if (!(err instanceof FetchHttpError)) return null;
   const code = err.body && typeof err.body === 'object' ? (err.body as { code?: unknown }).code : null;
-  if (code === 'ALBUM_CLOSED' || code === 'PASSCODE_REQUIRED' || code === 'PASSCODE_INVALID' || code === 'ALBUM_NOT_OPENED') {
+  if (code === 'ALBUM_CLOSED' || code === 'PASSCODE_REQUIRED' || code === 'PASSCODE_INVALID' || code === 'ALBUM_NOT_OPENED' || code === 'UPLOADS_CLOSED') {
     return code;
   }
   return null;
@@ -131,6 +167,9 @@ export interface GuestOpenResult {
   ok: boolean;
   album_uid: string;
   guest_view: boolean;
+  guest_upload: boolean;
+  // etkinlik duzeyi "Guests can view the gallery" anahtari (events.settings.guest_gallery)
+  gallery_on: boolean;
 }
 
 // Albumu linkten acar; private/protected ise token'a isler (X-Auth-Token core.ts'de saklanir).

@@ -556,7 +556,9 @@
             "sortByType": "Photos first",
             "empty": "No photos yet. Be the first to share!",
             "download": "Download",
-            "galleryTitle": "Gallery"
+            "galleryTitle": "Gallery",
+            "passcodeNeeded": "Passcode required",
+            "viewOnly": "View only"
         }
     },
     "guestGuestbook": {
@@ -970,16 +972,16 @@
             "privacyDesc": "Decide who can open this album.",
             "privacyPublicDesc": "Listed on the event page. Available via the main QR code or the album’s own link.",
             "privacyPrivateDesc": "Not listed on the event page. Only guests with this album’s link or QR code can open it.",
-            "privacyProtectedDesc": "Only guests who enter the passcode can open it.",
+            "privacyProtectedDesc": "Listed on the event page with a lock. Guests need the passcode to open it.",
             "passcodeLabel": "Passcode",
             "passcodePlaceholder": "4–8 characters",
             "passcodeHint": "Shown here in plain text so you can share it with your guests.",
             "guestAccess": "Guest access",
             "guestAccessDesc": "What guests can do in this album.",
             "guestUpload": "Guest uploads",
-            "guestUploadDesc": "Guests can add photos and videos. When off, the album is hidden from guests entirely.",
+            "guestUploadDesc": "Guests can add photos and videos. When off, guests can still open the album to view it (if viewing is on), but cannot upload.",
             "guestView": "Guests can view this album",
-            "guestViewDesc": "Guests see the photos and videos in this album. Also needs “Guests can view the gallery” in Settings.",
+            "guestViewDesc": "Guests see the photos and videos in this album. Also needs “Guests can view the gallery” in Settings. If both uploads and viewing are off, the album is hidden from guests.",
             "guestDownloadAll": "Guests can download the whole album",
             "guestDownloadAllDesc": "Shows a “Download all” button on the guest album page.",
             "save": "Save album",
@@ -1021,6 +1023,7 @@
             "preparing": "Preparing…",
             "failed": "Export failed",
             "latest": "Latest export: {{date}}"
-        }
+        },
+        "uploadsClosedBadge": "Uploads closed"
     }
 }

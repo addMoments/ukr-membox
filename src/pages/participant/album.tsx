@@ -134,7 +134,9 @@ function ParticipantAlbum() {
         setParticipantName(currentName);
       }
 
-      const visible = !!ev.settings?.guest_gallery && !!albumData.guest_view && !!openResult?.guest_view;
+      // Iki galeri anahtari: etkinlik (events_public.settings.guest_gallery) + album (guest_view).
+      // open ucu ikisini de doner; PostgREST'ten gelen kopya ile celisirse sunucuya guvenilir.
+      const visible = (openResult?.gallery_on ?? !!ev.settings?.guest_gallery) && !!albumData.guest_view;
       setGalleryVisible(visible);
       if (visible) {
         const requestId = ++requestIdRef.current;
@@ -408,12 +410,20 @@ function ParticipantAlbum() {
               {album.description && <p className="guest-album-desc">{album.description}</p>}
 
               <div className="guest-album-actions">
-                <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
-                  <button type="button" className="guest-album-btn primary">
-                    <i className="fa-solid fa-camera-retro" />
-                    {textOr('guest.album.uploadHere', 'Upload to this album', 'Завантажити в цей альбом')}
-                  </button>
-                </FileInput>
+                {album.guest_upload ? (
+                  <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
+                    <button type="button" className="guest-album-btn primary">
+                      <i className="fa-solid fa-camera-retro" />
+                      {textOr('guest.album.uploadHere', 'Upload to this album', 'Завантажити в цей альбом')}
+                    </button>
+                  </FileInput>
+                ) : (
+                  // v2: yuklemesi kapali album gizlenmiyor, yalnizca yukleme kapaniyor.
+                  <span className="guest-album-btn secondary guest-album-btn-static">
+                    <i className="fa-solid fa-lock" />
+                    {textOr('guest.album.uploadsClosed', 'Uploads are closed for this album', 'Завантаження в цей альбом закрито')}
+                  </span>
+                )}
                 {canDownloadAll && (
                   <button type="button" className="guest-album-btn secondary" onClick={handleDownloadAll} disabled={downloading}>
                     <i className={`fa-solid ${downloading ? 'fa-spinner fa-spin' : 'fa-file-zipper'}`} />

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import V2Header from '../v2-components/V2Header';
 import V2Footer from '../v2-components/V2Footer';
@@ -15,6 +15,7 @@ import { t } from '../packages/i18n';
 import { textOr } from '../utils/admin_i18n';
 import { AdvertorialCell, AdvertorialLayout, AdvertorialResponse } from '../types/advertorial';
 import { GuestAlbum, albumCoverUrl } from '../types/albums';
+import { guestCanUploadTo, guestOpenedAlbumUids } from '../client/albums';
 import { packUUID as packedAlbumUid } from '../packages/uuid';
 import GuestUploadModal, { GuestUploadModalHandle } from './GuestUploadModal';
 
@@ -36,7 +37,8 @@ export interface V2GuestHomeProps {
   theme?: GuestTheme;
   font?: string;
   advertorial?: AdvertorialResponse | null;
-  // Misafire gorunur albumler (RLS suzer: public + yukleme acik). Bos liste = yukleme kapali.
+  // Misafire gorunur albumler (RLS suzer: public + protected(kilitli) + linkten acilmis private;
+  // yuklemesi kapali VE galerisi gorunmeyen albumler listeye girmez).
   albums?: GuestAlbum[];
   albumsLoaded?: boolean;
 }
@@ -117,12 +119,28 @@ function V2GuestHome({
     ? (t('lang_code') === 'uk' ? 'Завантажити аудіо повідомлення' : 'Upload Audio Message')
     : uploadAudioMessageTextRaw;
 
-  // Ne: Gorunur album yoksa (liste yuklendi ve bos) yukleme kapali demektir: General dahil
-  //     her album misafire kapatilmis. Buton pasif, aciklama gosterilir.
-  // Neden: Karar 12 — yuklemesi kapali album misafire hic gorunmez; hepsi kapaliysa
-  //        misafirin yukleyecegi yer kalmaz.
-  const uploadsClosed = albumsLoaded && albums.length === 0;
-  const showAlbumCards = albums.length > 1;
+  // Ne: Token'daki "al" claim'i — misafirin passcode ile / linkten actigi albumler.
+  // Neden: Protected album listede kilitli gorunur; acilmamissa yukleme hedefi olamaz ve
+  //        karti kilit ikonuyla cikar. Album listesi degisince (passcode girildi, sayfaya
+  //        donuldu) token da degismis olabilir, o yuzden albums'a bagli.
+  //        Bagimlilik dizi referansi degil UID listesi: prop verilmediginde varsayilan []
+  //        her render'da yeni nesne olur ve effect sonsuz donguye girerdi.
+  const [openedAlbums, setOpenedAlbums] = useState<Set<string>>(() => new Set());
+  const albumKey = albums.map((album) => album.uid).join(',');
+  useEffect(() => {
+    let active = true;
+    guestOpenedAlbumUids().then((set) => { if (active) setOpenedAlbums(set); });
+    return () => { active = false; };
+  }, [albumKey]);
+
+  // Ne: Yukleme hedefi olabilecek albumler: yukleme acik + (public | acilmis).
+  //     Hic yoksa (liste yuklendi ve bos) yukleme kapali: buton pasif, aciklama gosterilir.
+  // Neden: 2026-09-15 v2 — yuklemesi kapali album artik gizlenmiyor (galeri gorunurse
+  //        listede kalir), bu yuzden "yukleme kapali" karari listeden degil bu alt kumeden verilir.
+  const uploadableAlbums = albums.filter((album) => guestCanUploadTo(album, openedAlbums));
+  const uploadsClosed = albumsLoaded && uploadableAlbums.length === 0;
+  const showAlbumCards = albums.length > 1 || albums.some((album) => !album.is_default);
+  const isLocked = (album: GuestAlbum) => album.privacy === 'protected' && !openedAlbums.has(album.uid);
   const formatAlbumDate = (dateStr: string | null) => {
     if (!dateStr) return '';
     const d = new Date(dateStr.length <= 10 ? dateStr + 'T00:00:00' : dateStr);
@@ -154,7 +172,7 @@ function V2GuestHome({
       <GuestUploadModal
         ref={uploadModalRef}
         packedUid={packedUid}
-        albums={albums}
+        albums={uploadableAlbums}
         participantUid={participantUid}
         initialUploaderName={initialUploaderName}
         onUploaderNameUpdate={onUploaderNameUpdate}
@@ -237,16 +255,20 @@ function V2GuestHome({
                     {albums.map((album) => {
                       const cover = albumCoverUrl(album);
                       const dateText = formatAlbumDate(album.album_date);
+                      const locked = isLocked(album);
                       return (
                         <Link
                           key={album.uid}
                           to={`/guest/${packedUid}/album/${album.uid ? packedAlbumUid(album.uid) : ''}`}
-                          className="guest-home-album-card"
+                          className={`guest-home-album-card${locked ? ' locked' : ''}`}
                         >
                           <div className="guest-home-album-cover">
                             {cover
                               ? <img src={cover} alt="" loading="lazy" />
                               : <div className="guest-home-album-cover-placeholder"><i className="fa-regular fa-images" /></div>}
+                            {locked && (
+                              <span className="guest-home-album-lock" aria-hidden="true"><i className="fa-solid fa-lock" /></span>
+                            )}
                           </div>
                           <div className="guest-home-album-body">
                             <span className="guest-home-album-name">{album.name}</span>
@@ -258,6 +280,17 @@ function V2GuestHome({
                             {album.description && (
                               <span className="guest-home-album-desc">{album.description}</span>
                             )}
+                            {locked ? (
+                              <span className="guest-home-album-state">
+                                <i className="fa-solid fa-lock" />
+                                {textOr('guest.album.passcodeNeeded', 'Passcode required', 'Потрібен пароль')}
+                              </span>
+                            ) : !album.guest_upload ? (
+                              <span className="guest-home-album-state">
+                                <i className="fa-solid fa-eye" />
+                                {textOr('guest.album.viewOnly', 'View only', 'Лише перегляд')}
+                              </span>
+                            ) : null}
                           </div>
                           <span className="guest-home-album-arrow"><i className="fa-solid fa-chevron-right" /></span>
                         </Link>

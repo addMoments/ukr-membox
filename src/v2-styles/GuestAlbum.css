@@ -169,6 +169,16 @@
   border: 1px solid var(--border);
 }
 
+/* Tiklanamayan durum rozeti (yukleme kapali): buton gorunumu, etkilesim yok */
+.guest-album-btn-static {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.guest-album-btn-static:hover {
+  transform: none;
+}
+
 .guest-album-note {
   text-align: left;
   display: flex;

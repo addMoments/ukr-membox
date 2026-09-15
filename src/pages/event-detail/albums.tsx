@@ -179,6 +179,11 @@ function EventAlbumsInner({ event }: { event: Event }) {
   };
 
   const guestGalleryOn = !!event.settings?.guest_gallery;
+  // v2 gorunurluk: album, misafire acik hicbir yani kalmayinca gizlenir
+  // (yukleme kapali VE (album gorunumu kapali YA DA etkinlik galerisi kapali)).
+  // 11-albums-v2.sql albums_guest_select ile ayni kural.
+  const isHiddenFromGuests = (album: Album) => !album.guest_upload && !(album.guest_view && guestGalleryOn);
+
   const sorted = sortAlbums(albums, sort);
 
   return (
@@ -254,8 +259,14 @@ function EventAlbumsInner({ event }: { event: Event }) {
                       <i className={`fa-solid ${album.privacy === 'protected' ? 'fa-lock' : album.privacy === 'private' ? 'fa-link' : 'fa-globe'}`} />
                       {privacyLabel(album)}
                     </span>
-                    {!album.guest_upload && <span className="album-badge closed"><i className="fa-solid fa-eye-slash" />{textOr('albums.closedBadge', 'Hidden from guests', 'Приховано від гостей')}</span>}
-                    {album.guest_upload && !album.guest_view && <span className="album-badge viewoff"><i className="fa-regular fa-eye-slash" />{textOr('albums.viewOffBadge', 'View off', 'Перегляд вимкнено')}</span>}
+                    {isHiddenFromGuests(album) ? (
+                      <span className="album-badge closed"><i className="fa-solid fa-eye-slash" />{textOr('albums.closedBadge', 'Hidden from guests', 'Приховано від гостей')}</span>
+                    ) : (
+                      <>
+                        {!album.guest_upload && <span className="album-badge closed"><i className="fa-solid fa-upload" />{textOr('albums.uploadsClosedBadge', 'Uploads closed', 'Завантаження закрито')}</span>}
+                        {!album.guest_view && <span className="album-badge viewoff"><i className="fa-regular fa-eye-slash" />{textOr('albums.viewOffBadge', 'View off', 'Перегляд вимкнено')}</span>}
+                      </>
+                    )}
                   </div>
                   <span className="album-card-count"><i className="fa-regular fa-images" />{count}</span>
                 </div>
