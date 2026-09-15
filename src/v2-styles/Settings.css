@@ -36,7 +36,9 @@
    bolum aciklamasi, toggle aciklamasi ve alan notlari sola yasli. */
 .settings-section p,
 .settings-section.csbox p,
-.settings-main-content p {
+.settings-main-content p,
+.album-form-default-note,
+.albums-notice {
   text-align: left;
 }
 

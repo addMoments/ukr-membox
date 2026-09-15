@@ -180,3 +180,71 @@
   font-size: 32px;
   border-radius: 8px;
 }
+
+/* Albumler (2026-09-08): album etiketi + coklu secim */
+.media-card-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  max-width: calc(100% - 32px);
+}
+
+.media-card-badge span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Video rozetiyle cakismasin: video varsa album etiketi onun sagina kayar */
+.media-card-video-badge + .media-card-badge {
+  left: 64px;
+  max-width: calc(100% - 80px);
+}
+
+.media-card-select {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 12;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: #a8a29e;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.media-card-select.is-selected {
+  color: #4F46E5;
+}
+
+.media-card--selectable {
+  cursor: pointer;
+}
+
+.media-card--selected {
+  outline: 3px solid #6366F1;
+  outline-offset: -3px;
+}
+
+.media-card--selected .media-card-image {
+  opacity: 0.85;
+}
