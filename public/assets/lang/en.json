@@ -529,6 +529,8 @@
         "limitReachedTitle": "Participant limit reached",
         "limitReachedDescription": "This event has reached the new participant limit.",
         "uploadCompleted": "Upload completed",
+        "uploadNotReceived": "Some files didn't upload. Check your connection and tap “Upload Files” again.",
+        "uploadUnreadable": "Some files couldn't be read from your device. Remove them, add them again and retry.",
         "album": {
             "sectionTitle": "Albums",
             "sectionHint": "Choose an album to share your photos.",

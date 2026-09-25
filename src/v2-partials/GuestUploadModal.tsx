@@ -1,7 +1,7 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import FileInput from '../components/FileInput';
 import ActivityIndicator from '../v2-components/activity-indicator';
-import { guestUpload } from '../client/uploads';
+import { guestUpload, GuestUploadError } from '../client/uploads';
 import { unpackUUID } from '../packages/uuid';
 import { t } from '../packages/i18n';
 import { textOr } from '../utils/admin_i18n';
@@ -37,6 +37,22 @@ interface GuestUploadModalProps {
 }
 
 type FileEntry = { file: File; previewUrl: string; uploaded: boolean; failed: boolean };
+
+// TS 4.9'un lib.dom'unda Screen Wake Lock API tipi yok; kullandigimiz kadarini tanimliyoruz.
+type ScreenWakeLock = { release: () => Promise<void> };
+type WakeLockNavigator = Navigator & { wakeLock?: { request: (type: 'screen') => Promise<ScreenWakeLock> } };
+
+// Ne: Yukleme surerken ekranin kendiliginden kararmasini engeller (destekleyen tarayicilarda).
+// Neden: Ekran kilitlenince telefon tarayiciyi askiya aliyor ve PUT yarida kaliyor; otobusteki
+//        misafirler yuklemeyi baslatip telefonu birakti (25 Eylul). Desteklenmiyorsa ya da
+//        reddedilirse yukleme yine calisir.
+const requestScreenWakeLock = async (): Promise<ScreenWakeLock | null> => {
+  try {
+    return (await (navigator as WakeLockNavigator).wakeLock?.request('screen')) ?? null;
+  } catch {
+    return null;
+  }
+};
 
 const pickDefaultAlbum = (albums: GuestAlbum[], preferred?: string | null) => {
   if (preferred && albums.some(a => a.uid === preferred)) return preferred;
@@ -152,6 +168,19 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
       }
     };
 
+    // Ag hatasi ve okunamayan dosya: ikisi de dosya bazli kirmizi X gosteriyordu ama misafir ne
+    // yapmasi gerektigini bilmiyordu (25 Eylul). Artik ne olduguna gore tek bir mesaj cikar.
+    const notReceivedMessage = textOr(
+      'guest.uploadNotReceived',
+      "Some files didn't upload. Check your connection and tap “Upload Files” again.",
+      "Деякі файли не завантажилися. Перевірте з'єднання й натисніть «Завантажити файли» ще раз."
+    );
+    const unreadableMessage = textOr(
+      'guest.uploadUnreadable',
+      "Some files couldn't be read from your device. Remove them, add them again and retry.",
+      'Деякі файли не вдалося прочитати з пристрою. Видаліть їх, додайте знову й повторіть спробу.'
+    );
+
     setUploadErrorMessage('');
     setUploadDone(null);
     setIsUploading(true);
@@ -162,6 +191,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
     });
     setFileEntries([...elemRef.entries]);
 
+    const wakeLock = await requestScreenWakeLock();
     try {
       if (uploaderName) {
         const uploaderUid = participantUid || (await whoAmI()).ui;
@@ -181,6 +211,8 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
       let contributorLimitHit = false;
       let albumClosedHit = false;
       let limitHit: UploadLimitCode | null = null;
+      let unreadableHit = false;
+      let notReceivedHit = false;
 
       for (const entry of pendingEntries) {
         try {
@@ -203,6 +235,11 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
             albumClosedHit = true;
           } else if (isForbiddenError(err) && !contributorLimitHit) {
             setUploadErrorMessage(genericForbiddenMessage);
+          } else if (err instanceof GuestUploadError && err.reason === 'unreadable') {
+            unreadableHit = true;
+          } else {
+            // guestUpload iki kez tekrar denedi; kalan hata agdir.
+            notReceivedHit = true;
           }
         } finally {
           doneCount += 1;
@@ -217,6 +254,10 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
         setUploadErrorMessage(limitMessage(limitHit));
       } else if (albumClosedHit) {
         setUploadErrorMessage(albumClosedMessage);
+      } else if (unreadableHit) {
+        setUploadErrorMessage(unreadableMessage);
+      } else if (notReceivedHit) {
+        setUploadErrorMessage(notReceivedMessage);
       }
 
       setFileEntries([...elemRef.entries]);
@@ -243,6 +284,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
         }, 2600);
       }
     } finally {
+      wakeLock?.release().catch(() => undefined);
       setIsUploading(false);
     }
   };
