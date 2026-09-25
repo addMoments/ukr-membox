@@ -238,7 +238,7 @@ function EventGallery() {
       return {
         src: S3_ROOT + upload.value,
         title: name,
-        tagline: `${type} on ${formatDate(upload.created_at)}${album ? ` · ${album}` : ''}`,
+        tagline: `${type} · ${formatDate(upload.created_at)}${album ? ` · ${album}` : ''}`,
         id: upload.uid,
         isVideo: upload.upload_type === 'video',
       };

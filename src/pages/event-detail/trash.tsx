@@ -134,7 +134,7 @@ function EventTrash() {
       return {
         src: S3_ROOT + upload.value,
         title: name,
-        tagline: `${type} on ${formatDate(upload.created_at)}`,
+        tagline: `${type} · ${formatDate(upload.created_at)}`,
         id: upload.uid,
         isVideo: upload.upload_type === 'video',
       };
