@@ -18,6 +18,7 @@ import { textOr } from '../utils/admin_i18n';
 import { displayConfigFieldLabel, localizedLabel, sortConfigFieldsLikeQrCard } from '../utils/product_i18n';
 import { PromoValidationResponse } from '../types/promo';
 import { markMetaEventOnce, trackMetaAddToCart } from '../client/meta-pixel';
+import { formatUah } from '../utils/money';
 
 interface ShippingAddress {
   full_name: string;
@@ -175,11 +176,6 @@ function V2Checkout() {
     }));
   };
 
-  // Ne: Checkout tutarlarini summary kartinda standart para formatina cevirir.
-  // Nasil: Bos/gecersiz degeri 0 kabul edip iki ondalikli hryvnia string'i dondurur.
-  // Neden: Cart total ve promo response tutarlari ayni gorunumle render edilsin.
-  const formatMoney = (value: number) => `₴${Number(value || 0).toFixed(2)}`;
-
   // Ne: Promo input degistiginde onceki apply sonucunu gecersiz kilar.
   // Nasil: Uncontrolled input kendi degerini tutar; state'te sadece basarili backend cevabi ve mesaj temizlenir.
   // Neden: Kullanici kodu sildiginde veya degistirdiginde purchase request'e eski promo yanlislikla eklenmesin.
@@ -305,8 +301,8 @@ function V2Checkout() {
         fromName: resolveDisplayTexts(currentCorePackage).name || currentCorePackage.id,
         // Not: API price'i STRING dondururken ("1790.00") Product tipi number diyor. Aritmetik
         //      calisiyor (JS coercion) ama .toFixed() cagirmak patlar; bu yuzden fiyatlar
-        //      modala formatMoney'den gecmis metin olarak veriliyor.
-        priceDiffLabel: formatMoney(Math.max(0, Number(nextCorePackage.price) - Number(currentCorePackage.price))),
+        //      modala formatUah'tan gecmis metin olarak veriliyor.
+        priceDiffLabel: formatUah(Math.max(0, Number(nextCorePackage.price) - Number(currentCorePackage.price))),
       }
     : null;
 
@@ -320,7 +316,7 @@ function V2Checkout() {
     .map(p => ({
       id: p.id,
       name: resolveDisplayTexts(p).name || p.id,
-      priceLabel: formatMoney(Number(p.price)),
+      priceLabel: formatUah(Number(p.price)),
       icon: p.options?.icon as string | undefined,
       image: p.options?.image as string | undefined,
       qtyHint: getQtyRuleHint(p),
@@ -533,20 +529,20 @@ function V2Checkout() {
                   yoksa ara toplam. Onceden bu is "Shipping" satirindaydi, o satir asagi tasindi. */}
               <div className={`checkout-summary-row${appliedPromo ? '' : ' checkout-summary-row-divider'}`}>
                 <span className="checkout-summary-row-label">{appliedPromo ? textOr('checkout.grossTotal', 'Gross total', 'Загальна сума') : t('checkout.subtotal')}</span>
-                <span className="checkout-summary-row-value">{formatMoney(appliedPromo?.gross_total ?? cart.total)}</span>
+                <span className="checkout-summary-row-value">{formatUah(appliedPromo?.gross_total ?? cart.total)}</span>
               </div>
               {appliedPromo && (
                 <div className="checkout-summary-row checkout-summary-discount-row checkout-summary-row-divider">
                   <span className="checkout-summary-row-label">{textOr('checkout.promoDiscount', 'Promo discount', 'Знижка за промокодом')}</span>
                   <span className="checkout-summary-row-value">
-                    -{formatMoney(appliedPromo.discount_amount)}
+                    -{formatUah(appliedPromo.discount_amount)}
                     {formattedPromoDiscountPercent ? ` (-${formattedPromoDiscountPercent}%)` : ''}
                   </span>
                 </div>
               )}
               <div className="checkout-summary-total">
                 <span className="checkout-summary-total-label">{appliedPromo ? textOr('checkout.netTotal', 'Net total', 'До сплати') : t('checkout.total')}</span>
-                <span className="checkout-summary-total-value">{formatMoney(appliedPromo?.net_total ?? cart.total)}</span>
+                <span className="checkout-summary-total-value">{formatUah(appliedPromo?.net_total ?? cart.total)}</span>
               </div>
             </div>
 
@@ -653,7 +649,7 @@ function V2Checkout() {
         <UpsellModal
           upgrade={upgradeOffer}
           addOns={upsellAddOns}
-          total={formatMoney(cart.total)}
+          total={formatUah(cart.total)}
           onUpgrade={applyUpgrade}
           onAddAddOn={addUpsellAddOn}
           onContinue={() => {
@@ -855,7 +851,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
             <h3 className="checkout-item-name">{displayName}</h3>
             <p className="checkout-item-description">{displayDescription}</p>
           </div>
-          <span className="checkout-item-price">₴{(product.price * quantity).toFixed(2)}</span>
+          <span className="checkout-item-price">{formatUah(product.price * quantity)}</span>
         </div>
 
         {isPhysical && (designs.length > 0 || visibleConfigFields.length > 0) && (

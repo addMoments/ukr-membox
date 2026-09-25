@@ -12,6 +12,7 @@ import V2SignInForm from './V2SignInForm';
 import { signInEmail } from '../client/auth';
 import { resolvePostSignInRedirect } from '../client/admin';
 import { FormState } from '../utils/form_event_parse';
+import { formatUah } from '../utils/money';
 
 interface V2EventNewProps {
   showSignInSection?: boolean;
@@ -315,7 +316,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
           <div className="event-new-checkout-info">
             <div className="event-new-checkout-total">
               <span className="event-new-checkout-total-label">{t('paywall.selectedTotal')}</span>
-              <span className="event-new-checkout-total-amount">₴{total.toFixed(2)}</span>
+              <span className="event-new-checkout-total-amount">{formatUah(total)}</span>
             </div>
             <div className="event-new-checkout-divider"></div>
             <span className="event-new-checkout-items">{t('paywall.itemsSelected', { count: itemCount })}</span>
@@ -377,7 +378,7 @@ function PackageCard({ id, displayName, displayDescription, displayBullets, pric
         <h3 className="event-new-package-name">{resolvedName}</h3>
         <div className="event-new-package-price-block">
           <div className="event-new-package-price">
-            <span className="event-new-package-price-amount">₴{price}</span>
+            <span className="event-new-package-price-amount">{formatUah(price)}</span>
             <span className="event-new-package-price-unit">{"UAH"}</span>
           </div>
         </div>
@@ -455,8 +456,7 @@ function SponsoredAddOnBand({ displayName, displayDescription, displayBullets = 
       </div>
 
       <div className="event-new-sponsored-side">
-        {/* Not: price API'den string gelebiliyor, bu yuzden bicimlendirilmeden basiliyor. */}
-        <span className="event-new-sponsored-price">₴{price}</span>
+        <span className="event-new-sponsored-price">{formatUah(price)}</span>
         <span className="event-new-sponsored-action">
           <span className="event-new-sponsored-action-label">
             {isSelected
@@ -512,7 +512,7 @@ function AddOnCard({ id, displayName, displayDescription, price, quantity = 0, i
         {/* Not: Adet kurali olan add-on'da kutuyu isaretlemek sepete 1 degil min_qty kadar
             ekliyor; kart fiyati da adet * birim fiyat gosterir. */}
         <div className="event-new-addon-price-block">
-          <span className="event-new-addon-price">₴{(price * Math.max(quantity, 1)).toFixed(2)}</span>
+          <span className="event-new-addon-price">{formatUah(price * Math.max(quantity, 1))}</span>
           {qtyRuleHint && <span className="event-new-addon-qty-rule">{qtyRuleHint}</span>}
         </div>
         <input
