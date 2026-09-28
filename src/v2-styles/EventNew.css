@@ -627,27 +627,9 @@
   margin-top: auto;
 }
 
-/* Reklam alani: kendi basligi altinda duran, metne dayali tam genislik serit.
-   Eskiden tek bir PNG basiliyordu; metin artik urun kaydindan geliyor. */
-.event-new-sponsored-heading {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 0 0 20px;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #6b7280;
-}
-
-.event-new-sponsored-heading::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: #e5e7eb;
-}
-
+/* Reklam alani: metne dayali tam genislik serit. Eskiden tek bir PNG
+   basiliyordu; metin artik urun kaydindan geliyor. Basligi diger bolumlerle
+   ayni `event-new-section-title` (eskiden kucuk gri bir etiketti). */
 .event-new-sponsored-band {
   position: relative;
   overflow: hidden;

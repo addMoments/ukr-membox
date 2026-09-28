@@ -268,13 +268,17 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
 
         {sponsoredAddOn && (
           <section className="event-new-section event-new-section-border">
-            <p className="event-new-sponsored-heading">
-              {textOr(
-                'paywall.sponsoredHeading',
-                'For professionals and event organizers',
-                'Для професіоналів та організаторів подій',
-              )}
-            </p>
+            <div className="event-new-section-header">
+              <div>
+                <h2 className="event-new-section-title">
+                  {textOr(
+                    'paywall.sponsoredHeading',
+                    'For Professionals and Event Organizers',
+                    'Для професіоналів та організаторів подій',
+                  )}
+                </h2>
+              </div>
+            </div>
             <SponsoredAddOnBand
               displayName={resolveDisplayTexts(sponsoredAddOn).name}
               displayDescription={resolveDisplayTexts(sponsoredAddOn).description}
