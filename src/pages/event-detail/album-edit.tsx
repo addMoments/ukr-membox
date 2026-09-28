@@ -351,7 +351,7 @@ function EventAlbumEditInner({ event }: { event: Event }) {
             />
             <SettingsToggle
               name={textOr('albums.form.guestDownloadAll', 'Guests can download the whole album', 'Гості можуть завантажити весь альбом')}
-              description={textOr('albums.form.guestDownloadAllDesc', 'Shows a “Download all” button on the guest album page.', 'Показує кнопку «Завантажити все» на сторінці альбому для гостей.')}
+              description={textOr('albums.form.guestDownloadAllDesc', 'Shows a “Download all” button on the guest album page.', 'Показує кнопку «Зберегти на пристрій» на сторінці альбому для гостей.')}
               checked={album ? album.guest_download_all : false}
               formName="guest_download_all"
             />

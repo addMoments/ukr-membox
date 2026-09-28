@@ -429,7 +429,7 @@ function ParticipantAlbum() {
                     <i className={`fa-solid ${downloading ? 'fa-spinner fa-spin' : 'fa-file-zipper'}`} />
                     {downloading
                       ? textOr('guest.album.downloading', 'Preparing your download…', 'Готуємо завантаження…')
-                      : textOr('guest.album.downloadAll', 'Download all', 'Завантажити все')}
+                      : textOr('guest.album.downloadAll', 'Download all', 'Зберегти на пристрій')}
                   </button>
                 )}
               </div>
