@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { t } from '../packages/i18n';
+import { textOr } from '../utils/admin_i18n';
 import '../v2-styles/GalleryFilterBar.css';
 
 const iconMap: Record<string, string> = {
@@ -67,14 +68,29 @@ function GalleryFilterBar({
             />
           </div>}
           {extraControls}
-          <button
-            className="gallery-sort-btn"
+          {/* AM-11: tek toggle butonu hangi siralamanin acik oldugunu anlatmiyordu; iki secenek yan yana. */}
+          <div
+            className="gallery-sort-toggle"
+            role="group"
             style={!renderSearch && !extraControls ? { marginLeft: 'auto' } : undefined}
-            onClick={() => onSortChange?.(sortOrder === 'desc' ? 'asc' : 'desc')}
           >
-            <i className={`fa-solid fa-arrow-${sortOrder === 'desc' ? 'down' : 'up'}-wide-short`}></i>
-            <span>{sortOrder === 'desc' ? t('gallery.sortNewest') : t('gallery.sortOldest')}</span>
-          </button>
+            <button
+              type="button"
+              className={sortOrder === 'desc' ? 'active' : ''}
+              aria-pressed={sortOrder === 'desc'}
+              onClick={() => onSortChange?.('desc')}
+            >
+              {textOr('gallery.sortNewest', 'Newest', 'Спочатку нові')}
+            </button>
+            <button
+              type="button"
+              className={sortOrder === 'asc' ? 'active' : ''}
+              aria-pressed={sortOrder === 'asc'}
+              onClick={() => onSortChange?.('asc')}
+            >
+              {textOr('gallery.sortOldest', 'Oldest', 'Спочатку старі')}
+            </button>
+          </div>
         </div>
       </div>
     </div>

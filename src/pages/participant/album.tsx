@@ -22,7 +22,7 @@ import { applyGuestFont } from '../../utils/applyGuestFont';
 import { saveUrl } from '../../utils/download';
 import { t } from '../../packages/i18n';
 import { textOr } from '../../utils/admin_i18n';
-import { getEventClosedMessage, isEventClosedError, isPackageLimitExceededError } from '../../utils/guestInitError';
+import { isEventClosedError, isPackageLimitExceededError } from '../../utils/guestInitError';
 import '../../v2-styles/GuestUploads.css';
 import '../../v2-styles/GuestAlbum.css';
 
@@ -73,13 +73,16 @@ function ParticipantAlbum() {
   const [downloadError, setDownloadError] = useState('');
   const [showPackageLimitError, setShowPackageLimitError] = useState(false);
   const [eventClosedMessage, setEventClosedMessage] = useState('');
+  // Uzun aciklama 3 satirda kesilir; tasiyorsa "Більше" ile acilir (AM-00).
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [descOverflows, setDescOverflows] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
   const uploadModalRef = useRef<GuestUploadModalHandle>(null);
   const passcodeRef = useRef<HTMLInputElement>(null);
   const requestIdRef = useRef(0);
 
   const theme = event.settings?.colors || defaultGuestTheme;
   const langCode = t('lang_code');
-  const isUk = langCode === 'uk';
 
   const fetchPage = useCallback(async (f: FilterType, s: SortType, offset: number): Promise<AlbumUpload[]> => {
     return pgREST(
@@ -153,17 +156,31 @@ function ParticipantAlbum() {
         return;
       }
       if (isEventClosedError(err)) {
-        setEventClosedMessage(getEventClosedMessage(err) || (isUk ? 'Цю подію закрито.' : 'This event is closed.'));
+        // Album ucu bu mesaji dile bakmadan Ingilizce donuyor; metni sunucudan almiyoruz (AM-09).
+        setEventClosedMessage(textOr('guestAccessError.eventClosedDefaultMessage', 'This event is closed.', 'Цю подію закрито.'));
         return;
       }
       console.error('[guest-album] bootstrap failed', err);
       setStatus('failed');
     }
-  }, [albumUid, eventUid, fetchPage, isUk, packedAlbumUid, packedUid]);
+  }, [albumUid, eventUid, fetchPage, packedAlbumUid, packedUid]);
 
   useEffect(() => {
     bootstrap();
   }, [bootstrap]);
+
+  // Kesilmis aciklama gercekten tasiyor mu? Yalnizca kapaliyken olculur; acikken
+  // scrollHeight == clientHeight olur ve "Згорнути" butonu kaybolurdu.
+  useEffect(() => {
+    if (descExpanded) return;
+    const measure = () => {
+      const el = descRef.current;
+      setDescOverflows(!!el && el.scrollHeight > el.clientHeight + 1);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [album?.description, descExpanded, status]);
 
   // Filtre / siralama degisince ilk sayfayi yeniden cek.
   const reload = useCallback(async (f: FilterType, s: SortType) => {
@@ -261,7 +278,7 @@ function ParticipantAlbum() {
       await guestDownloadAlbumZip(album.uid, `${album.name || 'album'}.zip`);
     } catch (err) {
       console.error('[guest-album] zip failed', err);
-      setDownloadError(textOr('guest.album.downloadFailed', 'Download failed. Please try again.', 'Не вдалося завантажити. Спробуйте ще раз.'));
+      setDownloadError(textOr('guest.album.downloadFailed', 'Download failed. Please try again.', 'Не вдалося зберегти. Спробуйте ще раз.'));
     } finally {
       setDownloading(false);
     }
@@ -284,7 +301,7 @@ function ParticipantAlbum() {
       <GuestAccessErrorScreen
         title={textOr('guest.limitReachedTitle', 'Participant limit reached', 'Ліміт учасників вичерпано')}
         message={textOr('guest.limitReachedDescription', 'This event has reached the new participant limit.', 'Для цієї події вичерпано ліміт нових учасників.')}
-        actionText={isUk ? 'Звʼязатися з підтримкою' : 'Contact help center'}
+        actionText={textOr('guest.contactSupport', 'Contact help center', 'Звʼязатися з підтримкою')}
         actionHref="/contact"
         theme={theme}
       />
@@ -407,14 +424,12 @@ function ParticipantAlbum() {
                   {album.location && <span><i className="fa-solid fa-location-dot" />{album.location}</span>}
                 </div>
               )}
-              {album.description && <p className="guest-album-desc">{album.description}</p>}
-
               <div className="guest-album-actions">
                 {album.guest_upload ? (
                   <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
                     <button type="button" className="guest-album-btn primary">
                       <i className="fa-solid fa-camera-retro" />
-                      {textOr('guest.album.uploadHere', 'Upload to this album', 'Завантажити в цей альбом')}
+                      {textOr('guest.album.uploadHere', 'Upload to this album', 'Додати фото в альбом')}
                     </button>
                   </FileInput>
                 ) : (
@@ -428,7 +443,7 @@ function ParticipantAlbum() {
                   <button type="button" className="guest-album-btn secondary" onClick={handleDownloadAll} disabled={downloading}>
                     <i className={`fa-solid ${downloading ? 'fa-spinner fa-spin' : 'fa-file-zipper'}`} />
                     {downloading
-                      ? textOr('guest.album.downloading', 'Preparing your download…', 'Готуємо завантаження…')
+                      ? textOr('guest.album.downloading', 'Preparing your download…', 'Готуємо файли…')
                       : textOr('guest.album.downloadAll', 'Download all', 'Зберегти на пристрій')}
                   </button>
                 )}
@@ -439,6 +454,19 @@ function ParticipantAlbum() {
                   <i className="fa-solid fa-eye-slash" />
                   {textOr('guest.album.viewOnlyHost', 'Photos in this album are visible only to the host.', 'Фото в цьому альбомі бачить лише організатор.')}
                 </p>
+              )}
+              {/* AM-00: aciklama butonlarin altinda; uzunsa mobilde butonu ekran disina itiyordu. */}
+              {album.description && (
+                <div className="guest-album-desc-wrap">
+                  <p ref={descRef} className={`guest-album-desc${descExpanded ? '' : ' clamped'}`}>{album.description}</p>
+                  {(descOverflows || descExpanded) && (
+                    <button type="button" className="guest-album-desc-toggle" onClick={() => setDescExpanded(v => !v)}>
+                      {descExpanded
+                        ? textOr('guest.album.readLess', 'Show less', 'Згорнути')
+                        : textOr('guest.album.readMore', 'Show more', 'Більше')}
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -462,10 +490,10 @@ function ParticipantAlbum() {
               </div>
               <div className="guest-album-sort">
                 <button type="button" className={sort === 'newest' ? 'active' : ''} onClick={() => changeSort('newest')}>
-                  {textOr('guest.album.sortNewest', 'Newest', 'Найновіші')}
+                  {textOr('guest.album.sortNewest', 'Newest', 'Спочатку нові')}
                 </button>
                 <button type="button" className={sort === 'oldest' ? 'active' : ''} onClick={() => changeSort('oldest')}>
-                  {textOr('guest.album.sortOldest', 'Oldest', 'Найстаріші')}
+                  {textOr('guest.album.sortOldest', 'Oldest', 'Спочатку старі')}
                 </button>
                 <button type="button" className={sort === 'type' ? 'active' : ''} onClick={() => changeSort('type')}>
                   {textOr('guest.album.sortByType', 'Photos first', 'Спочатку фото')}
@@ -487,7 +515,7 @@ function ParticipantAlbum() {
                     uploadEntry={upload}
                     onFullscreen={() => openPhotoViewer(upload.uid)}
                     actions={[
-                      { variant: 'icontext', text: '', icon: 'fa-solid fa-download', title: textOr('guest.album.download', 'Download', 'Завантажити'), onClick: () => downloadOne(upload) },
+                      { variant: 'icontext', text: '', icon: 'fa-solid fa-download', title: textOr('guest.album.download', 'Download', 'Зберегти'), onClick: () => downloadOne(upload) },
                     ]}
                   />
                 ))

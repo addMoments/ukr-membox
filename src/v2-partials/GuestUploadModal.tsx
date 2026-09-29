@@ -76,7 +76,8 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
   const albumSelectRef = useRef<HTMLSelectElement>(null);
   const [fileEntries, setFileEntries] = useState<FileEntry[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0, totalBytes: 0 });
+  // done = gercekten yuklenen; failed ayri sayilir (eskiden basarisizlar da "yuklendi" sayiliyordu).
+  const [uploadProgress, setUploadProgress] = useState({ done: 0, failed: 0, total: 0, totalBytes: 0 });
   const [modalOpen, setModalOpen] = useState(false);
   const [uploadErrorMessage, setUploadErrorMessage] = useState('');
   // Ne: Yukleme basariyla bitince gosterilecek onay ekraninin verisi (null = gosterme).
@@ -185,7 +186,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
     setUploadDone(null);
     setIsUploading(true);
     const totalBytes = pendingEntries.reduce((s, e) => s + e.file.size, 0);
-    setUploadProgress({ done: 0, total: pendingEntries.length, totalBytes });
+    setUploadProgress({ done: 0, failed: 0, total: pendingEntries.length, totalBytes });
     pendingEntries.forEach((entry) => {
       entry.failed = false;
     });
@@ -243,7 +244,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
           }
         } finally {
           doneCount += 1;
-          setUploadProgress({ done: doneCount, total: pendingEntries.length, totalBytes });
+          setUploadProgress({ done: successCount, failed: doneCount - successCount, total: pendingEntries.length, totalBytes });
           setFileEntries([...elemRef.entries]);
         }
       }
@@ -301,6 +302,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
   const uploadedCount = fileEntries.filter(e => e.uploaded).length;
   const failedLabel = getLocalizedText('common.failed', 'Failed');
   const uploadedLabel = getLocalizedText('common.uploaded', 'Uploaded');
+  const removeLabel = textOr('guest.removeFile', 'Remove', 'Прибрати');
   const showAlbumPicker = albums.length > 1;
   const defaultAlbumUid = pickDefaultAlbum(albums, initialAlbumUid);
   const lockedAlbum = lockAlbum ? albums.find(a => a.uid === defaultAlbumUid) : undefined;
@@ -393,23 +395,27 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
                 <span className="upload-modal-item-size">{formatBytes(entry.file.size)}</span>
                 {entry.failed ? <span className="upload-modal-item-error">{failedLabel}</span> : null}
               </div>
-              {entry.uploaded
-                ? <i className="fa-solid fa-circle-check upload-modal-item-check" />
-                : entry.failed
-                  ? <i className="fa-solid fa-circle-xmark upload-modal-item-fail" />
-                : !isUploading && (
-                  <button type="button" className="upload-modal-item-remove" onClick={() => handleRemoveFile(index)}>
-                    <i className="fa-solid fa-xmark" />
-                  </button>
-                )
-              }
+              {entry.uploaded && <i className="fa-solid fa-circle-check upload-modal-item-check" />}
+              {entry.failed && <i className="fa-solid fa-circle-xmark upload-modal-item-fail" />}
+              {/* Basarisiz dosya da cikarilabilir; "okunamadi" mesaji misafirden bunu istiyor. */}
+              {!entry.uploaded && !isUploading && (
+                <button
+                  type="button"
+                  className="upload-modal-item-remove"
+                  onClick={() => handleRemoveFile(index)}
+                  aria-label={removeLabel}
+                  title={removeLabel}
+                >
+                  <i className="fa-solid fa-xmark" />
+                </button>
+              )}
             </div>
           ))}
         </div>
 
         <div className="upload-modal-status">
           {isUploading
-            ? <><ActivityIndicator color="var(--text-secondary)" style={{ width: 16, height: 16 }} /><span>{t('guest.uploadingProgress', { done: uploadProgress.done, total: uploadProgress.total, size: formatBytes(totalBytes) })}</span></>
+            ? <><ActivityIndicator color="var(--text-secondary)" style={{ width: 16, height: 16 }} /><span>{t('guest.uploadingProgress', { done: uploadProgress.done, total: uploadProgress.total, size: formatBytes(totalBytes) })}{uploadProgress.failed > 0 ? ` · ${uploadProgress.failed} ${failedLabel}` : ''}</span></>
             : <><i className="fa-solid fa-circle-info" /><span>{fileEntries.length} {t('common.files')} · {formatBytes(totalBytes)} · {uploadedCount} {uploadedLabel} · {failedCount} {failedLabel}</span></>
           }
         </div>

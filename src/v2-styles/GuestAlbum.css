@@ -125,6 +125,36 @@
   font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* AM-00: aciklama butonlarin altinda ve 3 satirda kesik; "Більше" ile acilir. */
+.guest-album-desc-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.guest-album-desc.clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.guest-album-desc-toggle {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 
 .guest-album-actions {

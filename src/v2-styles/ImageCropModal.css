@@ -1,0 +1,126 @@
+/* Gorsel kirpma penceresi (AM-14): etkinlik gorseli ve album kapagi. */
+
+.crop-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(28, 25, 23, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.crop-modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.35);
+}
+
+.crop-modal-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1C1917;
+}
+
+.crop-modal-hint {
+  margin: 0;
+  font-size: 14px;
+  color: #78716C;
+  text-align: left;
+}
+
+.crop-modal-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #F5F5F4;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.crop-modal-frame:active {
+  cursor: grabbing;
+}
+
+.crop-modal-frame img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  pointer-events: none;
+}
+
+/* Ucte bir kilavuz cizgileri: konumlandirirken merkezi gostermek icin. */
+.crop-modal-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  background-image:
+    linear-gradient(to right, transparent calc(33.333% - 0.5px), rgba(255, 255, 255, 0.55) calc(33.333% - 0.5px), rgba(255, 255, 255, 0.55) calc(33.333% + 0.5px), transparent calc(33.333% + 0.5px), transparent calc(66.666% - 0.5px), rgba(255, 255, 255, 0.55) calc(66.666% - 0.5px), rgba(255, 255, 255, 0.55) calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px)),
+    linear-gradient(to bottom, transparent calc(33.333% - 0.5px), rgba(255, 255, 255, 0.55) calc(33.333% - 0.5px), rgba(255, 255, 255, 0.55) calc(33.333% + 0.5px), transparent calc(33.333% + 0.5px), transparent calc(66.666% - 0.5px), rgba(255, 255, 255, 0.55) calc(66.666% - 0.5px), rgba(255, 255, 255, 0.55) calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px));
+}
+
+.crop-modal-zoom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #78716C;
+  font-size: 14px;
+}
+
+.crop-modal-zoom input[type="range"] {
+  flex: 1;
+  accent-color: #1C1917;
+}
+
+.crop-modal-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.crop-modal-error {
+  margin: 0;
+  color: #DC2626;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.crop-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .crop-modal {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .crop-modal-actions .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}

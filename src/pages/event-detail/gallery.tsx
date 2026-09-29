@@ -311,14 +311,15 @@ function EventGallery() {
             onSortChange={setSortOrder}
             extraControls={(
               <div className="gallery-extra-controls">
+                {/* Ac/kapa: etiket sabit, acikken koyu (AM-11; eskiden etiket duruma gore degisiyordu). */}
                 <button
                   type="button"
                   className={`gallery-sort-btn${sortBy === 'type' ? ' active' : ''}`}
+                  aria-pressed={sortBy === 'type'}
                   onClick={() => setSortBy(sortBy === 'type' ? 'date' : 'type')}
-                  title={textOr('gallery.sortByType', 'By type', 'За типом')}
                 >
                   <i className="fa-solid fa-photo-film" />
-                  <span>{sortBy === 'type' ? textOr('gallery.sortByType', 'By type', 'За типом') : textOr('gallery.sortByDate', 'By date', 'За датою')}</span>
+                  <span>{textOr('gallery.photosFirst', 'Photos first', 'Спочатку фото')}</span>
                 </button>
                 {showAlbumTabs && (
                   <button

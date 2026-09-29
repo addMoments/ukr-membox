@@ -455,9 +455,27 @@
 .theme-upload-subtitle {
   font-size: 14px;
   color: #a8a29e;
-  margin: 0 0 20px 0;
+  margin: 0 0 8px 0;
   max-width: 280px;
   line-height: 1.5;
+}
+
+/* AM-14: onerilen olcu, bicim ve boyut siniri yuklemeden once gorunsun. */
+.theme-upload-specs {
+  font-size: 13px;
+  font-weight: 600;
+  color: #57534e;
+  margin: 0 0 20px 0;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.theme-upload-error {
+  margin: 12px 0 0;
+  color: #DC2626;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
 }
 
 .theme-upload-btn {

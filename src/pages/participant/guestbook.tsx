@@ -334,9 +334,9 @@ function ParticipantGuestbook() {
   if (showPackageLimitError) {
     return (
       <GuestAccessErrorScreen
-        title="Package limit exceeded"
-        message="You have exceeded your package limit. Please contact help center."
-        actionText="Contact help center"
+        title={textOr('guest.limitReachedTitle', 'Participant limit reached', 'Ліміт учасників вичерпано')}
+        message={textOr('guest.limitReachedDescription', 'This event has reached the new participant limit.', 'Для цієї події вичерпано ліміт нових учасників.')}
+        actionText={textOr('guest.contactSupport', 'Contact help center', 'Звʼязатися з підтримкою')}
         actionHref="/contact"
         theme={event.settings?.colors || defaultGuestTheme}
       />

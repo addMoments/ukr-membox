@@ -212,6 +212,35 @@ textarea.settings-field-input {
   transform: translateX(24px);
 }
 
+/* Ust ayar kapali oldugu icin degistirilemeyen toggle (album formu, AM-08). */
+.settings-toggle-item.is-disabled .settings-toggle-title,
+.settings-toggle-item.is-disabled .settings-toggle-description {
+  opacity: 0.55;
+}
+
+.settings-toggle-item.is-disabled .settings-toggle-switch {
+  opacity: 0.45;
+}
+
+.settings-toggle-item.is-disabled .settings-toggle-slider {
+  cursor: not-allowed;
+}
+
+.settings-toggle-disabled-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #B45309;
+}
+
+.settings-toggle-disabled-note i {
+  margin-top: 3px;
+  font-size: 11px;
+}
+
 /* Radio Cards */
 .settings-radio-list {
   display: flex;

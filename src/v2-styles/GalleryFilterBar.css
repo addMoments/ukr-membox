@@ -69,7 +69,9 @@
 
 .gallery-filter-search-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   flex-grow: 1;
   max-width: 600px;
@@ -132,4 +134,41 @@
 
 .gallery-sort-btn:hover {
   background: #f5f5f4;
+}
+
+/* AM-11: Newest | Oldest yan yana; secili olan koyu. */
+.gallery-sort-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+  padding: 4px;
+  box-sizing: border-box;
+  background: #fafaf9;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.gallery-sort-toggle button {
+  height: 100%;
+  padding: 0 14px;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: #57534e;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gallery-sort-toggle button:hover {
+  background: #f5f5f4;
+}
+
+.gallery-sort-toggle button.active {
+  background: #1C1917;
+  color: #fff;
 }

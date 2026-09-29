@@ -297,7 +297,7 @@ function EventAlbumsInner({ event }: { event: Event }) {
                   </button>
                   {job && job.status === 'succeeded' ? (
                     <button type="button" className="album-card-action" onClick={() => saveUrl(S3_ROOT + String(job.output?.zip_path || ''), `${album.name}.zip`)}>
-                      <i className="fa-solid fa-file-zipper" />{textOr('albums.download.ready', 'Download ZIP', 'Завантажити ZIP')}
+                      <i className="fa-solid fa-file-zipper" />{textOr('albums.download.ready', 'Download ZIP', 'Зберегти ZIP')}
                     </button>
                   ) : (
                     <button type="button" className="album-card-action" disabled={exportBusy || anyJobActive || count === 0} onClick={() => handleExport(album)}>
@@ -354,7 +354,7 @@ function EventAlbumsInner({ event }: { event: Event }) {
                     saveUrl(url, `qr-${shareAlbum.name}.png`).catch(() => window.open(url, '_blank'));
                   }}
                 >
-                  <i className="fa-solid fa-download" />{textOr('albums.share.downloadQr', 'Download QR (PNG)', 'Завантажити QR (PNG)')}
+                  <i className="fa-solid fa-download" />{textOr('albums.share.downloadQr', 'Download QR (PNG)', 'Зберегти QR (PNG)')}
                 </button>
                 <button type="button" className="album-modal-btn" onClick={() => navigate(`/event/${packedUid}/qr?album=${packUUID(shareAlbum.uid)}`)}>
                   <i className="fa-solid fa-palette" />{textOr('albums.share.customizeQr', 'Customize QR', 'Налаштувати QR')}

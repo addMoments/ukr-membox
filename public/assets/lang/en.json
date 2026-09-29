@@ -31,7 +31,8 @@
         "qtyRule": "Minimum {{min}}, in multiples of {{step}}",
         "items": "items",
         "selectAll": "Select all",
-        "deselectAll": "Deselect all"
+        "deselectAll": "Deselect all",
+        "justNow": "Just now"
     },
     "errors": {
         "forbidden": "This action is not allowed right now.",
@@ -81,7 +82,8 @@
         "sortByType": "By type",
         "setAsCover": "Set as album cover",
         "coverSet": "Album cover updated",
-        "coverFailed": "Could not update the cover"
+        "coverFailed": "Could not update the cover",
+        "photosFirst": "Photos first"
     },
     "poster": {
         "title": "Poster Designer",
@@ -147,7 +149,7 @@
         "saveChanges": "Save Changes",
         "customAtmosphere": "Custom Atmosphere",
         "uploadTitle": "Upload visual background",
-        "uploadSubtitle": "Natural scenery or event textures work best. Max 10MB.",
+        "uploadSubtitle": "Natural scenery or event textures work best.",
         "browseGallery": "Browse Gallery",
         "livePreview": "Live Preview",
         "vibePresets": "Vibe Presets",
@@ -155,7 +157,9 @@
         "typography": "Typography",
         "previewText": "Preview text",
         "previewHeadline": "Capturing Every Beat of the Celebration",
-        "previewSubtext": "Share your favorite photos and videos with everyone instantly."
+        "previewSubtext": "Share your favorite photos and videos with everyone instantly.",
+        "uploadSpecs": "Recommended 1800×600 px (3:1). JPG, PNG or WEBP, up to 10 MB. Phones show a narrower slice, so keep the important part in the center.",
+        "fileTooLarge": "This image is larger than 10 MB. Crop it or choose a smaller file."
     },
     "settings": {
         "title": "Event Settings",
@@ -560,8 +564,12 @@
             "download": "Download",
             "galleryTitle": "Gallery",
             "passcodeNeeded": "Passcode required",
-            "viewOnly": "View only"
-        }
+            "viewOnly": "View only",
+            "readMore": "Show more",
+            "readLess": "Show less"
+        },
+        "contactSupport": "Contact help center",
+        "removeFile": "Remove"
     },
     "guestGuestbook": {
         "voiceMessage": "Voice Message",
@@ -969,7 +977,7 @@
             "coverUpload": "Upload cover",
             "coverChange": "Change cover",
             "coverRemove": "Remove cover",
-            "coverHint": "JPG or PNG. You can also open the gallery and use “Set as album cover” on any photo.",
+            "coverHint": "Recommended 1600×1200 px (4:3). JPG, PNG or WEBP. Square previews trim the sides, so keep the main subject in the center. You can also open the gallery and use “Set as album cover” on any photo.",
             "privacy": "Privacy",
             "privacyDesc": "Decide who can open this album.",
             "privacyPublicDesc": "Listed on the event page. Available via the main QR code or the album’s own link.",
@@ -994,7 +1002,11 @@
             "nameRequired": "Please enter an album name.",
             "passcodeRequired": "Protected albums need a passcode.",
             "passcodeTooShort": "Passcode must be 4–8 characters.",
-            "defaultNote": "This is the default album. Uploads without an album go here, and it cannot be deleted."
+            "defaultNote": "This is the default album. Uploads without an album go here, and it cannot be deleted.",
+            "needsGallery": "Unavailable while “Guests can view the gallery” is off in the event Settings.",
+            "coverSaved": "Cover saved",
+            "coverRemoved": "Cover removed",
+            "unsaved": "Unsaved changes"
         },
         "delete": {
             "title": "Delete album",
@@ -1027,5 +1039,14 @@
             "latest": "Latest export: {{date}}"
         },
         "uploadsClosedBadge": "Uploads closed"
+    },
+    "crop": {
+        "title": "Crop image",
+        "hint": "Drag the image to position it. Use the slider or pinch to zoom.",
+        "zoom": "Zoom",
+        "apply": "Crop and use",
+        "useOriginal": "Use without cropping",
+        "cancel": "Cancel",
+        "failed": "Could not open this image. Try another file."
     }
 }

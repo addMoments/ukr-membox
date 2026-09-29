@@ -18,7 +18,15 @@ import { Event } from '../../types/events';
 import { GuestTheme } from '../../types/guestTheme';
 import { fonts } from '../../types/fonts';
 import Mockup2 from '../../components/Mockup2';
+import ImageCropModal from '../../v2-components/ImageCropModal';
 import { t } from '../../packages/i18n';
+import { textOr } from '../../utils/admin_i18n';
+
+// Misafir sayfasindaki etkinlik gorseli masaustunde ~848x280 (3:1), telefonda ~2.2:1 kutuda
+// cover ile gosteriliyor; kirpma 3:1'e gore, telefon yanlardan biraz keser (AM-14).
+const EVENT_IMAGE_ASPECT = 3;
+const EVENT_IMAGE_MAX_WIDTH = 1800;
+const EVENT_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 
 
 function EventThemeInner({event}: {event: Event}) {
@@ -30,6 +38,20 @@ function EventThemeInner({event}: {event: Event}) {
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState('');
+
+  // Kirpilmis ya da orijinal dosya; "Maks. 10 MB" yaziyordu ama hic kontrol edilmiyordu.
+  const handleImageReady = (file: File) => {
+    setCropFile(null);
+    if (file.size > EVENT_IMAGE_MAX_BYTES) {
+      setImageError(textOr('theme.fileTooLarge', 'This image is larger than 10 MB. Crop it or choose a smaller file.', 'Зображення більше за 10 МБ. Обріжте його або виберіть менший файл.'));
+      return;
+    }
+    setImageError('');
+    setBannerImage(file);
+    setBannerImageUrl(URL.createObjectURL(file));
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -100,11 +122,16 @@ function EventThemeInner({event}: {event: Event}) {
             <h2 className="theme-section-title">{t('theme.customAtmosphere')}</h2>
           </div>
           
-          <FileInput 
-          onFile={(file) => {
-            setBannerImage(file);
-            setBannerImageUrl(URL.createObjectURL(file));
-          }}
+          <ImageCropModal
+            file={cropFile}
+            aspect={EVENT_IMAGE_ASPECT}
+            maxOutputWidth={EVENT_IMAGE_MAX_WIDTH}
+            onCancel={() => setCropFile(null)}
+            onDone={handleImageReady}
+          />
+          <FileInput
+          onFile={setCropFile}
+          mimeTypes={['image/png', 'image/jpeg', 'image/webp']}
           >
           <div className="theme-upload-area">
             <div className="theme-upload-icon">
@@ -112,9 +139,11 @@ function EventThemeInner({event}: {event: Event}) {
             </div>
             <h3 className="theme-upload-title">{t('theme.uploadTitle')}</h3>
             <p className="theme-upload-subtitle">{t('theme.uploadSubtitle')}</p>
+            <p className="theme-upload-specs">{textOr('theme.uploadSpecs', 'Recommended 1800×600 px (3:1). JPG, PNG or WEBP, up to 10 MB. Phones show a narrower slice, so keep the important part in the center.', 'Рекомендовано 1800×600 px (3:1). JPG, PNG або WEBP, до 10 МБ. На телефоні краї трохи обрізаються, тож тримайте головне по центру.')}</p>
             <button className="theme-upload-btn">{t('theme.browseGallery')}</button>
           </div>
           </FileInput>
+          {imageError && <p className="theme-upload-error" role="alert">{imageError}</p>}
         </section>
 
         <ThemeCustomizer

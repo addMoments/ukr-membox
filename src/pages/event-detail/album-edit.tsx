@@ -5,6 +5,7 @@ import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import SettingsFieldNote from '../../v2-components/SettingsFieldNote';
 import FileInput from '../../components/FileInput';
 import Button from '../../components/Button';
+import ImageCropModal from '../../v2-components/ImageCropModal';
 import { Event } from '../../types/events';
 import { Album, AlbumInput, AlbumPrivacy, albumCoverUrl } from '../../types/albums';
 import { adjustAlbumQR, createAlbum, getAlbum, updateAlbum } from '../../client/albums';
@@ -21,18 +22,37 @@ import '../../v2-styles/Albums.css';
 //        parser'in disinda (name yok) cunku parser bos tarihte toISOString ile patliyor.
 //        Kapak: dosya yukle (/api/upload/album_cover) ya da galeriden "kapak yap".
 // Neden: GENERAL + PRIVACY alanlari musterinin listesindeki gibi tek ekranda.
+//        Var olan albumde kapak yuklenince/kaldirilinca aninda kaydedilir (AM-15); yeni albumde
+//        "Olustur" ile gider. Kaydet cubugu yapiskan ve kaydedilmemis degisikligi soyler.
 
 const PASSCODE_MIN = 4;
 const PASSCODE_MAX = 8;
+// Kapak hem kare (misafir ana sayfasi, masaustu album sayfasi) hem genis (mobil album sayfasi,
+// host karti) kutularda cover ile gosteriliyor; 4:3 ikisinde de gorselin en az %75'ini gosterir.
+const COVER_ASPECT = 4 / 3;
+const COVER_MAX_WIDTH = 1600;
 
-const SettingsToggle = ({ name, description, checked, formName }: { name: string; description: string; checked: boolean; formName: string }) => (
-  <div className="settings-toggle-item">
+type SettingsToggleProps = {
+  name: string;
+  description: string;
+  checked: boolean;
+  formName: string;
+  // AM-08: ust ayar kapaliyken toggle pasif ve nedeni altinda yazili.
+  disabled?: boolean;
+  disabledNote?: string;
+};
+
+const SettingsToggle = ({ name, description, checked, formName, disabled = false, disabledNote }: SettingsToggleProps) => (
+  <div className={`settings-toggle-item${disabled ? ' is-disabled' : ''}`}>
     <div className="settings-toggle-content">
       <h3 className="settings-toggle-title">{name}</h3>
       <p className="settings-toggle-description">{description}</p>
+      {disabled && disabledNote && (
+        <p className="settings-toggle-disabled-note"><i className="fa-solid fa-lock" />{disabledNote}</p>
+      )}
     </div>
     <label className="settings-toggle-switch">
-      <input type="checkbox" name={formName} defaultChecked={checked} />
+      <input type="checkbox" name={formName} defaultChecked={checked} disabled={disabled} />
       <span className="settings-toggle-slider"></span>
     </label>
   </div>
@@ -61,6 +81,9 @@ function EventAlbumEditInner({ event }: { event: Event }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [coverStatus, setCoverStatus] = useState('');
+  const [dirty, setDirty] = useState(false);
   const dateRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -80,14 +103,31 @@ function EventAlbumEditInner({ event }: { event: Event }) {
 
   useEffect(() => () => { if (coverPreview) URL.revokeObjectURL(coverPreview); }, [coverPreview]);
 
+  const flashCoverStatus = (text: string) => {
+    setCoverStatus(text);
+    window.setTimeout(() => setCoverStatus(''), 3000);
+  };
+
+  // Ne: Kapak dosyasini S3'e yukler; var olan albumde albums.cover'i hemen yazar.
+  // Neden: AM-15 — onizleme aninda gorundugu icin organizator kapagin kaydedildigini sanip
+  //        sayfanin altindaki Kaydet'e basmadan cikiyordu.
   const handleCoverFile = async (file: File) => {
     setCoverUploading(true);
     setError('');
+    setCoverStatus('');
+    const preview = URL.createObjectURL(file);
+    setCoverPreview(preview);
     try {
-      const preview = URL.createObjectURL(file);
-      setCoverPreview(preview);
       const [path] = await uploadAlbumCover(file);
-      setCover(path);
+      if (isNew) {
+        setCover(path);
+        setDirty(true);
+        return;
+      }
+      const updated = await updateAlbum(albumUid, { cover: path });
+      setAlbum(updated);
+      setCover(updated.cover);
+      flashCoverStatus(textOr('albums.form.coverSaved', 'Cover saved', 'Обкладинку збережено'));
     } catch (e) {
       console.error('[album-edit] cover upload failed', e);
       setCoverPreview(null);
@@ -96,6 +136,33 @@ function EventAlbumEditInner({ event }: { event: Event }) {
       setCoverUploading(false);
     }
   };
+
+  const handleCoverRemove = async () => {
+    setError('');
+    setCoverStatus('');
+    if (isNew) {
+      setCover(null);
+      setCoverPreview(null);
+      setDirty(true);
+      return;
+    }
+    setCoverUploading(true);
+    try {
+      const updated = await updateAlbum(albumUid, { cover: null });
+      setAlbum(updated);
+      setCover(null);
+      setCoverPreview(null);
+      flashCoverStatus(textOr('albums.form.coverRemoved', 'Cover removed', 'Обкладинку прибрано'));
+    } catch (e) {
+      console.error('[album-edit] cover remove failed', e);
+      setError(textOr('albums.form.saveFailed', 'Could not save the album', 'Не вдалося зберегти альбом'));
+    } finally {
+      setCoverUploading(false);
+    }
+  };
+
+  // Etkinlik anahtari: kapaliyken albumdeki "goruntuleme" ve "tumunu kaydet" ise yaramaz.
+  const guestGalleryOn = !!event.settings?.guest_gallery;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const form = parse_submit_event(e);
@@ -129,8 +196,9 @@ function EventAlbumEditInner({ event }: { event: Event }) {
       privacy,
       passcode: privacy === 'protected' ? passcodeRaw : null,
       guest_upload: !!form.guest_upload,
-      guest_view: !!form.guest_view,
-      guest_download_all: !!form.guest_download_all,
+      // Pasif checkbox formla gonderilmez; galeri kapaliyken kayitli degeri koru (AM-08).
+      guest_view: guestGalleryOn ? !!form.guest_view : (album ? album.guest_view : false),
+      guest_download_all: guestGalleryOn ? !!form.guest_download_all : (album ? album.guest_download_all : false),
     };
 
     setSaving(true);
@@ -144,6 +212,7 @@ function EventAlbumEditInner({ event }: { event: Event }) {
       }
       const updated = await updateAlbum(albumUid, input);
       setAlbum(updated);
+      setDirty(false);
       setSuccess(true);
       window.setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
@@ -173,7 +242,7 @@ function EventAlbumEditInner({ event }: { event: Event }) {
   }
 
   const coverSrc = coverPreview || (cover ? albumCoverUrl({ cover }) : null);
-  const guestGalleryOn = !!event.settings?.guest_gallery;
+  const needsGalleryNote = textOr('albums.form.needsGallery', 'Unavailable while “Guests can view the gallery” is off in the event Settings.', 'Недоступно, поки в налаштуваннях події вимкнено «Гості можуть переглядати галерею».');
 
   return (
     <>
@@ -187,7 +256,24 @@ function EventAlbumEditInner({ event }: { event: Event }) {
         title={title}
       />
 
-      <form className="settings-main-content" onSubmit={handleSubmit} key={album?.uid || 'new'}>
+      <ImageCropModal
+        file={cropFile}
+        aspect={COVER_ASPECT}
+        maxOutputWidth={COVER_MAX_WIDTH}
+        onCancel={() => setCropFile(null)}
+        onDone={(file) => { setCropFile(null); handleCoverFile(file); }}
+      />
+
+      <form
+        className="settings-main-content"
+        onSubmit={handleSubmit}
+        // Dosya secici kapagi kendisi kaydediyor; onu "kaydedilmemis" sayma.
+        onChange={(e) => {
+          const target: EventTarget = e.target;
+          if (!(target instanceof HTMLInputElement && target.type === 'file')) setDirty(true);
+        }}
+        key={album?.uid || 'new'}
+      >
         {album?.is_default && (
           <div className="album-form-default-note">
             <i className="fa-solid fa-star" />
@@ -251,7 +337,7 @@ function EventAlbumEditInner({ event }: { event: Event }) {
                   {coverSrc ? <img src={coverSrc} alt="" /> : <i className="fa-regular fa-images" />}
                 </div>
                 <div className="album-cover-actions">
-                  <FileInput onFile={handleCoverFile} mimeTypes={['image/png', 'image/jpeg', 'image/webp']} multiple={false}>
+                  <FileInput onFile={setCropFile} mimeTypes={['image/png', 'image/jpeg', 'image/webp']} multiple={false}>
                     <Button
                       type="button"
                       variant="secondary"
@@ -266,11 +352,13 @@ function EventAlbumEditInner({ event }: { event: Event }) {
                       variant="secondary"
                       icon="fa-solid fa-xmark"
                       text={textOr('albums.form.coverRemove', 'Remove cover', 'Прибрати обкладинку')}
-                      onClick={() => { setCover(null); setCoverPreview(null); }}
+                      onClick={handleCoverRemove}
+                      disabled={coverUploading}
                     />
                   )}
+                  {coverStatus && <span className="album-form-success album-cover-status" role="status">✓ {coverStatus}</span>}
                   <SettingsFieldNote>
-                    <p>{textOr('albums.form.coverHint', 'JPG or PNG. You can also open the gallery and use “Set as album cover” on any photo.', 'JPG або PNG. Також можна відкрити галерею й обрати «Зробити обкладинкою альбому» для будь-якого фото.')}</p>
+                    <p>{textOr('albums.form.coverHint', 'Recommended 1600×1200 px (4:3). JPG, PNG or WEBP. Square previews trim the sides, so keep the main subject in the center. You can also open the gallery and use “Set as album cover” on any photo.', 'Рекомендовано 1600×1200 px (4:3). JPG, PNG або WEBP. У квадратних мініатюрах краї обрізаються, тож тримайте головне по центру. Також можна відкрити галерею й обрати «Зробити обкладинкою альбому» для будь-якого фото.')}</p>
                   </SettingsFieldNote>
                 </div>
               </div>
@@ -346,14 +434,19 @@ function EventAlbumEditInner({ event }: { event: Event }) {
             <SettingsToggle
               name={textOr('albums.form.guestView', 'Guests can view this album', 'Гості можуть переглядати цей альбом')}
               description={textOr('albums.form.guestViewDesc', 'Guests see the photos and videos in this album. Also needs “Guests can view the gallery” in Settings. If both uploads and viewing are off, the album is hidden from guests.', 'Гості бачать фото та відео в цьому альбомі. Також потрібно увімкнути «Гості можуть переглядати галерею» у налаштуваннях. Якщо вимкнено і завантаження, і перегляд, альбом приховано від гостей.')}
-              checked={album ? album.guest_view : true}
+              // Yeni albumde varsayilan etkinlik anahtarini izler; eskiden galeri kapaliyken de "acik" basliyordu.
+              checked={album ? album.guest_view : guestGalleryOn}
               formName="guest_view"
+              disabled={!guestGalleryOn}
+              disabledNote={needsGalleryNote}
             />
             <SettingsToggle
-              name={textOr('albums.form.guestDownloadAll', 'Guests can download the whole album', 'Гості можуть завантажити весь альбом')}
+              name={textOr('albums.form.guestDownloadAll', 'Guests can download the whole album', 'Гості можуть зберегти весь альбом')}
               description={textOr('albums.form.guestDownloadAllDesc', 'Shows a “Download all” button on the guest album page.', 'Показує кнопку «Зберегти на пристрій» на сторінці альбому для гостей.')}
               checked={album ? album.guest_download_all : false}
               formName="guest_download_all"
+              disabled={!guestGalleryOn}
+              disabledNote={needsGalleryNote}
             />
           </div>
           {!guestGalleryOn && (
@@ -365,7 +458,7 @@ function EventAlbumEditInner({ event }: { event: Event }) {
           )}
         </section>
 
-        <div className="album-form-footer">
+        <div className={`album-form-footer${dirty ? ' is-dirty' : ''}`}>
           <Button
             type="submit"
             icon={isNew ? 'fa-solid fa-plus' : 'fa-solid fa-check'}
@@ -378,6 +471,9 @@ function EventAlbumEditInner({ event }: { event: Event }) {
             text={textOr('albums.form.cancel', 'Cancel', 'Скасувати')}
             onClick={() => navigate(`/event/${packedUid}/albums`)}
           />
+          {dirty && !saving && !success && (
+            <span className="album-form-unsaved"><i className="fa-solid fa-circle" />{textOr('albums.form.unsaved', 'Unsaved changes', 'Є незбережені зміни')}</span>
+          )}
           {success && <span className="album-form-success">✓ {textOr('albums.form.saved', 'Album saved', 'Альбом збережено')}</span>}
           {error && <span className="album-form-error">✗ {error}</span>}
         </div>

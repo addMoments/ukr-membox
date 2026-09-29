@@ -15,6 +15,7 @@ import PhotoViewerModal, { photoViewerState } from '../partials/PhotoViewerModal
 import '../v2-styles/GuestUploads.css';
 import { applyGuestFont } from '../utils/applyGuestFont';
 import { t } from '../packages/i18n';
+import { textOr } from '../utils/admin_i18n';
 import V2GuestGate from './V2GuestGate';
 import GuestAccessErrorScreen from './GuestAccessErrorScreen';
 import { getEventClosedMessage, isEventClosedError, isPackageLimitExceededError } from '../utils/guestInitError';
@@ -140,9 +141,9 @@ function V2ParticipantUploads() {
   if (showPackageLimitError) {
     return (
       <GuestAccessErrorScreen
-        title="Package limit exceeded"
-        message="You have exceeded your package limit. Please contact help center."
-        actionText="Contact help center"
+        title={textOr('guest.limitReachedTitle', 'Participant limit reached', 'Ліміт учасників вичерпано')}
+        message={textOr('guest.limitReachedDescription', 'This event has reached the new participant limit.', 'Для цієї події вичерпано ліміт нових учасників.')}
+        actionText={textOr('guest.contactSupport', 'Contact help center', 'Звʼязатися з підтримкою')}
         actionHref="/contact"
         theme={theme}
       />
