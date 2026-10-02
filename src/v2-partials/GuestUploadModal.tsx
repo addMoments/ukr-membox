@@ -36,7 +36,8 @@ interface GuestUploadModalProps {
   onUploadComplete?: () => void;
 }
 
-type FileEntry = { file: File; previewUrl: string; uploaded: boolean; failed: boolean };
+// duplicate: dosya bu albumde zaten vardi, sunucu ikinci kopyayi eklemedi (AM-07).
+type FileEntry = { file: File; previewUrl: string; uploaded: boolean; failed: boolean; duplicate: boolean };
 
 // TS 4.9'un lib.dom'unda Screen Wake Lock API tipi yok; kullandigimiz kadarini tanimliyoruz.
 type ScreenWakeLock = { release: () => Promise<void> };
@@ -83,7 +84,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
   // Ne: Yukleme basariyla bitince gosterilecek onay ekraninin verisi (null = gosterme).
   // Neden: 2.6 — misafir mobilden yukleyince modal 1 saniyede sessizce kapaniyordu ve
   //        hicbir onay gormuyordu.
-  const [uploadDone, setUploadDone] = useState<{ count: number; bytes: number } | null>(null);
+  const [uploadDone, setUploadDone] = useState<{ count: number; bytes: number; duplicates: number } | null>(null);
 
   const getLocalizedText = (key: string, fallback: string) => {
     const value = t(key);
@@ -92,7 +93,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
 
   const handleFileSelect = (file: File) => {
     const previewUrl = URL.createObjectURL(file);
-    elemRef.entries.push({ file, previewUrl, uploaded: false, failed: false });
+    elemRef.entries.push({ file, previewUrl, uploaded: false, failed: false, duplicate: false });
     setFileEntries([...elemRef.entries]);
     setModalOpen(true);
   };
@@ -189,6 +190,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
     setUploadProgress({ done: 0, failed: 0, total: pendingEntries.length, totalBytes });
     pendingEntries.forEach((entry) => {
       entry.failed = false;
+      entry.duplicate = false;
     });
     setFileEntries([...elemRef.entries]);
 
@@ -209,6 +211,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
 
       let doneCount = 0;
       let successCount = 0;
+      let duplicateCount = 0;
       let contributorLimitHit = false;
       let albumClosedHit = false;
       let limitHit: UploadLimitCode | null = null;
@@ -218,10 +221,12 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
       for (const entry of pendingEntries) {
         try {
           const uploadType = entry.file.type.startsWith('video/') ? 'video' : 'photo';
-          await guestUpload(eventUid, uploadType, [entry.file], albumUid);
+          const [result] = await guestUpload(eventUid, uploadType, [entry.file], albumUid);
           entry.uploaded = true;
           entry.failed = false;
+          entry.duplicate = !!result?.duplicate;
           successCount += 1;
+          if (entry.duplicate) duplicateCount += 1;
         } catch (err) {
           entry.uploaded = false;
           entry.failed = true;
@@ -275,14 +280,16 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
         setUploadDone({
           count: successCount,
           bytes: pendingEntries.reduce((sum, entry) => sum + entry.file.size, 0),
+          duplicates: duplicateCount,
         });
+        // "Zaten albumde" satiri da okunsun diye o durumda biraz daha uzun.
         setTimeout(() => {
           elemRef.entries.forEach(entry => URL.revokeObjectURL(entry.previewUrl));
           elemRef.entries = [];
           setFileEntries([]);
           setModalOpen(false);
           setUploadDone(null);
-        }, 2600);
+        }, duplicateCount > 0 ? 4000 : 2600);
       }
     } finally {
       wakeLock?.release().catch(() => undefined);
@@ -303,6 +310,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
   const failedLabel = getLocalizedText('common.failed', 'Failed');
   const uploadedLabel = getLocalizedText('common.uploaded', 'Uploaded');
   const removeLabel = textOr('guest.removeFile', 'Remove', 'Прибрати');
+  const alreadyInAlbumLabel = textOr('guest.alreadyInAlbum', 'Already in the album', 'Вже є в альбомі');
   const showAlbumPicker = albums.length > 1;
   const defaultAlbumUid = pickDefaultAlbum(albums, initialAlbumUid);
   const lockedAlbum = lockAlbum ? albums.find(a => a.uid === defaultAlbumUid) : undefined;
@@ -321,6 +329,11 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
             <p className="upload-modal-success-sub">
               {uploadDone.count} {t('common.files')} · {formatBytes(uploadDone.bytes)}
             </p>
+            {uploadDone.duplicates > 0 && (
+              <p className="upload-modal-success-sub">
+                {textOr('guest.alreadyInAlbumCount', 'Already in the album, not added again: {{count}}', 'Вже були в альбомі, повторно не додано: {{count}}', { count: uploadDone.duplicates })}
+              </p>
+            )}
           </div>
         ) : (
         <>
@@ -394,6 +407,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
                 <span className="upload-modal-item-name">{entry.file.name}</span>
                 <span className="upload-modal-item-size">{formatBytes(entry.file.size)}</span>
                 {entry.failed ? <span className="upload-modal-item-error">{failedLabel}</span> : null}
+                {entry.duplicate ? <span className="upload-modal-item-note">{alreadyInAlbumLabel}</span> : null}
               </div>
               {entry.uploaded && <i className="fa-solid fa-circle-check upload-modal-item-check" />}
               {entry.failed && <i className="fa-solid fa-circle-xmark upload-modal-item-fail" />}

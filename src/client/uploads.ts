@@ -45,7 +45,10 @@ export class GuestUploadError extends Error {
 }
 
 // Sunucunun /confirm cevabi (ukr-membox-serv upload_receipt.Status).
-type ConfirmStatus = 'received' | 'pending' | 'missing' | 'empty';
+type ConfirmStatus = 'received' | 'pending' | 'missing' | 'empty' | 'duplicate';
+
+// duplicate: ayni dosya bu albumde zaten vardi; sunucu yeni kopyayi sildi (AM-07). Misafir icin basari.
+export type GuestUploadResult = { path: string; duplicate: boolean };
 
 // Ilk deneme + iki tekrar; kisa kopmalari (tunel, baz istasyonu degisimi) atlatmaya yeter.
 const RETRY_DELAYS_MS = [2000, 5000];
@@ -89,7 +92,7 @@ const confirmGuestUpload = async (confirmUrl: string, filePath: string, putOk: b
 // Neden: 25 Eylul'de otobusteki misafirlerin PUT'lari yarida kaldi ve yalnizca kirmizi bir X
 //        gorduler. Sunucu satiri, dosyayi S3'te gorene kadar gizli tutuyor (received_at);
 //        /confirm o karari hemen verdirir ve basarisiz denemenin satirini siler.
-const uploadGuestFile = async (presignUrl: string, confirmUrl: string, file: File): Promise<string> => {
+const uploadGuestFile = async (presignUrl: string, confirmUrl: string, file: File): Promise<GuestUploadResult> => {
     let lastError: unknown = null;
 
     for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
@@ -124,11 +127,12 @@ const uploadGuestFile = async (presignUrl: string, confirmUrl: string, file: Fil
             lastError = err;
         }
 
-        if (status === 'received') return presign.filePath;
+        if (status === 'received') return { path: presign.filePath, duplicate: false };
+        if (status === 'duplicate') return { path: presign.filePath, duplicate: true };
         if (status === 'empty') throw new GuestUploadError('unreadable', `Empty upload for ${file.name}`);
         // Tarayici PUT'u basarili gordu ama sunucuya ulasilamadi ya da dosyayi henuz goremedi:
         // tarama bir dakika icinde galeriye alir. Yeniden yuklemek ayni fotografi iki kez ekler.
-        if (putOk && (status === null || status === 'pending')) return presign.filePath;
+        if (putOk && (status === null || status === 'pending')) return { path: presign.filePath, duplicate: false };
     }
 
     throw new GuestUploadError('not_received', `Upload failed for ${file.name}: ${String(lastError)}`);
@@ -140,7 +144,7 @@ const uploadGuestFile = async (presignUrl: string, confirmUrl: string, file: Fil
  * @param utype - Upload type: 'photo', 'video', or 'voice'
  * @param files - Array of File objects to upload
  * @param albumUid - Hedef album (photo/video). Verilmezse sunucu General'e yazar.
- * @returns Array of final S3 file paths
+ * @returns Dosya basina S3 yolu ve albumde zaten olup olmadigi (duplicate)
  * @throws GuestUploadError dosya okunamadiysa ya da S3'e ulasmadiysa; limit/album/yetki
  *         hatalarinda sunucunun FetchHttpError'u oldugu gibi gelir.
  */
@@ -153,14 +157,15 @@ export const guestUpload = async (
     const eventPackedUid = packUUID(eventUid);
     const albumParam = albumUid ? `?album=${packUUID(albumUid)}` : '';
     const presignUrl = `${SERV_ROOT}/api/guest/upload/${eventPackedUid}/${utype}${albumParam}`;
-    const confirmUrl = `${SERV_ROOT}/api/guest/upload/${eventPackedUid}/confirm`;
+    // dedupe=1: bu arayuz "duplicate" cevabini taniyor (sunucu eski arayuze "received" der).
+    const confirmUrl = `${SERV_ROOT}/api/guest/upload/${eventPackedUid}/confirm?dedupe=1`;
 
-    const paths: string[] = [];
+    const results: GuestUploadResult[] = [];
     for (const file of files) {
         await assertReadable(file);
-        paths.push(await uploadGuestFile(presignUrl, confirmUrl, file));
+        results.push(await uploadGuestFile(presignUrl, confirmUrl, file));
     }
-    return paths;
+    return results;
 }
 
 const presignFiles = async (url: string, files: File[]): Promise<PresignResponse> => {

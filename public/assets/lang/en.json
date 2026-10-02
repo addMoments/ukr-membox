@@ -533,6 +533,8 @@
         "limitReachedTitle": "Participant limit reached",
         "limitReachedDescription": "This event has reached the new participant limit.",
         "uploadCompleted": "Upload completed",
+        "alreadyInAlbum": "Already in the album",
+        "alreadyInAlbumCount": "Already in the album, not added again: {{count}}",
         "uploadNotReceived": "Some files didn't upload. Check your connection and tap “Upload Files” again.",
         "uploadUnreadable": "Some files couldn't be read from your device. Remove them, add them again and retry.",
         "album": {
