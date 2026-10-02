@@ -139,7 +139,7 @@ function EventThemeInner({event}: {event: Event}) {
             </div>
             <h3 className="theme-upload-title">{t('theme.uploadTitle')}</h3>
             <p className="theme-upload-subtitle">{t('theme.uploadSubtitle')}</p>
-            <p className="theme-upload-specs">{textOr('theme.uploadSpecs', 'Recommended 1800×600 px (3:1). JPG, PNG or WEBP, up to 10 MB. Phones show a narrower slice, so keep the important part in the center.', 'Рекомендовано 1800×600 px (3:1). JPG, PNG або WEBP, до 10 МБ. На телефоні краї трохи обрізаються, тож тримайте головне по центру.')}</p>
+            <p className="theme-upload-specs">{textOr('theme.uploadSpecs', 'Recommended 1800×600 px (3:1). JPG, PNG or WEBP, up to 10 MB. Guests see exactly the area you crop, on phones and computers alike.', 'Рекомендовано 1800×600 px (3:1). JPG, PNG або WEBP, до 10 МБ. Гості бачать саме ту частину, яку ви обрізали, — і на телефоні, і на комп’ютері.')}</p>
             <button className="theme-upload-btn">{t('theme.browseGallery')}</button>
           </div>
           </FileInput>

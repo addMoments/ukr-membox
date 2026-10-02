@@ -158,7 +158,7 @@
         "previewText": "Preview text",
         "previewHeadline": "Capturing Every Beat of the Celebration",
         "previewSubtext": "Share your favorite photos and videos with everyone instantly.",
-        "uploadSpecs": "Recommended 1800×600 px (3:1). JPG, PNG or WEBP, up to 10 MB. Phones show a narrower slice, so keep the important part in the center.",
+        "uploadSpecs": "Recommended 1800×600 px (3:1). JPG, PNG or WEBP, up to 10 MB. Guests see exactly the area you crop, on phones and computers alike.",
         "fileTooLarge": "This image is larger than 10 MB. Crop it or choose a smaller file."
     },
     "settings": {
@@ -977,7 +977,7 @@
             "coverUpload": "Upload cover",
             "coverChange": "Change cover",
             "coverRemove": "Remove cover",
-            "coverHint": "Recommended 1600×1200 px (4:3). JPG, PNG or WEBP. Square previews trim the sides, so keep the main subject in the center. You can also open the gallery and use “Set as album cover” on any photo.",
+            "coverHint": "Recommended 1600×1200 px (4:3). JPG, PNG or WEBP. The cover appears in this 4:3 shape everywhere, on phones and computers alike. You can also open the gallery and use “Set as album cover” on any photo.",
             "privacy": "Privacy",
             "privacyDesc": "Decide who can open this album.",
             "privacyPublicDesc": "Listed on the event page. Available via the main QR code or the album’s own link.",
@@ -1042,7 +1042,7 @@
     },
     "crop": {
         "title": "Crop image",
-        "hint": "Drag the image to position it. Use the slider or pinch to zoom.",
+        "hint": "Drag the image to position it. Use the slider or pinch to zoom. Guests will see exactly what is inside the frame.",
         "zoom": "Zoom",
         "apply": "Crop and use",
         "useOriginal": "Use without cropping",

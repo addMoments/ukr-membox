@@ -358,7 +358,7 @@ function EventAlbumEditInner({ event }: { event: Event }) {
                   )}
                   {coverStatus && <span className="album-form-success album-cover-status" role="status">✓ {coverStatus}</span>}
                   <SettingsFieldNote>
-                    <p>{textOr('albums.form.coverHint', 'Recommended 1600×1200 px (4:3). JPG, PNG or WEBP. Square previews trim the sides, so keep the main subject in the center. You can also open the gallery and use “Set as album cover” on any photo.', 'Рекомендовано 1600×1200 px (4:3). JPG, PNG або WEBP. У квадратних мініатюрах краї обрізаються, тож тримайте головне по центру. Також можна відкрити галерею й обрати «Зробити обкладинкою альбому» для будь-якого фото.')}</p>
+                    <p>{textOr('albums.form.coverHint', 'Recommended 1600×1200 px (4:3). JPG, PNG or WEBP. The cover appears in this 4:3 shape everywhere, on phones and computers alike. You can also open the gallery and use “Set as album cover” on any photo.', 'Рекомендовано 1600×1200 px (4:3). JPG, PNG або WEBP. Обкладинка всюди показується в цій формі 4:3 — і на телефоні, і на комп’ютері. Також можна відкрити галерею й обрати «Зробити обкладинкою альбому» для будь-якого фото.')}</p>
                   </SettingsFieldNote>
                 </div>
               </div>

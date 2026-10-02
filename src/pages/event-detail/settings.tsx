@@ -73,6 +73,14 @@ function EventSettingsInner({event}: {event: Event}) {
   const [downloadLoading, setDownloadLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Ne: settings JSONB'sinin en son kaydedilen hali.
+  // Neden: Iki form da settings'in tamamini yaziyor; sayfa acilisindaki kopyadan yazinca biri digerinin
+  //        kaydini geri aliyordu (AM-08: galeri kapatilip ayni ziyarette ad kaydedilince galeri yeniden aciliyordu).
+  const savedSettingsRef = useRef(event.settings || {});
+  useEffect(() => {
+    savedSettingsRef.current = event.settings || {};
+  }, [event.settings]);
+
   // Paketin aktif kalma suresi ayri bir alanda tutulmuyor; active_until ile
   // activation_date farki tam olarak products.options.activation_days'i verir.
   const activeDays = daysBetween(event.activation_date, event.active_until);
@@ -101,7 +109,7 @@ function EventSettingsInner({event}: {event: Event}) {
     setDateStatus(null);
 
     // event_date bir kolon degil; settings JSONB icinde yasiyor, diger anahtarlar korunmali.
-    const settings = { ...(event.settings || {}), event_date: event_date || null };
+    const settings = { ...savedSettingsRef.current, event_date: event_date || null };
 
     // Always fire the main fields request
     const mainReq = pgErr(`/events?uid=eq.${eventUid}`, {
@@ -126,6 +134,7 @@ function EventSettingsInner({event}: {event: Event}) {
       setGeneralStatus({ state: 'error', message: (mainErr as Error).message });
       setGeneralFormKey(k => k + 1);
     } else {
+      savedSettingsRef.current = settings;
       setGeneralStatus({ state: 'success' });
       setTimeout(() => setGeneralStatus(null), 3000);
     }
@@ -154,13 +163,15 @@ function EventSettingsInner({event}: {event: Event}) {
     const eventUid = unpackUUID(packedUid || "");
 
     setPrivacyStatus({ state: 'saving' });
+    const nextSettings = { ...savedSettingsRef.current, ...form };
     const { err } = await pgErr(`/events?uid=eq.${eventUid}`, {
       method: 'PATCH',
-      body: JSON.stringify({ settings: { ...settings, ...form } })
+      body: JSON.stringify({ settings: nextSettings })
     });
     if (err) {
       setPrivacyStatus({ state: 'error', message: (err as Error).message });
     } else {
+      savedSettingsRef.current = nextSettings;
       setPrivacyStatus({ state: 'success' });
       setTimeout(() => setPrivacyStatus(null), 3000);
     }

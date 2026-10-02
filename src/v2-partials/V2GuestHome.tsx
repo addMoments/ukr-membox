@@ -41,6 +41,8 @@ export interface V2GuestHomeProps {
   // yuklemesi kapali VE galerisi gorunmeyen albumler listeye girmez).
   albums?: GuestAlbum[];
   albumsLoaded?: boolean;
+  // Etkinligin "Guests can view the gallery" anahtari (events_public.settings.guest_gallery).
+  galleryOn?: boolean;
 }
 
 const ADVERTORIAL_CELL_COUNT: Record<AdvertorialLayout, number> = {
@@ -109,6 +111,7 @@ function V2GuestHome({
   advertorial,
   albums = [],
   albumsLoaded = false,
+  galleryOn = false,
 }: V2GuestHomeProps) {
   // Yukleme modali ayri bilesende (GuestUploadModal); dosyalar ref uzerinden verilir.
   const uploadModalRef = useRef<GuestUploadModalHandle>(null);
@@ -139,7 +142,11 @@ function V2GuestHome({
   //        listede kalir), bu yuzden "yukleme kapali" karari listeden degil bu alt kumeden verilir.
   const uploadableAlbums = albums.filter((album) => guestCanUploadTo(album, openedAlbums));
   const uploadsClosed = albumsLoaded && uploadableAlbums.length === 0;
-  const showAlbumCards = albums.length > 1 || albums.some((album) => !album.is_default);
+  // Yalnizca General varken kart gizliydi; fotograflari gorulebiliyorsa misafirin galeriye tek yolu bu kart
+  // (AM-08: iki anahtar da acikken tek albumlu etkinlikte misafir fotograflara ulasamiyordu).
+  const showAlbumCards = albums.length > 1
+    || albums.some((album) => !album.is_default)
+    || (galleryOn && albums.some((album) => album.guest_view));
   const isLocked = (album: GuestAlbum) => album.privacy === 'protected' && !openedAlbums.has(album.uid);
   const formatAlbumDate = (dateStr: string | null) => {
     if (!dateStr) return '';

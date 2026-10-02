@@ -107,9 +107,11 @@
   flex-direction: column;
 }
 
+/* AM-14: Kapak 4:3 kirpiliyor; kart da 4:3 (sabit 180px yukseklik ekran genisligine gore kesiyordu). */
 .album-card-cover {
   position: relative;
-  height: 180px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
   background: #F5F5F4;
   cursor: pointer;
 }
@@ -470,9 +472,10 @@
   align-items: flex-start;
 }
 
+/* AM-14: Onizleme de kirpma cercevesiyle ayni oranda (4:3). */
 .album-cover-preview {
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 150px;
   border-radius: 20px;
   background: #F5F5F4;
   border: 1px solid #E7E5E4;

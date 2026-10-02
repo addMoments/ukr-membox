@@ -43,10 +43,13 @@
   }
 }
 
+/* AM-14: Etkinlik gorseli 3:1 kirpiliyor; kutu da her ekranda 3:1, yoksa telefon/tablet
+   kirpilan alanin farkli bir dilimini gosteriyordu. overflow: aspect-ratio kutusu resimle uzamasin. */
 .guest-home-hero-image {
-  height: 280px;
+  aspect-ratio: 3 / 1;
   width: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 .guest-home-hero-info-band-wrap {
@@ -68,6 +71,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .guest-home-hero-image-overlay {
@@ -424,10 +428,6 @@
 
   .guest-home-hero-info-band .guest-home-hero-meta {
     display: none;
-  }
-
-  .guest-home-hero-image {
-    height: 150px;
   }
 
   .guest-home-hero-badge {
@@ -1245,8 +1245,9 @@
   box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.25);
 }
 
+/* AM-14: Kapak 4:3 kirpiliyor, kucuk resim de 4:3 (kare kenarlari kesiyordu). */
 .guest-home-album-cover {
-  width: 72px;
+  width: 96px;
   height: 72px;
   border-radius: 14px;
   overflow: hidden;

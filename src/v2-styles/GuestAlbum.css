@@ -48,9 +48,10 @@
   }
 }
 
+/* AM-14: Kapak 4:3 kirpiliyor; telefonda da bilgisayarda da ayni 4:3 (eskiden genis / kare). */
 .guest-album-cover {
   width: 100%;
-  height: 200px;
+  aspect-ratio: 4 / 3;
   border-radius: 24px;
   overflow: hidden;
   background: var(--base);
@@ -60,7 +61,18 @@
 
 @media (min-width: 768px) {
   .guest-album-cover {
-    width: 240px;
+    width: 320px;
+  }
+}
+
+/* Kapak yoksa (cogu zaman General) korunacak oran yok: telefonda eski yukseklik, buton yukarida kalsin. */
+.guest-album-cover.empty {
+  aspect-ratio: auto;
+  height: 200px;
+}
+
+@media (min-width: 768px) {
+  .guest-album-cover.empty {
     height: 240px;
   }
 }

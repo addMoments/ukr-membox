@@ -187,7 +187,7 @@ function ImageCropModal({ file, aspect, maxOutputWidth, onCancel, onDone }: Imag
     <div className="crop-modal-backdrop" onClick={() => { if (!busy) onCancel(); }}>
       <div className="crop-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <h3 className="crop-modal-title">{textOr('crop.title', 'Crop image', 'Обрізати зображення')}</h3>
-        <p className="crop-modal-hint">{textOr('crop.hint', 'Drag the image to position it. Use the slider or pinch to zoom.', 'Перетягніть зображення, щоб розмістити його. Масштаб — повзунком або двома пальцями.')}</p>
+        <p className="crop-modal-hint">{textOr('crop.hint', 'Drag the image to position it. Use the slider or pinch to zoom. Guests will see exactly what is inside the frame.', 'Перетягніть зображення, щоб розмістити його. Масштаб — повзунком або двома пальцями. Гості побачать саме те, що в рамці.')}</p>
 
         <div
           ref={frameRef}

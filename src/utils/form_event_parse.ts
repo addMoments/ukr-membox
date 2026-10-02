@@ -62,8 +62,10 @@ const submit_parser_settings = {
                 const input = el as HTMLInputElement;
                 return !!(input.type === 'date');
             },
-            f: (el: DomElement): string => {
-                return new Date(el.value).toISOString();
+            // Bos alan null: new Date('').toISOString() RangeError atiyor ve formun tamami kaydedilemiyordu
+            // (Ayarlar'da etkinlik tarihi bossa ad / karsilama mesaji da kaydedilmiyordu).
+            f: (el: DomElement): string | null => {
+                return el.value ? new Date(el.value).toISOString() : null;
             },
             put: (dom_elem: DomElement, value: string): void => {
                 (dom_elem as HTMLInputElement).value = new Date(value).toISOString().split('T')[0];
@@ -74,8 +76,9 @@ const submit_parser_settings = {
                 const input = el as HTMLInputElement;
                 return !!(input.type === 'datetime-local');
             },
-            f: (el: DomElement): string => {
-                return new Date((el as HTMLInputElement).value).toISOString();
+            f: (el: DomElement): string | null => {
+                const value = (el as HTMLInputElement).value;
+                return value ? new Date(value).toISOString() : null;
             },
             put: (dom_elem: DomElement, value: number): void => {
                 (dom_elem as HTMLInputElement).value = new Date(value).toISOString();

@@ -411,7 +411,7 @@ function ParticipantAlbum() {
           </Link>
 
           <div className="guest-album-hero">
-            <div className="guest-album-cover">
+            <div className={`guest-album-cover${cover ? '' : ' empty'}`}>
               {cover
                 ? <img src={cover} alt={album.name} />
                 : <div className="guest-album-cover-placeholder"><i className="fa-regular fa-images" /></div>}
