@@ -339,3 +339,10 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* AM-06: tek seferde yuklenebilecek dosya sayisi, butonlarin altinda. */
+.guest-album-upload-limit {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}

@@ -550,7 +550,10 @@
             "reasonNetwork": "Didn't upload: connection problem",
             "reasonUnreadable": "Can't read this file",
             "reasonLimit": "Upload limit reached",
-            "reasonAlbumClosed": "Uploads to this album are closed"
+            "reasonAlbumClosed": "Uploads to this album are closed",
+            "maxPerUpload": "You can upload up to {{max}} files at a time.",
+            "maxPerUploadShort": "up to {{max}} at a time",
+            "limitSkipped": "You can upload up to {{max}} files at a time. Not added: {{count}}. Select them again after these finish uploading."
         },
         "uploadNotReceived": "Some files didn't upload. Check your connection and tap “Upload Files” again.",
         "uploadUnreadable": "Some files couldn't be read from your device. Remove them, add them again and retry.",

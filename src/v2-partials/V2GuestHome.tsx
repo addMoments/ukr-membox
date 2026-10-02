@@ -17,7 +17,7 @@ import { AdvertorialCell, AdvertorialLayout, AdvertorialResponse } from '../type
 import { GuestAlbum, albumCoverUrl } from '../types/albums';
 import { guestCanUploadTo, guestOpenedAlbumUids } from '../client/albums';
 import { packUUID as packedAlbumUid } from '../packages/uuid';
-import GuestUploadModal, { GuestUploadModalHandle } from './GuestUploadModal';
+import GuestUploadModal, { GuestUploadModalHandle, MAX_FILES_PER_UPLOAD } from './GuestUploadModal';
 
 export interface V2GuestHomeProps {
   bannerImageUrl: string | null;
@@ -225,12 +225,16 @@ function V2GuestHome({
                   <span>{textOr('guest.album.noVisibleAlbums', 'Uploads are closed for this event right now.', 'Завантаження для цієї події зараз закрито.')}</span>
                 </div>
               ) : (
+                <>
                 <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
                 <button style={{marginBottom: '10px'}} className="guest-home-upload-btn">
                   <i className="fa-solid fa-camera-retro" />
                   <span>{uploadPhotosAndVideosText}</span>
                 </button>
                 </FileInput>
+                {/* AM-06: sinir yuklemeye baslamadan gorunsun. */}
+                <p className="guest-home-upload-limit">{textOr('guest.upload.maxPerUpload', 'You can upload up to {{max}} files at a time.', 'За один раз ви можете завантажити до {{max}} файлів.', { max: MAX_FILES_PER_UPLOAD })}</p>
+                </>
               )}
 
               <Link style={{textDecoration: 'none'}} to={`/guest/${packedUid}/guestbook`}>

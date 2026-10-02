@@ -1452,3 +1452,11 @@
 .upload-modal-album-locked i {
   color: #888;
 }
+
+/* AM-06: tek seferde yuklenebilecek dosya sayisi, yukleme dugmesinin altinda. */
+.guest-home-upload-limit {
+  margin: -2px 0 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}

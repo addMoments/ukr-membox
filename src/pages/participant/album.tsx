@@ -7,7 +7,7 @@ import MediaCard from '../../v2-components/MediaCard';
 import PhotoViewerModal, { photoViewerState } from '../../partials/PhotoViewerModal';
 import V2GuestGate from '../../v2-partials/V2GuestGate';
 import GuestAccessErrorScreen from '../../v2-partials/GuestAccessErrorScreen';
-import GuestUploadModal, { GuestUploadModalHandle } from '../../v2-partials/GuestUploadModal';
+import GuestUploadModal, { GuestUploadModalHandle, MAX_FILES_PER_UPLOAD } from '../../v2-partials/GuestUploadModal';
 import { unpackUUID } from '../../packages/uuid';
 import { pgREST } from '../../client/postgrest';
 import { whoAmI } from '../../client/auth';
@@ -448,6 +448,10 @@ function ParticipantAlbum() {
                   </button>
                 )}
               </div>
+              {/* AM-06: sinir yuklemeye baslamadan gorunsun. */}
+              {album.guest_upload && (
+                <p className="guest-album-upload-limit">{textOr('guest.upload.maxPerUpload', 'You can upload up to {{max}} files at a time.', 'За один раз ви можете завантажити до {{max}} файлів.', { max: MAX_FILES_PER_UPLOAD })}</p>
+              )}
               {downloadError && <p className="guest-album-lock-error">{downloadError}</p>}
               {!galleryVisible && (
                 <p className="guest-album-note">

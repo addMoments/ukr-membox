@@ -61,6 +61,12 @@ const isNetworkFailed = (entry: FileEntry) => entry.status === 'failed' && entry
 // Neden: AM-04 — misafir gecici bir kopma yuzunden yuzlerce dosyayi yeniden secmek zorunda kalmasin.
 const AUTO_RETRY_DELAYS_MS = [15000, 30000, 60000, 120000, 300000];
 
+// Ne: Tek seferde secilip yuklenebilecek dosya sayisi (AM-06; sabit, 2 Ekim'de 35 secildi).
+// Neden: Sunucu dosyalari tek tek aldigi icin "bir secim" kavramini gormez; sinir yalnizca burada.
+// Not: Ukraynaca metin "до 35 файлів" bicimine gore; sayi 1 ya da 2-4 ile biten bir degere
+//      degisirse isim cekimine bakmak gerekir.
+export const MAX_FILES_PER_UPLOAD = 35;
+
 // TS 4.9'un lib.dom'unda Screen Wake Lock API tipi yok; kullandigimiz kadarini tanimliyoruz.
 type ScreenWakeLock = { release: () => Promise<void> };
 type WakeLockNavigator = Navigator & { wakeLock?: { request: (type: 'screen') => Promise<ScreenWakeLock> } };
@@ -103,6 +109,9 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
     retryTimer: null as ReturnType<typeof setTimeout> | null,
     retryRound: 0,
     renderPending: false,
+    // Ayni secimin dosyalari ayni gorevde art arda gelir; sinira takilanlar tek bildirimde toplanir.
+    selecting: false,
+    skipped: 0,
   }).current;
   const nameInputRef = useRef<HTMLInputElement>(null);
   const albumSelectRef = useRef<HTMLSelectElement>(null);
@@ -116,6 +125,8 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
   // Neden: 2.6 — misafir mobilden yukleyince modal 1 saniyede sessizce kapaniyordu ve
   //        hicbir onay gormuyordu.
   const [uploadDone, setUploadDone] = useState<{ count: number; bytes: number; duplicates: number } | null>(null);
+  // AM-06: son secimde sinir yuzunden eklenmeyen dosya sayisi (0 = bildirim yok).
+  const [limitSkipped, setLimitSkipped] = useState(0);
 
   const getLocalizedText = (key: string, fallback: string) => {
     const value = t(key);
@@ -140,6 +151,18 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
   };
 
   const handleFileSelect = (file: File) => {
+    if (!runtime.selecting) {
+      runtime.selecting = true;
+      runtime.skipped = 0;
+      queueMicrotask(() => {
+        runtime.selecting = false;
+        setLimitSkipped(runtime.skipped);
+      });
+    }
+    if (elemRef.entries.filter(e => !isFinished(e)).length >= MAX_FILES_PER_UPLOAD) {
+      runtime.skipped += 1;
+      return;
+    }
     const previewUrl = URL.createObjectURL(file);
     elemRef.entries.push({ file, previewUrl, status: 'queued', progress: 0 });
     render();
@@ -168,6 +191,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
     setModalOpen(false);
     setUploadDone(null);
     setUploadErrorMessage('');
+    setLimitSkipped(0);
   };
 
   // "Durdur": suren dosya kesilir ve sirada kalir; misafir sonra devam ettirebilir ya da vazgecer.
@@ -260,6 +284,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
 
     setUploadErrorMessage('');
     setUploadDone(null);
+    setLimitSkipped(0);
     setIsUploading(true);
     const controller = new AbortController();
     runtime.abort = controller;
@@ -471,6 +496,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
 
   const totalBytes = fileEntries.reduce((s, e) => s + e.file.size, 0);
   const finishedCount = fileEntries.filter(isFinished).length;
+  const unfinishedCount = fileEntries.length - finishedCount;
   const failedCount = fileEntries.filter(e => e.status === 'failed').length;
   const networkFailedCount = fileEntries.filter(isNetworkFailed).length;
   const offlineNow = fileEntries.some(e => e.status === 'offline');
@@ -553,6 +579,13 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
             <span>{uploadErrorMessage}</span>
           </div>
         ) : null}
+        {/* AM-06: secim siniri asildiysa kac dosyanin eklenmedigi. */}
+        {limitSkipped > 0 && !isUploading ? (
+          <div className="upload-modal-notice" role="status">
+            <i className="fa-solid fa-circle-info" />
+            <span>{textOr('guest.upload.limitSkipped', 'You can upload up to {{max}} files at a time. Not added: {{count}}. Select them again after these finish uploading.', 'За один раз можна завантажити до {{max}} файлів. Не додано: {{count}}. Виберіть їх ще раз, коли ці завантажаться.', { max: MAX_FILES_PER_UPLOAD, count: limitSkipped })}</span>
+          </div>
+        ) : null}
         {/* AM-04: kesintide ne oldugu ve ne olacagi. */}
         {isUploading && offlineNow ? (
           <div className="upload-modal-notice" role="status">
@@ -609,8 +642,8 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
         )}
 
         <div className="upload-modal-list-header">
-          <span>{fileEntries.length} {t('common.files')}</span>
-          {!isUploading && (
+          <span>{fileEntries.length} {t('common.files')} · {textOr('guest.upload.maxPerUploadShort', 'up to {{max}} at a time', 'до {{max}} за раз', { max: MAX_FILES_PER_UPLOAD })}</span>
+          {!isUploading && unfinishedCount < MAX_FILES_PER_UPLOAD && (
             <FileInput onFile={handleFileSelect} multiple accept="image/*,video/*">
               <button type="button" className="upload-modal-add-btn">
                 <i className="fa-solid fa-plus" />
