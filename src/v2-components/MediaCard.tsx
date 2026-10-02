@@ -29,8 +29,10 @@ interface MediaCardProps {
 //        acilamayan video oynatilabilir gibi duruyor, tiklayan misafir bos bir oynaticiyla kaliyordu.
 type MediaState = 'loading' | 'ready' | 'error';
 
-// Video bu surede ust bilgisini de getiremezse "oynatilamiyor" sayilir; sonsuz yukleniyor gibi kalmasin.
-const VIDEO_TIMEOUT_MS = 60000;
+// Video bu sure boyunca HIC veri almazsa "oynatilamiyor" sayilir; sonsuz yukleniyor gibi kalmasin.
+// Neden "veri almazsa": iPhone .mov'larinda ust bilgi dosyanin sonunda; 33 MB'lik bir dosyada Safari
+// onu 5-10 sn'de aldi (canli, 2 Ekim). Yavas agda sabit bir sure saglam videoya da hata derdi.
+const VIDEO_STALL_MS = 60000;
 
 const formatDuration = (seconds: number) => {
   if (!isFinite(seconds) || seconds <= 0) return '';
@@ -59,6 +61,7 @@ function MediaCard({
   // Video ust bilgisi yalnizca kart ekrana yaklasinca istenir (fotograflarda bunu loading="lazy" yapar).
   const [inView, setInView] = useState(!isVideo);
   const mediaRef = useRef<HTMLDivElement>(null);
+  const lastProgressRef = useRef(0);
 
   useEffect(() => {
     if (!isVideo || inView) return undefined;
@@ -79,8 +82,11 @@ function MediaCard({
 
   useEffect(() => {
     if (!isVideo || !inView || state !== 'loading') return undefined;
-    const timer = setTimeout(() => setState('error'), VIDEO_TIMEOUT_MS);
-    return () => clearTimeout(timer);
+    lastProgressRef.current = Date.now();
+    const timer = setInterval(() => {
+      if (Date.now() - lastProgressRef.current > VIDEO_STALL_MS) setState('error');
+    }, 5000);
+    return () => clearInterval(timer);
   }, [isVideo, inView, state, attempt]);
 
   const retry = (e: React.MouseEvent) => {
@@ -157,6 +163,7 @@ function MediaCard({
             muted
             playsInline
             preload={inView ? 'metadata' : 'none'}
+            onProgress={() => { lastProgressRef.current = Date.now(); }}
             onLoadedMetadata={(e) => {
               setDuration(formatDuration(e.currentTarget.duration));
               setState('ready');
