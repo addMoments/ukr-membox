@@ -535,6 +535,14 @@
         "uploadCompleted": "Upload completed",
         "alreadyInAlbum": "Already in the album",
         "alreadyInAlbumCount": "Already in the album, not added again: {{count}}",
+        "save": {
+            "toPhotos": "Save to Photos",
+            "save": "Save",
+            "preparing": "Preparing the file…",
+            "tapAgain": "Ready. Tap “Save to Photos” again.",
+            "filesApp": "Saved to the Files app. To add it to Photos, open it there and save it to Photos.",
+            "zipIos": "On iPhone, the ZIP is saved to the Files app. To add a photo to Photos, open it here and tap “Save to Photos”."
+        },
         "upload": {
             "inQueue": "In queue",
             "uploadingPercent": "Uploading {{percent}}%",

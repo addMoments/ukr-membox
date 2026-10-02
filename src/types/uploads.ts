@@ -10,4 +10,6 @@ export interface UploadEntry {
   trashed_at: string;
   // photo/video icin zorunlu (DB CHECK), text/voice icin null
   album_uid?: string | null;
+  // S3'te olculen boyut (received); buyuk videoyu paylasim yerine indirmek icin (AM-16).
+  size_bytes?: number | null;
 }

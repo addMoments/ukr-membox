@@ -11,6 +11,8 @@ type PhotoItem = {
 
 type PhotoAction = {
   icon: string;
+  // Verilirse dugme simge + metin olarak cizilir (misafir albumu: "Зберегти у Фото", AM-16).
+  label?: string;
   onClick: (id: string) => void;
 };
 
@@ -91,10 +93,13 @@ function PhotoViewerModal() {
               {snap.actions.map((action, idx) => (
                 <button 
                   key={idx} 
-                  className="photo-viewer-action-btn"
+                  className={`photo-viewer-action-btn${action.label ? ' labeled' : ''}`}
                   onClick={() => handleActionClick(action as PhotoAction)}
+                  aria-label={action.label}
+                  title={action.label}
                 >
                   <i className={action.icon} />
+                  {action.label && <span>{action.label}</span>}
                 </button>
               ))}
             </div>

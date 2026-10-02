@@ -132,6 +132,18 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* AM-16: metinli eylem (misafir albumu "Зберегти у Фото"); simgeli dugmelerle ayni yukseklik. */
+.photo-viewer-action-btn.labeled {
+  width: auto;
+  padding: 0 18px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .photo-viewer-counter {
   position: absolute;
   bottom: 30px;

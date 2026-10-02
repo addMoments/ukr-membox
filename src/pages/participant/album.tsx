@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { subscribe } from 'valtio';
 import V2Header from '../../v2-components/V2Header';
 import V2Footer from '../../v2-components/V2Footer';
 import FileInput from '../../components/FileInput';
@@ -20,6 +21,7 @@ import { defaultGuestTheme } from '../../types/guestTheme';
 import { fonts } from '../../types/fonts';
 import { applyGuestFont } from '../../utils/applyGuestFont';
 import { saveUrl } from '../../utils/download';
+import { isAppleMobile, isReadyToSave, prefetchForSave, saveMedia, savesToPhotos } from '../../utils/saveMedia';
 import { t } from '../../packages/i18n';
 import { textOr } from '../../utils/admin_i18n';
 import { isEventClosedError, isPackageLimitExceededError } from '../../utils/guestInitError';
@@ -78,6 +80,9 @@ function ParticipantAlbum() {
   const [descOverflows, setDescOverflows] = useState(false);
   const descRef = useRef<HTMLParagraphElement>(null);
   const uploadModalRef = useRef<GuestUploadModalHandle>(null);
+  // AM-16: kaydetme sirasinda kisa bilgi (hazirlaniyor / tekrar dokun / Dosyalar'a gitti).
+  const [saveNote, setSaveNote] = useState<string | null>(null);
+  const saveNoteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const passcodeRef = useRef<HTMLInputElement>(null);
   const requestIdRef = useRef(0);
 
@@ -182,6 +187,18 @@ function ParticipantAlbum() {
     return () => window.removeEventListener('resize', measure);
   }, [album?.description, descExpanded, status]);
 
+  // AM-16: iPhone'da goruntuleyicide acilan fotograf arka planda alinir; "Зберегти у Фото"ya ilk
+  // dokunusta paylasim menusu hemen acilsin (iOS menuyu ancak dokunustan hemen sonra acar).
+  useEffect(() => {
+    if (!savesToPhotos()) return undefined;
+    return subscribe(photoViewerState, () => {
+      if (!photoViewerState.open) return;
+      const item = photoViewerState.items[photoViewerState.currentIndex];
+      if (!item || item.isVideo) return;
+      prefetchForSave(item.src, item.src.split('/').pop() || 'photo').catch(() => undefined);
+    });
+  }, []);
+
   // Filtre / siralama degisince ilk sayfayi yeniden cek.
   const reload = useCallback(async (f: FilterType, s: SortType) => {
     if (!galleryVisible) return;
@@ -232,10 +249,34 @@ function ParticipantAlbum() {
     return p?.name?.trim() || 'guest-';
   };
 
-  const downloadOne = (upload: AlbumUpload) => {
+  const showSaveNote = (text: string | null, ms = 6000) => {
+    if (saveNoteTimer.current) clearTimeout(saveNoteTimer.current);
+    setSaveNote(text);
+    if (text) saveNoteTimer.current = setTimeout(() => setSaveNote(null), ms);
+  };
+
+  // AM-16: platforma gore en kisa kaydetme yolu; iPhone'da paylasim menusu -> Fotograflar.
+  const saveOne = async (upload: AlbumUpload) => {
     const url = S3_ROOT + upload.value;
     const filename = upload.value.split('/').pop() || 'download';
-    saveUrl(url, filename).catch(() => window.open(url, '_blank'));
+    if (savesToPhotos() && !isReadyToSave(url)) {
+      showSaveNote(textOr('guest.save.preparing', 'Preparing the file…', 'Готуємо файл…'), 30000);
+    }
+    try {
+      const outcome = await saveMedia(url, filename, upload.size_bytes);
+      if (outcome === 'needs_tap') {
+        showSaveNote(textOr('guest.save.tapAgain', 'Ready. Tap “Save to Photos” again.', 'Готово. Натисніть «Зберегти у Фото» ще раз.'), 8000);
+      } else if (outcome === 'downloaded' && isAppleMobile()) {
+        showSaveNote(textOr('guest.save.filesApp', 'Saved to the Files app. To add it to Photos, open it there and save it to Photos.', 'Збережено в застосунку «Файли». Щоб додати у «Фото», відкрийте файл там і збережіть у «Фото».'), 9000);
+      } else {
+        showSaveNote(null);
+      }
+    } catch {
+      showSaveNote(null);
+      // Paylasim yolu olmadiysa indirmeye, indirme de olmadiysa dosyayi yeni sekmede acmaya dus.
+      if (savesToPhotos()) saveUrl(url, filename).catch(() => window.open(url, '_blank'));
+      else window.open(url, '_blank');
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -263,8 +304,15 @@ function ParticipantAlbum() {
         isVideo: upload.upload_type === 'video',
       };
     });
+    const toPhotos = savesToPhotos();
     photoViewerState.actions = [
-      { icon: 'fa-solid fa-download', onClick: (id) => { const u = uploads.find(x => x.uid === id); if (u) downloadOne(u); } },
+      {
+        icon: toPhotos ? 'fa-solid fa-arrow-up-from-bracket' : 'fa-solid fa-download',
+        label: toPhotos
+          ? textOr('guest.save.toPhotos', 'Save to Photos', 'Зберегти у Фото')
+          : textOr('guest.save.save', 'Save', 'Зберегти'),
+        onClick: (id) => { const u = uploads.find(x => x.uid === id); if (u) saveOne(u); },
+      },
     ];
     photoViewerState.currentIndex = index >= 0 ? index : 0;
     photoViewerState.open = true;
@@ -390,6 +438,12 @@ function ParticipantAlbum() {
   return (
     <div className="guest-uploads" style={{ ...theme, fontFamily: fonts.find(f => f.id === event.settings?.font)?.fontFamily }}>
       <PhotoViewerModal />
+      {saveNote && (
+        <div className="guest-album-toast" role="status">
+          <i className="fa-solid fa-circle-info" />
+          <span>{saveNote}</span>
+        </div>
+      )}
       <GuestUploadModal
         ref={uploadModalRef}
         packedUid={packedUid || ''}
@@ -451,6 +505,10 @@ function ParticipantAlbum() {
               {/* AM-06: sinir yuklemeye baslamadan gorunsun. */}
               {album.guest_upload && (
                 <p className="guest-album-upload-limit">{textOr('guest.upload.maxPerUpload', 'You can upload up to {{max}} files at a time.', 'За один раз ви можете завантажити до {{max}} файлів.', { max: MAX_FILES_PER_UPLOAD })}</p>
+              )}
+              {/* AM-16: iPhone'da ZIP Fotograflar'a degil Dosyalar'a gider; tek tek kaydetme yolunu soyle. */}
+              {canDownloadAll && isAppleMobile() && (
+                <p className="guest-album-zip-note">{textOr('guest.save.zipIos', 'On iPhone, the ZIP is saved to the Files app. To add a photo to Photos, open it here and tap “Save to Photos”.', 'На iPhone ZIP-архів зберігається в застосунку «Файли». Щоб додати фото у «Фото», відкрийте його тут і натисніть «Зберегти у Фото».')}</p>
               )}
               {downloadError && <p className="guest-album-lock-error">{downloadError}</p>}
               {!galleryVisible && (
@@ -519,7 +577,7 @@ function ParticipantAlbum() {
                     uploadEntry={upload}
                     onFullscreen={() => openPhotoViewer(upload.uid)}
                     actions={[
-                      { variant: 'icontext', text: '', icon: 'fa-solid fa-download', title: textOr('guest.album.download', 'Download', 'Зберегти'), onClick: () => downloadOne(upload) },
+                      { variant: 'icontext', text: '', icon: savesToPhotos() ? 'fa-solid fa-arrow-up-from-bracket' : 'fa-solid fa-download', title: savesToPhotos() ? textOr('guest.save.toPhotos', 'Save to Photos', 'Зберегти у Фото') : textOr('guest.album.download', 'Download', 'Зберегти'), onClick: () => saveOne(upload) },
                     ]}
                   />
                 ))

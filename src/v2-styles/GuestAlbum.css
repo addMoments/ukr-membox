@@ -346,3 +346,37 @@
   font-size: 13px;
   color: var(--text-secondary);
 }
+
+/* AM-16: iPhone'da ZIP'in nereye gittigi. */
+.guest-album-zip-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* AM-16: kaydetme bilgisi; goruntuleyicinin de ustunde, uzun metin satir kirar. */
+.guest-album-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  background: #1c1917;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 100000;
+}
+
+.guest-album-toast i {
+  color: #4ade80;
+  flex-shrink: 0;
+}
