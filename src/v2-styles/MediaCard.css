@@ -20,7 +20,7 @@
   min-height: 120px;
   display: block;
   object-fit: cover;
-  transition: transform 0.7s;
+  transition: transform 0.7s, opacity 0.3s;
 }
 
 .media-card:hover .media-card-image {
@@ -169,16 +169,83 @@
   color: #DAE0FC;
 }
 
-.media-card-broken {
-  width: 100%;
-  min-height: 160px;
+/* AM-03 / AM-02: yukleniyor iskeleti, acilamayan dosya ve video suresi. */
+.media-card-media {
+  position: relative;
+}
+
+.media-card-media.is-loading {
+  min-height: 200px;
+}
+
+.media-card-media.is-loading .media-card-image {
+  opacity: 0;
+}
+
+.media-card-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, #f1f1ef 30%, #f9f9f7 50%, #f1f1ef 70%);
+  background-size: 300% 100%;
+  animation: media-card-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes media-card-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-card-skeleton {
+    animation: none;
+  }
+}
+
+.media-card-error {
+  min-height: 200px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
-  color: #94a3b8;
-  font-size: 32px;
-  border-radius: 8px;
+  gap: 10px;
+  padding: 16px;
+  background: #f5f5f4;
+  color: #78716c;
+  font-size: 13px;
+  text-align: center;
+}
+
+.media-card-error i {
+  font-size: 28px;
+  color: #a8a29e;
+}
+
+/* Kartin ustundeki tiklama katmanindan (tam ekran) once yakalansin. */
+.media-card-retry {
+  position: relative;
+  z-index: 11;
+  border: none;
+  background: #1c1917;
+  color: #fff;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.media-card-duration {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  pointer-events: none;
 }
 
 /* Albumler (2026-09-08): album etiketi + coklu secim */

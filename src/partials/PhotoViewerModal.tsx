@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import '../styles/PhotoViewerModal.css';
 import { proxy, useSnapshot } from 'valtio';
+import { textOr } from '../utils/admin_i18n';
 
 type PhotoItem = {
   src: string;
@@ -25,6 +27,8 @@ const photoViewerState = proxy({
 
 function PhotoViewerModal() {
   const snap = useSnapshot(photoViewerState);
+  // AM-02: oynatilamayan videonun id'si; bos oynatici yerine aciklama gosterilir.
+  const [failedVideoId, setFailedVideoId] = useState<string | null>(null);
 
   if (!snap.open || snap.items.length === 0) return null;
 
@@ -72,13 +76,20 @@ function PhotoViewerModal() {
 
 
           <div className="photo-viewer-content">
-            {currentItem.isVideo ? (
+            {currentItem.isVideo && failedVideoId === currentItem.id ? (
+              <div className="photo-viewer-video-error" role="status">
+                <i className="fa-solid fa-video-slash" />
+                <span>{textOr('media.videoUnplayableViewer', "This video can't be played in the browser. You can still save it to your device.", 'Це відео не відтворюється в браузері. Його все одно можна зберегти на пристрій.')}</span>
+              </div>
+            ) : currentItem.isVideo ? (
               <video 
+                key={currentItem.id}
                 src={currentItem.src} 
                 className="photo-viewer-image" 
                 controls 
                 autoPlay 
                 playsInline
+                onError={() => setFailedVideoId(currentItem.id)}
               />
             ) : (
               <img src={currentItem.src} alt={currentItem.title} className="photo-viewer-image" />

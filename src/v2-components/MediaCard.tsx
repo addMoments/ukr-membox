@@ -1,8 +1,10 @@
+import { useEffect, useRef, useState } from 'react';
 import '../v2-styles/MediaCard.css';
 import { Action } from '../types/button';
 import { UploadEntry } from '../types/uploads';
 import { getTimeAgo } from '../temp-ai-logic-and-data/time-ago';
 import { S3_ROOT } from '../consts';
+import { textOr } from '../utils/admin_i18n';
 
 type IconTextAction = Action & { variant: 'icontext'; title?: string };
 
@@ -19,6 +21,25 @@ interface MediaCardProps {
   onSelectToggle?: () => void;
 }
 
+// Ne: Kartin medya durumu (AM-03 / AM-02).
+//   loading — iskelet gorunur, dosya yukleniyor (fotograf ekrana yaklasinca yuklenir)
+//   ready   — fotograf / videonun ilk karesi gorunur
+//   error   — dosya acilamadi: "tekrar dene"li ayri bir durum; video icin "oynatilamiyor"
+// Neden: Galeri yuklenirken kartlar sifir yukseklikle baslayip ziplayarak "bozuk" gorunuyordu;
+//        acilamayan video oynatilabilir gibi duruyor, tiklayan misafir bos bir oynaticiyla kaliyordu.
+type MediaState = 'loading' | 'ready' | 'error';
+
+// Video bu surede ust bilgisini de getiremezse "oynatilamiyor" sayilir; sonsuz yukleniyor gibi kalmasin.
+const VIDEO_TIMEOUT_MS = 60000;
+
+const formatDuration = (seconds: number) => {
+  if (!isFinite(seconds) || seconds <= 0) return '';
+  const total = Math.round(seconds);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
 function MediaCard({
   uploaderName = "guest-",
   actions = [],
@@ -31,6 +52,43 @@ function MediaCard({
 }: MediaCardProps) {
   const isVideo = uploadEntry.upload_type === 'video';
   const mediaUrl = S3_ROOT + uploadEntry.value;
+  const [state, setState] = useState<MediaState>('loading');
+  // Tekrar denemede <img>/<video> yeniden kurulur (key), istek yeniden gider.
+  const [attempt, setAttempt] = useState(0);
+  const [duration, setDuration] = useState('');
+  // Video ust bilgisi yalnizca kart ekrana yaklasinca istenir (fotograflarda bunu loading="lazy" yapar).
+  const [inView, setInView] = useState(!isVideo);
+  const mediaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isVideo || inView) return undefined;
+    const el = mediaRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setInView(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        setInView(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isVideo, inView]);
+
+  useEffect(() => {
+    if (!isVideo || !inView || state !== 'loading') return undefined;
+    const timer = setTimeout(() => setState('error'), VIDEO_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [isVideo, inView, state, attempt]);
+
+  const retry = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setState('loading');
+    setAttempt(a => a + 1);
+  };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
@@ -79,34 +137,48 @@ function MediaCard({
           ))}
         </div>
       )}
-      {isVideo ? (
-        <video
-          src={mediaUrl}
-          className="media-card-image"
-          muted
-          playsInline
-          preload="none"
-          onError={(e) => { (e.currentTarget as HTMLVideoElement).style.display = 'none'; }}
-        />
-      ) : (
-        <img
-          src={mediaUrl}
-          alt={uploaderName}
-          className="media-card-image"
-          onError={(e) => {
-            const el = e.currentTarget as HTMLImageElement;
-            el.style.display = 'none';
-            const parent = el.parentElement;
-            if (parent && !parent.querySelector('.media-card-broken')) {
-              const placeholder = document.createElement('div');
-              placeholder.className = 'media-card-broken';
-              placeholder.innerHTML = '<i class="fa-solid fa-image-slash"></i>';
-              parent.insertBefore(placeholder, el);
-            }
-          }}
-        />
-      )}
-      {isVideo && !selectable && (
+      <div ref={mediaRef} className={`media-card-media${state === 'loading' ? ' is-loading' : ''}`}>
+        {state === 'error' ? (
+          <div className="media-card-error" role="status">
+            <i className={`fa-solid ${isVideo ? 'fa-video-slash' : 'fa-image'}`}></i>
+            <span>{isVideo
+              ? textOr('media.videoUnplayable', "This video can't be played here", 'Це відео тут не відтворюється')
+              : textOr('media.couldNotLoad', "Couldn't load", 'Не вдалося завантажити')}</span>
+            <button type="button" className="media-card-retry" onClick={retry}>
+              {textOr('media.retry', 'Retry', 'Повторити')}
+            </button>
+          </div>
+        ) : isVideo ? (
+          <video
+            key={attempt}
+            // #t=0.1: Safari / iOS ilk kareyi ancak bir zaman verilince onizleme olarak cizer.
+            src={inView ? `${mediaUrl}#t=0.1` : undefined}
+            className="media-card-image"
+            muted
+            playsInline
+            preload={inView ? 'metadata' : 'none'}
+            onLoadedMetadata={(e) => {
+              setDuration(formatDuration(e.currentTarget.duration));
+              setState('ready');
+            }}
+            onError={() => setState('error')}
+          />
+        ) : (
+          <img
+            key={attempt}
+            src={mediaUrl}
+            alt={uploaderName}
+            className="media-card-image"
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setState('ready')}
+            onError={() => setState('error')}
+          />
+        )}
+        {state === 'loading' && <div className="media-card-skeleton" aria-hidden="true" />}
+      </div>
+      {isVideo && state === 'ready' && duration && <span className="media-card-duration">{duration}</span>}
+      {isVideo && state === 'ready' && !selectable && (
         <button className="media-card-play-btn">
           <i className="fa-solid fa-play"></i>
         </button>
