@@ -53,7 +53,70 @@ export type GuestUploadResult = { path: string; duplicate: boolean };
 // Ilk deneme + iki tekrar; kisa kopmalari (tunel, baz istasyonu degisimi) atlatmaya yeter.
 const RETRY_DELAYS_MS = [2000, 5000];
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+// Ne: Tek dosyanin yukleme asamasi; modal dosya satirinda gosterir (AM-01).
+//   uploading  — dosya S3'e gidiyor (progress 0..1)
+//   processing — PUT bitti, sunucu dosyayi S3'te dogruluyor (/confirm)
+//   retrying   — ag hatasi; kisa bekleme sonrasi yeni deneme (attempt / of)
+//   offline    — baglanti yok; gelince kendiliginden devam eder
+export type GuestUploadPhase =
+    | { phase: 'uploading'; progress: number }
+    | { phase: 'processing' }
+    | { phase: 'retrying'; attempt: number; of: number }
+    | { phase: 'offline' };
+
+export type GuestUploadOptions = {
+    onPhase?: (phase: GuestUploadPhase) => void;
+    // Misafir "Durdur"a basinca yukleme ve beklemeler AbortError ile biter.
+    signal?: AbortSignal;
+};
+
+const abortError = () => new DOMException('Upload stopped', 'AbortError');
+
+export const isAbortError = (err: unknown) => err instanceof DOMException && err.name === 'AbortError';
+
+const sleep = (ms: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+        reject(abortError());
+        return;
+    }
+    const onAbort = () => {
+        clearTimeout(timer);
+        reject(abortError());
+    };
+    const timer = setTimeout(() => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
+});
+
+// Ne: Baglanti yoksa gelene kadar bekler (AM-04).
+// Neden: Otobusteki misafirin dosyalari tunelde art arda "basarisiz" oluyordu; artik baglanti
+//        donene kadar bekliyor ve deneme hakkini harcamiyor. 'online' olayi bazi mobil
+//        tarayicilarda gec geliyor, o yuzden birkac saniyede bir navigator.onLine'a da bakilir.
+const waitForOnline = (signal?: AbortSignal) => new Promise<void>((resolve, reject) => {
+    if (navigator.onLine) {
+        resolve();
+        return;
+    }
+    if (signal?.aborted) {
+        reject(abortError());
+        return;
+    }
+    const finish = (err?: DOMException) => {
+        clearInterval(poll);
+        window.removeEventListener('online', onOnline);
+        signal?.removeEventListener('abort', onAbort);
+        if (err) reject(err); else resolve();
+    };
+    const onOnline = () => finish();
+    const onAbort = () => finish(abortError());
+    const poll = setInterval(() => {
+        if (navigator.onLine) finish();
+    }, 3000);
+    window.addEventListener('online', onOnline);
+    signal?.addEventListener('abort', onAbort, { once: true });
+});
 
 // Ne: PUT'tan once dosyanin ilk baytini okur.
 // Neden: iOS Safari okuyamadigi dosyayi (21 Eylul, bir misafirin 100 videosu) fetch'e hata
@@ -72,7 +135,7 @@ const assertReadable = async (file: File) => {
     }
 };
 
-const confirmGuestUpload = async (confirmUrl: string, filePath: string, putOk: boolean): Promise<ConfirmStatus> => {
+const confirmGuestUpload = async (confirmUrl: string, filePath: string, putOk: boolean, signal?: AbortSignal): Promise<ConfirmStatus> => {
     const res = await fetch(
         confirmUrl,
         {
@@ -81,6 +144,7 @@ const confirmGuestUpload = async (confirmUrl: string, filePath: string, putOk: b
                 "Content-Type": "application/json",
             },
             body: JSON.stringify([{ path: filePath, ok: putOk }]),
+            signal,
         }
     );
     const body: Record<string, ConfirmStatus> = await res.json();
@@ -92,16 +156,27 @@ const confirmGuestUpload = async (confirmUrl: string, filePath: string, putOk: b
 // Neden: 25 Eylul'de otobusteki misafirlerin PUT'lari yarida kaldi ve yalnizca kirmizi bir X
 //        gorduler. Sunucu satiri, dosyayi S3'te gorene kadar gizli tutuyor (received_at);
 //        /confirm o karari hemen verdirir ve basarisiz denemenin satirini siler.
-const uploadGuestFile = async (presignUrl: string, confirmUrl: string, file: File): Promise<GuestUploadResult> => {
+const uploadGuestFile = async (presignUrl: string, confirmUrl: string, file: File, opts: GuestUploadOptions = {}): Promise<GuestUploadResult> => {
+    const { onPhase, signal } = opts;
+    const attempts = RETRY_DELAYS_MS.length + 1;
     let lastError: unknown = null;
 
-    for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
-        if (attempt > 0) await sleep(RETRY_DELAYS_MS[attempt - 1]);
+    for (let attempt = 0; attempt < attempts; attempt++) {
+        if (attempt > 0) {
+            onPhase?.({ phase: 'retrying', attempt: attempt + 1, of: attempts });
+            await sleep(RETRY_DELAYS_MS[attempt - 1], signal);
+        }
+        if (!navigator.onLine) {
+            onPhase?.({ phase: 'offline' });
+            await waitForOnline(signal);
+        }
+        onPhase?.({ phase: 'uploading', progress: 0 });
 
         let presign: PresignResponse[string] | undefined;
         try {
-            presign = (await presignFiles(presignUrl, [file]))[file.name];
+            presign = (await presignFiles(presignUrl, [file], signal))[file.name];
         } catch (err) {
+            if (isAbortError(err)) throw err;
             // Limit, album ve yetki hatalari (4xx) tekrar denense de degismez; modal onlari tanir.
             if (err instanceof FetchHttpError && err.status < 500) throw err;
             lastError = err;
@@ -114,16 +189,23 @@ const uploadGuestFile = async (presignUrl: string, confirmUrl: string, file: Fil
 
         let putOk = true;
         try {
-            await putToS3(presign.upUrl, file);
+            await putToS3(presign.upUrl, file, progress => onPhase?.({ phase: 'uploading', progress }), signal);
         } catch (err) {
+            if (isAbortError(err)) {
+                // Durduruldu: yarim denemenin gizli satiri bir saat kotaya sayilmasin, sunucu hemen silsin.
+                confirmGuestUpload(confirmUrl, presign.filePath, false).catch(() => undefined);
+                throw err;
+            }
             putOk = false;
             lastError = err;
         }
 
+        onPhase?.({ phase: 'processing' });
         let status: ConfirmStatus | null = null;
         try {
-            status = await confirmGuestUpload(confirmUrl, presign.filePath, putOk);
+            status = await confirmGuestUpload(confirmUrl, presign.filePath, putOk, signal);
         } catch (err) {
+            if (isAbortError(err)) throw err;
             lastError = err;
         }
 
@@ -145,14 +227,16 @@ const uploadGuestFile = async (presignUrl: string, confirmUrl: string, file: Fil
  * @param files - Array of File objects to upload
  * @param albumUid - Hedef album (photo/video). Verilmezse sunucu General'e yazar.
  * @returns Dosya basina S3 yolu ve albumde zaten olup olmadigi (duplicate)
+ * @param opts - Asama bildirimi (onPhase) ve durdurma sinyali (signal)
  * @throws GuestUploadError dosya okunamadiysa ya da S3'e ulasmadiysa; limit/album/yetki
- *         hatalarinda sunucunun FetchHttpError'u oldugu gibi gelir.
+ *         hatalarinda sunucunun FetchHttpError'u oldugu gibi gelir; durdurulursa AbortError.
  */
 export const guestUpload = async (
     eventUid: string,
     utype: string,
     files: File[],
-    albumUid?: string | null
+    albumUid?: string | null,
+    opts: GuestUploadOptions = {}
 ) => {
     const eventPackedUid = packUUID(eventUid);
     const albumParam = albumUid ? `?album=${packUUID(albumUid)}` : '';
@@ -162,13 +246,19 @@ export const guestUpload = async (
 
     const results: GuestUploadResult[] = [];
     for (const file of files) {
+        // Baglanti yokken dosyayi okumaya calisma: WebKit yerel blob'u da ag sureci uzerinden
+        // okuyor, kesintide okuma hatasi dosyayi yanlislikla "okunamadi" diye isaretliyordu.
+        if (!navigator.onLine) {
+            opts.onPhase?.({ phase: 'offline' });
+            await waitForOnline(opts.signal);
+        }
         await assertReadable(file);
-        results.push(await uploadGuestFile(presignUrl, confirmUrl, file));
+        results.push(await uploadGuestFile(presignUrl, confirmUrl, file, opts));
     }
     return results;
 }
 
-const presignFiles = async (url: string, files: File[]): Promise<PresignResponse> => {
+const presignFiles = async (url: string, files: File[], signal?: AbortSignal): Promise<PresignResponse> => {
     // Ne: Presign istegi dosya adiyla birlikte boyutu da tasir.
     // Neden: Depolama limiti (paket basina GB, misafir basina GB) yalnizca boyut
     //        bilinirse uygulanabilir; dosyanin kendisi tarayicidan dogrudan S3'e gidiyor,
@@ -181,25 +271,47 @@ const presignFiles = async (url: string, files: File[]): Promise<PresignResponse
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(files.map(f => ({ name: f.name, size: f.size }))),
+            signal,
         }
     );
 
     return presignRes.json();
 };
 
-const putToS3 = async (upUrl: string, file: File) => {
-    const uploadRes = await window.fetch(upUrl, {
-        method: "PUT",
-        body: file,
-        headers: {
-            "Content-Type": file.type || "application/octet-stream",
-        },
-    });
-
-    if (!uploadRes.ok) {
-        throw new Error(`Upload failed for ${file.name}: ${uploadRes.status}`);
+// Ne: Dosyayi presign'li URL'e PUT eder; ilerlemeyi 0..1 olarak bildirir.
+// Neden: fetch yukleme ilerlemesi vermiyor; buyuk bir video dakikalarca "yukleniyor"da
+//        kipirdamadan duruyordu (AM-01). XHR'in upload.onprogress'i her tarayicida var.
+const putToS3 = (upUrl: string, file: File, onProgress?: (progress: number) => void, signal?: AbortSignal) => new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+        reject(abortError());
+        return;
     }
-};
+    const xhr = new XMLHttpRequest();
+    const onAbort = () => xhr.abort();
+    const done = (err?: Error) => {
+        signal?.removeEventListener('abort', onAbort);
+        if (err) reject(err); else resolve();
+    };
+    // Yuzde her degistiginde bir kez: 100 dosyalik listede her olayda cizim telefonu yorar.
+    let lastPercent = -1;
+    xhr.upload.onprogress = (e) => {
+        if (!onProgress || !e.lengthComputable || e.total === 0) return;
+        const percent = Math.floor((e.loaded / e.total) * 100);
+        if (percent === lastPercent) return;
+        lastPercent = percent;
+        onProgress(percent / 100);
+    };
+    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300)
+        ? done()
+        : done(new Error(`Upload failed for ${file.name}: ${xhr.status}`));
+    xhr.onerror = () => done(new Error(`Upload failed for ${file.name}: network error`));
+    xhr.ontimeout = () => done(new Error(`Upload failed for ${file.name}: timeout`));
+    xhr.onabort = () => done(abortError());
+    xhr.open('PUT', upUrl);
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    signal?.addEventListener('abort', onAbort, { once: true });
+    xhr.send(file);
+});
 
 /**
  * Upload files to S3 via presigned URLs (host yuklemeleri: etkinlik gorseli, QR logosu,

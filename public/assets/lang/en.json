@@ -535,6 +535,23 @@
         "uploadCompleted": "Upload completed",
         "alreadyInAlbum": "Already in the album",
         "alreadyInAlbumCount": "Already in the album, not added again: {{count}}",
+        "upload": {
+            "inQueue": "In queue",
+            "uploadingPercent": "Uploading {{percent}}%",
+            "processing": "Processing…",
+            "retrying": "Retrying ({{n}}/{{of}})…",
+            "waitingConnection": "Waiting for connection",
+            "retry": "Retry",
+            "retryCount": "Retry ({{count}})",
+            "stop": "Stop",
+            "offlineNotice": "No connection. {{done}} of {{total}} uploaded; the rest will continue when you're back online. Keep this page open.",
+            "interruptedNotice": "Upload interrupted: {{done}} of {{total}} uploaded, {{waiting}} waiting. We will try again automatically, so keep this page open, or tap “Retry”.",
+            "interruptedManual": "Upload interrupted: {{done}} of {{total}} uploaded, {{waiting}} didn't upload. Check your connection and tap “Retry”.",
+            "reasonNetwork": "Didn't upload: connection problem",
+            "reasonUnreadable": "Can't read this file",
+            "reasonLimit": "Upload limit reached",
+            "reasonAlbumClosed": "Uploads to this album are closed"
+        },
         "uploadNotReceived": "Some files didn't upload. Check your connection and tap “Upload Files” again.",
         "uploadUnreadable": "Some files couldn't be read from your device. Remove them, add them again and retry.",
         "album": {

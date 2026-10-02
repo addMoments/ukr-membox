@@ -789,6 +789,66 @@
   font-weight: 600;
 }
 
+/* AM-01/04: dosya durumu, ilerleme cubugu, tekrar dene dugmesi ve kesinti bildirimi. */
+.upload-modal-item--active {
+  background: #fafafa;
+}
+
+.upload-modal-item-state {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.upload-modal-item-bar {
+  display: block;
+  height: 3px;
+  border-radius: 3px;
+  background: #ececec;
+  overflow: hidden;
+}
+
+.upload-modal-item-bar > span {
+  display: block;
+  height: 100%;
+  background: #22c55e;
+  transition: width 0.2s;
+}
+
+.upload-modal-item-offline {
+  font-size: 16px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.upload-modal-item-retry {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: #fef3c7;
+  color: #92400e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.upload-modal-notice {
+  margin: 0 20px 12px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+  border-radius: 10px;
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
 .upload-modal-status {
   display: flex;
   align-items: center;
