@@ -54,10 +54,18 @@ const remember = (url: string, file: File) => {
 
 // Ne: Dosyayi paylasima hazir File olarak alir; ayni adres icin tek istek.
 // Not: Projenin fetch'i Authorization basligi ekliyor, S3 onu istemez; dogrudan window.fetch.
+// Neden no-store: fotograf ekranda <img> ile (CORS'suz) zaten yuklu; S3 o yanita CORS basligi
+//        koymuyor ve tarayici onbellekteki o yaniti CORS istegine veriyor. Chromium istegi hemen
+//        dusuruyor, iOS Safari'de istek takiliyordu ("Готуємо файл…"da kaliyordu, canli, 2 Ekim).
+// Zaman asimi: istek baska bir nedenle takilirsa kaydetme indirmeye duser.
+const FETCH_TIMEOUT_MS = 60000;
+
 export const prefetchForSave = (url: string, filename: string): Promise<File> => {
   const known = pending.get(url);
   if (known) return known;
-  const request = window.fetch(url, { mode: 'cors', credentials: 'omit' })
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const request = window.fetch(url, { mode: 'cors', credentials: 'omit', cache: 'no-store', signal: controller.signal })
     .then((res) => {
       if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
       return res.blob();
@@ -66,7 +74,8 @@ export const prefetchForSave = (url: string, filename: string): Promise<File> =>
       const file = new File([blob], filename, { type: blob.type || 'application/octet-stream' });
       remember(url, file);
       return file;
-    });
+    })
+    .finally(() => clearTimeout(timer));
   request.catch(() => pending.delete(url));
   pending.set(url, request);
   return request;
