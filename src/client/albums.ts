@@ -182,9 +182,10 @@ export const guestOpenAlbum = async (albumUid: string, passcode?: string): Promi
   return res.json();
 };
 
-// Tum albumu zip olarak indirir (sunucu anlik akitir, S3'e yazmaz).
-export const guestDownloadAlbumZip = async (albumUid: string, fileName: string): Promise<void> => {
-  const res = await fetch(`${SERV_ROOT}/api/guest/album/${packUUID(albumUid)}/zip`, {
+// Tum albumu ya da secilenleri (uids, AM-12) zip olarak indirir (sunucu anlik akitir, S3'e yazmaz).
+export const guestDownloadAlbumZip = async (albumUid: string, fileName: string, uids?: string[]): Promise<void> => {
+  const query = uids && uids.length ? `?uids=${uids.map(uid => packUUID(uid)).join(',')}` : '';
+  const res = await fetch(`${SERV_ROOT}/api/guest/album/${packUUID(albumUid)}/zip${query}`, {
     method: 'GET',
   });
   const blob = await res.blob();

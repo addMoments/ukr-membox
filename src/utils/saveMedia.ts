@@ -18,6 +18,8 @@ const CACHE_LIMIT = 3;
 
 export type SaveOutcome = 'shared' | 'cancelled' | 'downloaded' | 'needs_tap';
 
+export const isAndroid = () => /Android/i.test(navigator.userAgent);
+
 export const isAppleMobile = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
@@ -101,5 +103,44 @@ export const saveMedia = async (url: string, filename: string, size?: number | n
     if (name === 'AbortError') return 'cancelled';
     if (name === 'NotAllowedError' && !readyFile) return 'needs_tap';
     throw err;
+  }
+};
+
+// --- AM-12: birden cok dosya ---
+
+// Toplu paylasimda bellege alinacak en fazla toplam boyut; ustu zip'e (Dosyalar) duser.
+export const SHARE_BATCH_MAX_BYTES = 300 * 1024 * 1024;
+
+// Ne: Secilen dosyalari paylasim icin File olarak alir; ayni anda en fazla 3 istek.
+// Not: prefetchForSave'deki gibi onbellek kullanilmaz (ekrandaki <img> CORS'suz yanit birakiyor).
+export const fetchFilesForShare = async (
+  items: { url: string; filename: string }[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<File[]> => {
+  const files: File[] = new Array(items.length);
+  let next = 0;
+  let done = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const index = next++;
+      const { url, filename } = items[index];
+      const res = await window.fetch(url, { mode: 'cors', credentials: 'omit', cache: 'no-store' });
+      if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+      const blob = await res.blob();
+      files[index] = new File([blob], filename, { type: blob.type || 'application/octet-stream' });
+      done += 1;
+      onProgress?.(done, items.length);
+    }
+  };
+  await Promise.all([worker(), worker(), worker()]);
+  return files;
+};
+
+// iOS'un paylasim menusu bu listeyi kabul ediyor mu (sayi / boyut).
+export const canShareFileList = (files: File[]) => {
+  try {
+    return typeof navigator.canShare === 'function' && navigator.canShare({ files });
+  } catch {
+    return false;
   }
 };

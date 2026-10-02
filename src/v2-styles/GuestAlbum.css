@@ -380,3 +380,73 @@
   color: #4ade80;
   flex-shrink: 0;
 }
+
+/* AM-12: coklu secim. "Вибрати" siralama dugmeleriyle ayni gorunumde; cubuk ekranin altinda sabit. */
+.guest-album-sort .guest-album-select-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guest-album-selectbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: min(720px, calc(100% - 24px));
+  z-index: 9000;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 12px 14px;
+  background: var(--base-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.guest-album-selectbar-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 14px;
+}
+
+.guest-album-selectbar-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.guest-album-selectbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guest-album-selectbar-actions .guest-album-btn {
+  padding: 10px 16px;
+}
+
+/* iPhone: dosyalar hazir, ikinci dokunus paylasim menusunu acar; gozden kacmasin. */
+.guest-album-selectbar-actions .guest-album-btn.is-ready {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+}
+
+.guest-album-selectbar-spacer {
+  height: 120px;
+}
+
+.guest-album-toast.raised {
+  bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+}

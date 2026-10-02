@@ -21,7 +21,7 @@ import { defaultGuestTheme } from '../../types/guestTheme';
 import { fonts } from '../../types/fonts';
 import { applyGuestFont } from '../../utils/applyGuestFont';
 import { saveUrl } from '../../utils/download';
-import { isAppleMobile, isReadyToSave, prefetchForSave, saveMedia, savesToPhotos } from '../../utils/saveMedia';
+import { canShareFileList, fetchFilesForShare, isAndroid, isAppleMobile, isReadyToSave, prefetchForSave, saveMedia, savesToPhotos, SHARE_BATCH_MAX_BYTES } from '../../utils/saveMedia';
 import { t } from '../../packages/i18n';
 import { textOr } from '../../utils/admin_i18n';
 import { isEventClosedError, isPackageLimitExceededError } from '../../utils/guestInitError';
@@ -40,6 +40,16 @@ type PageStatus = 'loading' | 'ready' | 'closed' | 'passcode' | 'failed';
 type AlbumUpload = UploadEntry & { participants?: { name?: string } | { name?: string }[] };
 
 const PAGE_SIZE = 24;
+
+// AM-12: tek seferde secilebilecek en fazla dosya (iPhone'da hepsi bellege alinip paylasiliyor).
+const MAX_SELECT = 30;
+
+// Toplu kaydetmenin durumu. working: hazirlaniyor (prepare), tek tek indiriliyor (download) ya da zip;
+// ready: iPhone'da dosyalar hazir, ikinci dokunus paylasim menusunu acar.
+type BatchState =
+  | { phase: 'working'; kind: 'prepare' | 'download' | 'zip'; done: number; total: number }
+  | { phase: 'ready'; files: File[] }
+  | null;
 
 const orderFor = (sort: SortType) => {
   if (sort === 'oldest') return 'order=created_at.asc,uid.asc';
@@ -83,6 +93,10 @@ function ParticipantAlbum() {
   // AM-16: kaydetme sirasinda kisa bilgi (hazirlaniyor / tekrar dokun / Dosyalar'a gitti).
   const [saveNote, setSaveNote] = useState<string | null>(null);
   const saveNoteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // AM-12: coklu secim. uid -> kayit; filtre degisse de, "daha fazla" yuklense de secim kalir.
+  const [selectMode, setSelectMode] = useState(false);
+  const [selection, setSelection] = useState<Map<string, AlbumUpload>>(() => new Map());
+  const [batch, setBatch] = useState<BatchState>(null);
   const passcodeRef = useRef<HTMLInputElement>(null);
   const requestIdRef = useRef(0);
 
@@ -279,6 +293,133 @@ function ParticipantAlbum() {
     }
   };
 
+  // --- AM-12: coklu secim ve toplu kaydetme ---
+  const selectLimitText = () => textOr('guest.select.limit', 'You can select up to {{max}} files at a time.', 'За один раз можна вибрати до {{max}} файлів.', { max: MAX_SELECT });
+
+  const toggleSelect = (upload: AlbumUpload) => {
+    setBatch(null);
+    const next = new Map(selection);
+    if (next.has(upload.uid)) {
+      next.delete(upload.uid);
+    } else if (next.size >= MAX_SELECT) {
+      showSaveNote(selectLimitText(), 4000);
+      return;
+    } else {
+      next.set(upload.uid, upload);
+    }
+    setSelection(next);
+  };
+
+  const exitSelect = () => {
+    setSelectMode(false);
+    setSelection(new Map());
+    setBatch(null);
+  };
+
+  const allShownSelected = uploads.length > 0 && uploads.every(u => selection.has(u.uid));
+
+  const toggleAllShown = () => {
+    setBatch(null);
+    const next = new Map(selection);
+    if (allShownSelected) {
+      uploads.forEach(u => next.delete(u.uid));
+    } else {
+      for (const u of uploads) {
+        if (next.size >= MAX_SELECT) break;
+        next.set(u.uid, u);
+      }
+      if (uploads.some(u => !next.has(u.uid))) showSaveNote(selectLimitText(), 4000);
+    }
+    setSelection(next);
+  };
+
+  const zipSelection = async (items: AlbumUpload[], toFilesApp: boolean) => {
+    if (!album) return;
+    setBatch({ phase: 'working', kind: 'zip', done: 0, total: items.length });
+    try {
+      await guestDownloadAlbumZip(album.uid, `${album.name || 'album'}-selection.zip`, items.map(u => u.uid));
+      exitSelect();
+      if (toFilesApp) showSaveNote(textOr('guest.select.zipIos', 'The ZIP was saved to the Files app.', 'ZIP-архів збережено в застосунку «Файли».'), 6000);
+    } catch {
+      setBatch(null);
+      showSaveNote(textOr('guest.select.zipFailed', "Couldn't prepare the ZIP. Please try again.", 'Не вдалося підготувати ZIP. Спробуйте ще раз.'), 6000);
+    }
+  };
+
+  // Ne: Secilenleri platforma gore kaydeder (AM-12).
+  //   iPhone/iPad: once hazirlanir, sonra tek paylasim menusu -> "Save N Images" (Fotograflar)
+  //   Android: tek tek indirilir; her dosya Indirilenler'e iner ve galeride gorunur
+  //   masaustu: tek zip
+  const saveSelection = async () => {
+    const items = Array.from(selection.values());
+    if (!items.length || batch?.phase === 'working') return;
+
+    if (batch?.phase === 'ready') {
+      try {
+        await navigator.share({ files: batch.files });
+        exitSelect();
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setBatch(null);
+        showSaveNote(textOr('guest.select.shareFailed', "Couldn't open the share menu. Please try again.", 'Не вдалося відкрити меню «Поширити». Спробуйте ще раз.'), 6000);
+      }
+      return;
+    }
+
+    const list = items.map(u => ({ url: S3_ROOT + u.value, filename: u.value.split('/').pop() || 'file' }));
+    const totalBytes = items.reduce((sum, u) => sum + (u.size_bytes || 0), 0);
+
+    if (savesToPhotos() && totalBytes <= SHARE_BATCH_MAX_BYTES) {
+      // iOS paylasim menusunu ancak dokunustan hemen sonra acar: once hazirla, sonra ikinci dokunus.
+      setBatch({ phase: 'working', kind: 'prepare', done: 0, total: list.length });
+      try {
+        const files = await fetchFilesForShare(list, (done, total) => setBatch({ phase: 'working', kind: 'prepare', done, total }));
+        if (!canShareFileList(files)) throw new Error('share not possible');
+        setBatch({ phase: 'ready', files });
+        showSaveNote(textOr('guest.select.readyHint', 'Ready. Tap “Save {{count}} to Photos”.', 'Готово. Натисніть «Зберегти {{count}} у Фото».', { count: files.length }), 6000);
+      } catch {
+        await zipSelection(items, true);
+      }
+      return;
+    }
+    if (isAppleMobile()) {
+      await zipSelection(items, true);
+      return;
+    }
+    if (isAndroid()) {
+      setBatch({ phase: 'working', kind: 'download', done: 0, total: list.length });
+      let failed = 0;
+      for (let i = 0; i < list.length; i++) {
+        try {
+          await saveUrl(list[i].url, list[i].filename);
+        } catch {
+          failed += 1;
+        }
+        setBatch({ phase: 'working', kind: 'download', done: i + 1, total: list.length });
+        // Tarayici art arda inen dosyalari tek tek kaydetsin.
+        await new Promise(resolve => setTimeout(resolve, 700));
+      }
+      exitSelect();
+      showSaveNote(failed > 0
+        ? textOr('guest.select.androidFailed', 'Saved: {{count}}. Not saved: {{failed}}.', 'Збережено: {{count}}. Не збережено: {{failed}}.', { count: list.length - failed, failed })
+        : textOr('guest.select.androidDone', 'Saved: {{count}}. You will find them in Downloads or your gallery.', 'Збережено: {{count}}. Шукайте їх у «Завантаженнях» або в галереї.', { count: list.length }), 7000);
+      return;
+    }
+    await zipSelection(items, false);
+  };
+
+  const selectionButtonText = () => {
+    if (batch?.phase === 'working') {
+      if (batch.kind === 'zip') return textOr('guest.select.preparingZip', 'Preparing ZIP…', 'Готуємо ZIP…');
+      if (batch.kind === 'download') return textOr('guest.select.saving', 'Saving {{done}} of {{total}}…', 'Зберігаємо {{done}} з {{total}}…', { done: batch.done, total: batch.total });
+      return textOr('guest.select.preparing', 'Preparing {{done}} of {{total}}…', 'Готуємо {{done}} з {{total}}…', { done: batch.done, total: batch.total });
+    }
+    if (batch?.phase === 'ready') return textOr('guest.select.readyToPhotos', 'Save {{count}} to Photos', 'Зберегти {{count}} у Фото', { count: batch.files.length });
+    if (savesToPhotos()) return textOr('guest.save.toPhotos', 'Save to Photos', 'Зберегти у Фото');
+    if (isAndroid()) return textOr('guest.select.saveDevice', 'Save to device', 'Зберегти на пристрій');
+    return textOr('guest.select.saveZip', 'Save as ZIP', 'Зберегти ZIP');
+  };
+
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString(langCode, { day: 'numeric', month: 'short', year: 'numeric' });
@@ -439,9 +580,31 @@ function ParticipantAlbum() {
     <div className="guest-uploads" style={{ ...theme, fontFamily: fonts.find(f => f.id === event.settings?.font)?.fontFamily }}>
       <PhotoViewerModal />
       {saveNote && (
-        <div className="guest-album-toast" role="status">
+        <div className={`guest-album-toast${selectMode ? ' raised' : ''}`} role="status">
           <i className="fa-solid fa-circle-info" />
           <span>{saveNote}</span>
+        </div>
+      )}
+      {/* AM-12: secim cubugu; sayfa kaydirilirken de altta kalir. */}
+      {selectMode && (
+        <div className="guest-album-selectbar" role="region" aria-label={textOr('guest.select.select', 'Select', 'Вибрати')}>
+          <div className="guest-album-selectbar-info">
+            <strong>{textOr('guest.select.count', '{{count}} selected', 'Вибрано: {{count}}', { count: selection.size })}</strong>
+            <button type="button" className="guest-album-selectbar-link" onClick={toggleAllShown} disabled={batch?.phase === 'working'}>
+              {allShownSelected
+                ? textOr('guest.select.none', 'Deselect all', 'Зняти вибір')
+                : textOr('guest.select.allShown', 'Select all shown', 'Вибрати всі показані')}
+            </button>
+          </div>
+          <div className="guest-album-selectbar-actions">
+            <button type="button" className="guest-album-btn secondary" onClick={exitSelect} disabled={batch?.phase === 'working'}>
+              {textOr('guest.select.cancel', 'Cancel', 'Скасувати')}
+            </button>
+            <button type="button" className={`guest-album-btn primary${batch?.phase === 'ready' ? ' is-ready' : ''}`} onClick={saveSelection} disabled={selection.size === 0 || batch?.phase === 'working'}>
+              <i className={`fa-solid ${batch?.phase === 'working' ? 'fa-spinner fa-spin' : savesToPhotos() ? 'fa-arrow-up-from-bracket' : 'fa-download'}`} />
+              {selectionButtonText()}
+            </button>
+          </div>
         </div>
       )}
       <GuestUploadModal
@@ -560,6 +723,16 @@ function ParticipantAlbum() {
                 <button type="button" className={sort === 'type' ? 'active' : ''} onClick={() => changeSort('type')}>
                   {textOr('guest.album.sortByType', 'Photos first', 'Спочатку фото')}
                 </button>
+                {uploads.length > 0 && (
+                  <button
+                    type="button"
+                    className={`guest-album-select-toggle${selectMode ? ' active' : ''}`}
+                    onClick={() => (selectMode ? exitSelect() : setSelectMode(true))}
+                  >
+                    <i className={`fa-solid ${selectMode ? 'fa-xmark' : 'fa-check-double'}`} />
+                    {selectMode ? textOr('guest.select.cancel', 'Cancel', 'Скасувати') : textOr('guest.select.select', 'Select', 'Вибрати')}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -576,6 +749,9 @@ function ParticipantAlbum() {
                     uploaderName={uploaderName(upload)}
                     uploadEntry={upload}
                     onFullscreen={() => openPhotoViewer(upload.uid)}
+                    selectable={selectMode}
+                    selected={selection.has(upload.uid)}
+                    onSelectToggle={() => toggleSelect(upload)}
                     actions={[
                       { variant: 'icontext', text: '', icon: savesToPhotos() ? 'fa-solid fa-arrow-up-from-bracket' : 'fa-solid fa-download', title: savesToPhotos() ? textOr('guest.save.toPhotos', 'Save to Photos', 'Зберегти у Фото') : textOr('guest.album.download', 'Download', 'Зберегти'), onClick: () => saveOne(upload) },
                     ]}
@@ -592,6 +768,7 @@ function ParticipantAlbum() {
                 </button>
               </div>
             )}
+            {selectMode && <div className="guest-album-selectbar-spacer" aria-hidden="true" />}
           </div>
         </main>
       )}
