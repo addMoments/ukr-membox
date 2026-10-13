@@ -1408,6 +1408,42 @@
   font-size: 10px;
 }
 
+/* 3'ten fazla album varsa listenin altindaki "Show all albums N" butonu */
+.guest-home-albums-show-all {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--base);
+  border: 1.5px solid var(--primary);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.guest-home-albums-show-all:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.25);
+}
+
+.guest-home-albums-show-all-count {
+  color: var(--text-secondary);
+}
+
+.guest-home-albums-show-all-arrow {
+  margin-left: auto;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  padding-right: 6px;
+}
+
 /* Yukleme modalindaki album secici */
 .upload-modal-album-wrap {
   display: flex;

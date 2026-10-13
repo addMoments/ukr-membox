@@ -45,6 +45,9 @@ export interface V2GuestHomeProps {
   galleryOn?: boolean;
 }
 
+// Misafir ana sayfasinda "Show all albums"a basilmadan gorunen album sayisi.
+const ALBUM_PREVIEW_COUNT = 3;
+
 const ADVERTORIAL_CELL_COUNT: Record<AdvertorialLayout, number> = {
   none: 0,
   single: 1,
@@ -147,6 +150,10 @@ function V2GuestHome({
   const showAlbumCards = albums.length > 1
     || albums.some((album) => !album.is_default)
     || (galleryOn && albums.some((album) => album.guest_view));
+  // Ilk 3 album gorunur; fazlasi varsa "Show all albums N" butonu listeyi yerinde acar.
+  const [albumsExpanded, setAlbumsExpanded] = useState(false);
+  const hasHiddenAlbums = albums.length > ALBUM_PREVIEW_COUNT && !albumsExpanded;
+  const visibleAlbums = hasHiddenAlbums ? albums.slice(0, ALBUM_PREVIEW_COUNT) : albums;
   const isLocked = (album: GuestAlbum) => album.privacy === 'protected' && !openedAlbums.has(album.uid);
   const formatAlbumDate = (dateStr: string | null) => {
     if (!dateStr) return '';
@@ -263,7 +270,7 @@ function V2GuestHome({
                     </p>
                   </div>
                   <div className="guest-home-albums-grid">
-                    {albums.map((album) => {
+                    {visibleAlbums.map((album) => {
                       const cover = albumCoverUrl(album);
                       const dateText = formatAlbumDate(album.album_date);
                       const locked = isLocked(album);
@@ -308,6 +315,21 @@ function V2GuestHome({
                       );
                     })}
                   </div>
+                  {hasHiddenAlbums && (
+                    <button
+                      type="button"
+                      className="guest-home-albums-show-all"
+                      onClick={() => setAlbumsExpanded(true)}
+                      aria-expanded={false}
+                    >
+                      <i className="fa-solid fa-table-cells-large" />
+                      <span className="guest-home-albums-show-all-label">
+                        {textOr('guest.album.showAllAlbums', 'Show all albums', 'Показати всі альбоми')}
+                      </span>
+                      <span className="guest-home-albums-show-all-count">{albums.length}</span>
+                      <i className="fa-solid fa-chevron-down guest-home-albums-show-all-arrow" />
+                    </button>
+                  )}
                 </section>
               )}
 

@@ -615,6 +615,7 @@
             "galleryTitle": "Gallery",
             "passcodeNeeded": "Passcode required",
             "viewOnly": "View only",
+            "showAllAlbums": "Show all albums",
             "readMore": "Show more",
             "readLess": "Show less"
         },
