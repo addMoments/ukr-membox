@@ -16,7 +16,7 @@ import GuestAccessErrorScreen from '../../v2-partials/GuestAccessErrorScreen';
 import { getEventClosedMessage, isEventClosedError, isPackageLimitExceededError } from '../../utils/guestInitError';
 import { getPublicAdvertorialConfig } from '../../client/advertorial';
 import { AdvertorialResponse } from '../../types/advertorial';
-import { guestListAlbums } from '../../client/albums';
+import { albumMediaCounts as fetchAlbumMediaCounts, guestListAlbums } from '../../client/albums';
 import { GuestAlbum } from '../../types/albums';
 
 
@@ -42,6 +42,8 @@ function Participant() {
   // whoami'de eklenir, PostgREST RLS'i o claim'e bakar.
   const [albums, setAlbums] = useState<GuestAlbum[]>([]);
   const [albumsLoaded, setAlbumsLoaded] = useState(false);
+  // Album basina misafirin gorebildigi medya adedi ("Moments N"); hata verirse sayac gizlenir.
+  const [albumMediaCounts, setAlbumMediaCounts] = useState<Record<string, number> | null>(null);
   const langCode = t('lang_code');
   const resolveFallback = (rawValue: string, key: string, enText: string, ukText: string) => {
     if (rawValue !== key) return rawValue;
@@ -106,7 +108,7 @@ function Participant() {
         const user = await whoAmI();
         setParticipantUid(user.ui);
 
-        const [eventData, uploadsData, participantData, advertorialData, albumsData] = await Promise.all([
+        const [eventData, uploadsData, participantData, advertorialData, albumsData, mediaCounts] = await Promise.all([
           pgREST(`/events_public?uid=eq.${uid}`),
           pgREST(`/uploads?event_uid=eq.${uid}&client_uid=eq.${user.ui}&upload_type=in.(photo,video)&trashed_at=is.null&order=created_at.desc&limit=3`),
           pgREST(`/participants?uid=eq.${user.ui}&select=name`),
@@ -114,6 +116,7 @@ function Participant() {
           // Album listesi hata verirse (ornegin migration heniz yoksa) sayfa yine acilir;
           // albumsLoaded false kalir, yukleme butonu eski davranisla calisir.
           guestListAlbums(uid).then((list) => ({ ok: true, list })).catch(() => ({ ok: false, list: [] as GuestAlbum[] })),
+          fetchAlbumMediaCounts(uid).catch(() => null),
         ]);
 
         // Ne: Event kaydi gelmediyse erken cikar.
@@ -130,6 +133,7 @@ function Participant() {
         setAdvertorial(advertorialData);
         setAlbums(albumsData.list);
         setAlbumsLoaded(albumsData.ok);
+        setAlbumMediaCounts(mediaCounts);
         const currentName = participantData?.[0]?.name || '';
         if (currentName && !currentName.startsWith('guest-')) {
           setParticipantName(currentName);
@@ -163,12 +167,11 @@ function Participant() {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString(t('lang_code'), { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+    // Misafir hero'sunda tarih gg.aa.yyyy (2026-10-13 tasarimi); tarih-only deger yerel gun olarak okunur.
+    const date = new Date(dateString.length <= 10 ? dateString + 'T00:00:00' : dateString);
+    if (isNaN(date.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
   };
 
   // Generate initials from event name (e.g., "Sarah & Michael's Wedding" -> "S+M")
@@ -186,6 +189,8 @@ function Participant() {
       const user = await whoAmI();
       const uploadsData = await pgREST(`/uploads?event_uid=eq.${uid}&client_uid=eq.${user.ui}&upload_type=in.(photo,video)&trashed_at=is.null&order=created_at.desc&limit=3`);
       setRecentUploads(uploadsData as UploadEntry[]);
+      // Misafirin yeni yukledikleri gorunur bir albume dustuyse "Moments" sayaci da artar.
+      setAlbumMediaCounts(await fetchAlbumMediaCounts(uid).catch(() => null));
     } catch (err) {
       console.error('Failed to refresh uploads:', err);
     }
@@ -263,6 +268,7 @@ function Participant() {
       albums={albums}
       albumsLoaded={albumsLoaded}
       galleryOn={!!event.settings?.guest_gallery}
+      albumMediaCounts={albumMediaCounts}
     />
   );
 }

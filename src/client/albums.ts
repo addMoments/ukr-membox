@@ -16,6 +16,8 @@ export const listAlbums = async (eventUid: string): Promise<Album[]> => {
 
 // Album basina cope atilmamis medya adedi. Sayim istemcide: etkinlik medya limiti
 // (products.options.media_count) bini gecmiyor, tek istek yeterli.
+// Misafir ana sayfasi da kullanir ("Moments N"): orada RLS misafirin okuyabildigi satirlara suzer.
+// Content-Range ile sayim olmuyor, DB proxy'si o basligi tarayiciya acmiyor.
 export const albumMediaCounts = async (eventUid: string): Promise<Record<string, number>> => {
   const rows = await pgREST(`/uploads?event_uid=eq.${eventUid}&trashed_at=is.null&upload_type=in.(photo,video)&select=album_uid`);
   const counts: Record<string, number> = {};

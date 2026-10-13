@@ -83,12 +83,11 @@ function EventThemeInner({event}: {event: Event}) {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString(t('lang_code'), { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+    // Misafir hero'sunda tarih gg.aa.yyyy (2026-10-13 tasarimi); tarih-only deger yerel gun olarak okunur.
+    const date = new Date(dateString.length <= 10 ? dateString + 'T00:00:00' : dateString);
+    if (isNaN(date.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
   };
 
   

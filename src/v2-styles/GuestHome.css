@@ -1,3 +1,5 @@
+/* Misafir ana sayfasi (2026-10-13 yeni tasarim): telefon oncelikli tek sutun.
+   Hero gorseli -> karsilama metni -> yukleme / ses / ani defteri -> sponsorlu alan -> albumler. */
 .guest-home {
   background-color: var(--base);
   min-height: 100vh;
@@ -7,13 +9,16 @@
 
 .guest-home-main {
   flex-grow: 1;
-  max-width: 896px;
+  max-width: 560px;
   margin: 0 auto;
   width: 100%;
-  padding: 48px 24px;
+  box-sizing: border-box;
+  padding: 24px 16px 40px;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 16px;
+  /* Yazi boyutlari ekrana degil bu sutuna gore: host tema onizlemesi ayni sayfayi dar telefon cercevesinde gosterir. */
+  container-type: inline-size;
 }
 
 @media (max-width: 900px) {
@@ -22,49 +27,16 @@
   }
 }
 
-/* Event Hero Card */
-.guest-home-hero {
-  background: var(--base-card);
-  border-radius: 32px;
-  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-}
-
-.guest-home-main-card-content {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-@media (min-width: 640px) {
-  .guest-home-main-card-content {
-    padding: 28px;
-  }
-}
-
-/* AM-14: Etkinlik gorseli 3:1 kirpiliyor; kutu da her ekranda 3:1, yoksa telefon/tablet
+/* Hero: gorsel karti, tarih ustte, etkinlik adi altta gorselin uzerinde.
+   AM-14: Etkinlik gorseli 3:1 kirpiliyor; kutu da her ekranda 3:1, yoksa telefon/tablet
    kirpilan alanin farkli bir dilimini gosteriyordu. overflow: aspect-ratio kutusu resimle uzamasin. */
 .guest-home-hero-image {
   aspect-ratio: 3 / 1;
   width: 100%;
   position: relative;
   overflow: hidden;
-}
-
-.guest-home-hero-info-band-wrap {
-  padding: 14px 14px 0;
-}
-
-.guest-home-hero-info-band {
-  width: 100%;
-  padding: 12px 18px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 10px 24px -14px rgba(15, 23, 42, 0.35);
-  text-align: center;
+  border-radius: 24px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 45%, #1c1917), #1c1917);
 }
 
 .guest-home-hero-image img {
@@ -77,274 +49,231 @@
 .guest-home-hero-image-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.4), transparent, transparent);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 35%, transparent 45%, rgba(0, 0, 0, 0.6));
 }
 
-.guest-home-hero-badge {
+.guest-home-hero-date {
   position: absolute;
-  bottom: 32px;
-  left: 32px;
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(12px);
-  color: white;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 6px 16px;
-  border-radius: 9999px;
-  border: 1px solid rgba(255,255,255,0.3);
-}
-
-.guest-home-hero-date-badge {
-  display: none;
-}
-
-.guest-home-hero-content {
-  padding: 0;
-}
-
-.guest-home-hero-header {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-@media (min-width: 768px) {
-  .guest-home-hero-header {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-  }
-}
-
-.guest-home-hero-info {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  top: 12px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .guest-home-hero-title {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--text);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin: 0 0 4px;
-}
-
-@media (min-width: 640px) {
-  .guest-home-hero-title {
-    font-size: 30px;
-  }
-}
-
-.guest-home-hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.guest-home-hero-meta-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.guest-home-hero-meta-item i {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-.guest-home-hero-meta-item span {
-  font-size: 14px;
-}
-
-.guest-home-hero-initials {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .guest-home-hero-initials {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-.guest-home-hero-initials-circle {
-  width: 80px;
-  height: 80px;
-  background: color-mix(in srgb, var(--primary) 30%, transparent);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 4px solid var(--base-card);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.03);
-}
-
-.guest-home-hero-initials-text {
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--text);
-}
-
-/* Welcome Message */
-.guest-home-welcome {
-  margin-top: 48px;
-  padding: 32px;
-  background: var(--base);
-  border-radius: 24px;
-  border: 1px solid var(--border);
-  position: relative;
-  width: 320px;
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.guest-home-welcome-icon {
   position: absolute;
-  top: -16px;
-  left: 24px;
-  background: var(--primary);
-  color: var(--primary-text);
-  padding: 8px;
-  border-radius: 8px;
-}
-
-.guest-home-welcome-icon i {
-  font-size: 16px;
-}
-
-.guest-home-welcome-text {
-  font-size: 18px;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  font-style: italic;
+  left: 16px;
+  right: 16px;
+  bottom: 12px;
   margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
-.guest-home-welcome-author {
-  margin-top: 16px;
-  font-weight: 700;
+/* Dar telefonda 3:1 kutu alcak kaliyor; ucuncu satir tarihin ustune binmesin. */
+@container (max-width: 420px) {
+  .guest-home-hero-title {
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (min-width: 480px) {
+  .guest-home-hero-date {
+    top: 16px;
+    left: 20px;
+    font-size: 14px;
+  }
+
+  .guest-home-hero-title {
+    left: 20px;
+    right: 20px;
+    bottom: 16px;
+    font-size: 20px;
+  }
+}
+
+/* Karsilama metni: hostun yazdigi satir sonlari korunur. */
+.guest-home-welcome {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 16px;
+  line-height: 1.5;
   color: var(--text);
+  /* index.html'deki global p { text-align: center } kuralini ezer; tasarimda sola dayali. */
+  text-align: left;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
-/* Upload Section */
-.guest-home-upload {
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
-  padding: 0;
-}
-
-.guest-home-main-card .guest-home-upload {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.guest-home-upload-inner {
-  border: 2px dashed var(--border);
-  border-radius: 24px;
-  background: var(--base-card);
-  padding: 48px;
-  text-align: center;
+/* Eylemler: tam genislik yukleme hapi + yan yana Ses / Ani defteri */
+.guest-home-actions {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 12px;
 }
 
-.guest-home-upload-inner * {
-  z-index: 2;
-}
-
-.guest-home-upload-icon {
-  width: 100px;
-  height: 100px;
-  background: var(--base);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  color: var(--text-secondary);
-  overflow: hidden;
-}
-
-.guest-home-upload-icon img {
+.guest-home-actions .file-input-wrapper {
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.guest-home-upload-icon i {
-  font-size: 32px;
-}
-
-.guest-home-upload-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0 0 8px;
-}
-
-.guest-home-upload-desc {
-  color: var(--text-secondary);
-  margin: 0 0 32px;
-  max-width: 384px;
 }
 
 .guest-home-upload-btn {
-  background: var(--primary);
-  padding: 16px 40px;
-  border-radius: 9999px;
-  border: none;
-  cursor: pointer;
+  width: 100%;
+  min-height: 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.03);
-  transition: transform 0.2s, opacity 0.2s;
-  width: 320px;
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.guest-home-upload-btn:hover {
-  transform: scale(1.02);
+  gap: 10px;
+  padding: 6px 6px 6px 18px;
+  border-radius: 9999px;
+  border: 2px solid var(--primary);
+  background: var(--primary);
+  color: var(--primary-text);
+  font: inherit;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.15s;
 }
 
 .guest-home-upload-btn:active {
   transform: scale(0.98);
 }
 
-.guest-home-upload-btn i {
+.guest-home-upload-btn > i {
   font-size: 18px;
-  font-weight: 600;
 }
 
-.guest-home-upload-btn span {
+.guest-home-upload-btn-label {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font-size: clamp(14px, 4.1vw, 18px);
+  font-size: clamp(13px, 4.5cqi, 18px);
   font-weight: 700;
-  color: var(--primary-text);
 }
 
-.guest-home-upload-inner > a {
+.guest-home-btn-arrow {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #1c1917;
+  font-size: 18px;
+}
+
+.guest-home-secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.guest-home-secondary-btn {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 10px;
+  border-radius: 9999px;
+  border: 2px solid var(--primary);
+  background: var(--base-card);
+  color: var(--text);
+  text-decoration: none;
+  box-sizing: border-box;
+  min-width: 0;
+  transition: transform 0.15s;
+}
+
+.guest-home-secondary-btn:active {
+  transform: scale(0.98);
+}
+
+.guest-home-secondary-btn > i {
+  font-size: 15px;
+}
+
+.guest-home-secondary-btn-label {
+  flex: 1;
+  min-width: 0;
+  /* 360px telefonda "Побажання" da sigsin */
+  font-size: clamp(13px, 3.9vw, 17px);
+  font-size: clamp(12px, 4.25cqi, 17px);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guest-home-secondary-btn .guest-home-btn-arrow {
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  color: var(--text);
+}
+
+.guest-home-secure {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.guest-home-secure-check {
+  color: var(--primary);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.guest-home-secure-lock {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text-secondary);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+/* Sponsorlu alan: reklam yoksa (layout none / eksik gorsel) hic render edilmez. */
+.guest-advertorial {
+  padding: 12px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--primary) 12%, var(--base-card));
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.guest-advertorial-label {
   display: block;
+  margin: 2px 4px 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
 }
 
 .guest-advertorial-grid {
-  width: 320px;
-  max-width: 100%;
-  margin: 24px auto 0;
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
@@ -358,22 +287,10 @@
 .guest-advertorial-cell {
   min-width: 0;
   aspect-ratio: 16 / 9;
-  border-radius: 16px;
-  position: relative;
-  background: transparent;
-}
-
-.guest-advertorial-cell::after {
-  content: '';
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: -9px;
-  height: 18px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.22);
-  filter: blur(10px);
-  pointer-events: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--base-card);
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.25);
 }
 
 .guest-advertorial-cell a {
@@ -382,10 +299,6 @@
   height: 100%;
   color: inherit;
   text-decoration: none;
-  border-radius: inherit;
-  overflow: hidden;
-  position: relative;
-  z-index: 1;
 }
 
 .guest-advertorial-cell img {
@@ -394,139 +307,8 @@
   object-fit: contain;
   object-position: center;
   display: block;
-  border-radius: inherit;
-  position: relative;
-  z-index: 1;
 }
 
-@media (max-width: 900px) {
-  .guest-home-main {
-    padding-left: 18px;
-    padding-right: 18px;
-  }
-
-  .guest-home-hero {
-    border-radius: 26px;
-  }
-
-  .guest-home-hero-info-band-wrap {
-    padding: 18px 18px 10px;
-  }
-
-  .guest-home-hero-info-band {
-    padding: 0;
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-
-  .guest-home-hero-title {
-    font-size: 28px;
-    margin: 0;
-  }
-
-  .guest-home-hero-info-band .guest-home-hero-meta {
-    display: none;
-  }
-
-  .guest-home-hero-badge {
-    left: 18px;
-    bottom: 18px;
-  }
-
-  .guest-home-hero-date-badge {
-    position: absolute;
-    right: 18px;
-    bottom: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.22);
-    backdrop-filter: blur(12px);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    padding: 6px 12px;
-    border-radius: 9999px;
-    border: 1px solid rgba(255,255,255,0.3);
-    max-width: calc(100% - 140px);
-    white-space: nowrap;
-  }
-
-  .guest-home-upload-inner {
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    padding: 0 10px;
-    align-items: stretch;
-  }
-
-  .guest-home-upload-inner .file-input-wrapper,
-  .guest-home-upload-inner > a,
-  .guest-advertorial-grid,
-  .guest-home-welcome {
-    align-self: stretch;
-    width: 100%;
-  }
-
-  .guest-advertorial-grid {
-    max-width: none;
-    margin-top: 20px;
-    gap: 8px;
-  }
-
-  .guest-home-upload-btn {
-    width: 100% !important;
-    max-width: none;
-    padding: 14px 24px;
-    gap: 10px;
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  .guest-home-upload-btn i {
-    font-size: 15px;
-  }
-
-  .guest-home-welcome {
-    box-sizing: border-box;
-    margin-top: 34px;
-    padding: 24px 10px;
-    width: 100%;
-  }
-
-  .guest-home-welcome-icon {
-    left: 18px;
-  }
-
-  .guest-home-welcome-text {
-    font-size: 16px;
-    line-height: 1.45;
-  }
-
-  .guest-home-upload-secure {
-    justify-content: center;
-    width: 100%;
-  }
-}
-
-.guest-home-upload-secure {
-  margin-top: 32px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  color: var(--text-tertiary);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.guest-home-upload-secure i {
-  font-size: 12px;
-}
 
 /* File input hidden */
 .guest-home-file-input {
@@ -1238,13 +1020,11 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 14px 20px;
-  margin: 0 auto 10px;
-  width: 320px;
-  max-width: 100%;
+  min-height: 60px;
+  padding: 12px 20px;
   border-radius: 9999px;
-  background: var(--base);
-  border: 1px dashed var(--border);
+  background: var(--base-card);
+  border: 2px dashed color-mix(in srgb, var(--text) 18%, transparent);
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
@@ -1253,54 +1033,53 @@
 }
 
 .guest-home-albums {
-  margin: 24px 0 8px;
+  margin: 8px 0 0;
 }
 
 .guest-home-albums-header {
-  margin-bottom: 14px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 4px 12px;
 }
 
 .guest-home-albums-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 4px;
-  font-size: 18px;
+  margin: 0;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text);
 }
 
-.guest-home-albums-title i {
+/* "Moments 306": misafirin gorebildigi albumlerdeki foto + video sayisi */
+.guest-home-albums-moments {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 15px;
   color: var(--text-secondary);
-  font-size: 16px;
+  white-space: nowrap;
 }
 
-.guest-home-albums-hint {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary);
+.guest-home-albums-moments strong {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .guest-home-albums-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-@media (min-width: 640px) {
-  .guest-home-albums-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+  gap: 10px;
 }
 
 .guest-home-album-card {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px;
-  border-radius: 18px;
-  background: var(--base);
-  border: 1px solid var(--border);
+  padding: 7px;
+  border-radius: 20px;
+  background: var(--base-card);
+  border: 1.5px solid color-mix(in srgb, var(--text) 14%, transparent);
   text-decoration: none;
   color: var(--text);
   transition: transform 0.15s, box-shadow 0.15s;
@@ -1314,12 +1093,13 @@
 
 /* AM-14: Kapak 4:3 kirpiliyor, kucuk resim de 4:3 (kare kenarlari kesiyordu). */
 .guest-home-album-cover {
-  width: 96px;
-  height: 72px;
-  border-radius: 14px;
+  position: relative;
+  width: 108px;
+  height: 81px;
+  border-radius: 13px;
   overflow: hidden;
   flex-shrink: 0;
-  background: var(--base-card);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 
 .guest-home-album-cover img {
@@ -1342,21 +1122,24 @@
 .guest-home-album-body {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
   min-width: 0;
   flex: 1;
 }
 
 .guest-home-album-name {
+  max-width: 100%;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 17px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .guest-home-album-meta {
-  font-size: 12px;
+  max-width: 100%;
+  font-size: 14px;
   color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -1364,7 +1147,7 @@
 }
 
 .guest-home-album-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1372,17 +1155,16 @@
   overflow: hidden;
 }
 
-.guest-home-album-arrow {
-  color: var(--text-tertiary);
-  font-size: 12px;
-  padding-right: 6px;
+.guest-home-album-arrow,
+.guest-home-albums-show-all-arrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0 12px 0 4px;
+  color: var(--text);
+  font-size: 16px;
 }
 
 /* Kilitli (protected, passcode girilmemis) ve yalnizca-goruntule kart durumlari */
-.guest-home-album-cover {
-  position: relative;
-}
-
 .guest-home-album-lock {
   position: absolute;
   inset: 0;
@@ -1397,34 +1179,45 @@
 .guest-home-album-state {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-top: 2px;
-  font-size: 11px;
+  gap: 6px;
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--primary) 18%, var(--base-card));
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text);
 }
 
 .guest-home-album-state i {
   font-size: 10px;
 }
 
-/* 3'ten fazla album varsa listenin altindaki "Show all albums N" butonu */
+/* 3'ten fazla album varsa listenin altindaki "Show all albums N" butonu; listeyi yerinde acar. */
 .guest-home-albums-show-all {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin-top: 12px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: var(--base);
-  border: 1.5px solid var(--primary);
+  min-height: 56px;
+  margin-top: 10px;
+  padding: 8px 0 8px 18px;
+  border-radius: 20px;
+  background: var(--base-card);
+  border: 2px solid var(--primary);
   color: var(--text);
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
+  box-sizing: border-box;
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
@@ -1437,12 +1230,6 @@
   color: var(--text-secondary);
 }
 
-.guest-home-albums-show-all-arrow {
-  margin-left: auto;
-  color: var(--text-tertiary);
-  font-size: 12px;
-  padding-right: 6px;
-}
 
 /* Yukleme modalindaki album secici */
 .upload-modal-album-wrap {
@@ -1491,7 +1278,7 @@
 
 /* AM-06: tek seferde yuklenebilecek dosya sayisi, yukleme dugmesinin altinda. */
 .guest-home-upload-limit {
-  margin: -2px 0 14px;
+  margin: -4px 0 0;
   font-size: 12px;
   color: var(--text-secondary);
   text-align: center;

@@ -43,6 +43,8 @@ export interface V2GuestHomeProps {
   albumsLoaded?: boolean;
   // Etkinligin "Guests can view the gallery" anahtari (events_public.settings.guest_gallery).
   galleryOn?: boolean;
+  // Album basina misafirin okuyabildigi medya adedi (RLS suzer); "Moments N" sayaci bundan.
+  albumMediaCounts?: Record<string, number> | null;
 }
 
 // Misafir ana sayfasinda "Show all albums"a basilmadan gorunen album sayisi.
@@ -80,27 +82,29 @@ function GuestAdvertorialGrid({ advertorial }: { advertorial?: AdvertorialRespon
   if (!layout || cells.length === 0 || cells.length !== ADVERTORIAL_CELL_COUNT[layout]) return null;
 
   return (
-    <div className={`guest-advertorial-grid guest-advertorial-grid-${layout}`}>
-      {cells.map((cell) => {
-        const image = <img src={cell.image_url} alt="" loading="lazy" />;
-        return (
-          <div key={cell.index} className="guest-advertorial-cell">
-            {cell.link_url ? (
-              <a href={cell.link_url} target="_blank" rel="noopener noreferrer">
-                {image}
-              </a>
-            ) : image}
-          </div>
-        );
-      })}
-    </div>
+    <section className="guest-advertorial">
+      <span className="guest-advertorial-label">{textOr('guest.home.sponsored', 'Sponsored', 'Промоція')}</span>
+      <div className={`guest-advertorial-grid guest-advertorial-grid-${layout}`}>
+        {cells.map((cell) => {
+          const image = <img src={cell.image_url} alt="" loading="lazy" />;
+          return (
+            <div key={cell.index} className="guest-advertorial-cell">
+              {cell.link_url ? (
+                <a href={cell.link_url} target="_blank" rel="noopener noreferrer">
+                  {image}
+                </a>
+              ) : image}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
 function V2GuestHome({
   bannerImageUrl,
   eventTitle,
-  eventType,
   eventDate,
   welcomeMessage,
   recentUploads,
@@ -115,15 +119,10 @@ function V2GuestHome({
   albums = [],
   albumsLoaded = false,
   galleryOn = false,
+  albumMediaCounts = null,
 }: V2GuestHomeProps) {
   // Yukleme modali ayri bilesende (GuestUploadModal); dosyalar ref uzerinden verilir.
   const uploadModalRef = useRef<GuestUploadModalHandle>(null);
-
-  const uploadPhotosAndVideosText = t('guest.uploadPhotosAndVideos');
-  const uploadAudioMessageTextRaw = t('guest.uploadAudioMessage');
-  const uploadAudioMessageText = uploadAudioMessageTextRaw === 'guest.uploadAudioMessage'
-    ? (t('lang_code') === 'uk' ? 'Завантажити аудіо повідомлення' : 'Upload Audio Message')
-    : uploadAudioMessageTextRaw;
 
   // Ne: Token'daki "al" claim'i — misafirin passcode ile / linkten actigi albumler.
   // Neden: Protected album listede kilitli gorunur; acilmamissa yukleme hedefi olamaz ve
@@ -155,11 +154,19 @@ function V2GuestHome({
   const hasHiddenAlbums = albums.length > ALBUM_PREVIEW_COUNT && !albumsExpanded;
   const visibleAlbums = hasHiddenAlbums ? albums.slice(0, ALBUM_PREVIEW_COUNT) : albums;
   const isLocked = (album: GuestAlbum) => album.privacy === 'protected' && !openedAlbums.has(album.uid);
+  // Ne: "Moments N" — misafirin acip bakabildigi albumlerdeki foto + video sayisi.
+  // Neden: Galeri kapaliyken misafir yalnizca kendi yuklediklerini okuyabilir; o sayi
+  //        etkinligin anlari gibi okunmasin diye sayac hic gosterilmez.
+  const momentsCount = galleryOn && albumMediaCounts
+    ? albums
+      .filter((album) => album.guest_view && !isLocked(album))
+      .reduce((sum, album) => sum + (albumMediaCounts[album.uid] || 0), 0)
+    : null;
   const formatAlbumDate = (dateStr: string | null) => {
     if (!dateStr) return '';
     const d = new Date(dateStr.length <= 10 ? dateStr + 'T00:00:00' : dateStr);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleDateString(t('lang_code'), { year: 'numeric', month: 'long', day: 'numeric' });
+    return d.toLocaleDateString(t('lang_code'), { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   // const openPhotoViewer = (uploadUid: string) => {
@@ -196,163 +203,147 @@ function V2GuestHome({
       <V2Header />
 
       <main className="guest-home-main">
-        {/* Unified Hero + Upload Card */}
-        <section className="guest-home-hero guest-home-main-card">
-          <div className="guest-home-hero-info-band-wrap">
-            <div className="guest-home-hero-info-band">
-              <h1 className="guest-home-hero-title">{eventTitle}</h1>
-              <div className="guest-home-hero-meta">
-                <div className="guest-home-hero-meta-item">
-                  <i className="fa-regular fa-calendar" />
-                  <span>{eventDate}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        <section className="guest-home-hero">
           <div className="guest-home-hero-image">
             {bannerImageUrl && (
               <img src={bannerImageUrl} alt={t('guest.eventAmbiance')} />
             )}
             <div className="guest-home-hero-image-overlay" />
-            <span className="guest-home-hero-badge">{eventType}</span>
-            <span className="guest-home-hero-date-badge">
-              <i className="fa-regular fa-calendar" />
-              <span>{eventDate}</span>
-            </span>
-          </div>
-
-          <div className="guest-home-main-card-content">
-            <section className="guest-home-upload">
-              <div className="guest-home-upload-inner" style={{position: 'relative', zIndex: 1}}>
-
-              {uploadsClosed ? (
-                <div className="guest-home-uploads-closed" role="status">
-                  <i className="fa-solid fa-lock" />
-                  <span>{textOr('guest.album.noVisibleAlbums', 'Uploads are closed for this event right now.', 'Завантаження для цієї події зараз закрито.')}</span>
-                </div>
-              ) : (
-                <>
-                <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
-                <button style={{marginBottom: '10px'}} className="guest-home-upload-btn">
-                  <i className="fa-solid fa-camera-retro" />
-                  <span>{uploadPhotosAndVideosText}</span>
-                </button>
-                </FileInput>
-                {/* AM-06: sinir yuklemeye baslamadan gorunsun. */}
-                <p className="guest-home-upload-limit">{textOr('guest.upload.maxPerUpload', 'You can upload up to {{max}} files at a time.', 'За один раз ви можете завантажити до {{max}} файлів.', { max: MAX_FILES_PER_UPLOAD })}</p>
-                </>
-              )}
-
-              <Link style={{textDecoration: 'none'}} to={`/guest/${packedUid}/guestbook`}>
-                <button style={{marginBottom: '10px'}} className="guest-home-upload-btn" >
-                  <i className="fa-solid fa-microphone-lines" />
-                  <span>{uploadAudioMessageText}</span>
-                </button>
-              </Link>
-
-              <Link style={{textDecoration: 'none'}} to={`/guest/${packedUid}/guestbook`}>
-                <button className="guest-home-upload-btn" >
-                  <i className="fa-solid fa-book" />
-                  <span>{t('guest.signTheGuestbook')}</span>
-                </button>
-              </Link>
-
-              {showAlbumCards && (
-                <section className="guest-home-albums" aria-label={textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}>
-                  <div className="guest-home-albums-header">
-                    <h2 className="guest-home-albums-title">
-                      <i className="fa-regular fa-folder-open" />
-                      {textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}
-                    </h2>
-                    <p className="guest-home-albums-hint">
-                      {textOr('guest.album.sectionHint', 'Choose an album to share your photos.', 'Оберіть альбом, щоб поділитися фото.')}
-                    </p>
-                  </div>
-                  <div className="guest-home-albums-grid">
-                    {visibleAlbums.map((album) => {
-                      const cover = albumCoverUrl(album);
-                      const dateText = formatAlbumDate(album.album_date);
-                      const locked = isLocked(album);
-                      return (
-                        <Link
-                          key={album.uid}
-                          to={`/guest/${packedUid}/album/${album.uid ? packedAlbumUid(album.uid) : ''}`}
-                          className={`guest-home-album-card${locked ? ' locked' : ''}`}
-                        >
-                          <div className="guest-home-album-cover">
-                            {cover
-                              ? <img src={cover} alt="" loading="lazy" />
-                              : <div className="guest-home-album-cover-placeholder"><i className="fa-regular fa-images" /></div>}
-                            {locked && (
-                              <span className="guest-home-album-lock" aria-hidden="true"><i className="fa-solid fa-lock" /></span>
-                            )}
-                          </div>
-                          <div className="guest-home-album-body">
-                            <span className="guest-home-album-name">{album.name}</span>
-                            {(dateText || album.location) && (
-                              <span className="guest-home-album-meta">
-                                {dateText}{dateText && album.location ? ' · ' : ''}{album.location || ''}
-                              </span>
-                            )}
-                            {album.description && (
-                              <span className="guest-home-album-desc">{album.description}</span>
-                            )}
-                            {locked ? (
-                              <span className="guest-home-album-state">
-                                <i className="fa-solid fa-lock" />
-                                {textOr('guest.album.passcodeNeeded', 'Passcode required', 'Потрібен пароль')}
-                              </span>
-                            ) : !album.guest_upload ? (
-                              <span className="guest-home-album-state">
-                                <i className="fa-solid fa-eye" />
-                                {textOr('guest.album.viewOnly', 'View only', 'Лише перегляд')}
-                              </span>
-                            ) : null}
-                          </div>
-                          <span className="guest-home-album-arrow"><i className="fa-solid fa-chevron-right" /></span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                  {hasHiddenAlbums && (
-                    <button
-                      type="button"
-                      className="guest-home-albums-show-all"
-                      onClick={() => setAlbumsExpanded(true)}
-                      aria-expanded={false}
-                    >
-                      <i className="fa-solid fa-table-cells-large" />
-                      <span className="guest-home-albums-show-all-label">
-                        {textOr('guest.album.showAllAlbums', 'Show all albums', 'Показати всі альбоми')}
-                      </span>
-                      <span className="guest-home-albums-show-all-count">{albums.length}</span>
-                      <i className="fa-solid fa-chevron-down guest-home-albums-show-all-arrow" />
-                    </button>
-                  )}
-                </section>
-              )}
-
-              <GuestAdvertorialGrid advertorial={advertorial} />
-
-              {/* Welcome Message */}
-              {welcomeMessage && (
-                <div className="guest-home-welcome">
-                  <span className="guest-home-welcome-icon">
-                    <i className="fa-solid fa-quote-left" />
-                  </span>
-                  <p className="guest-home-welcome-text">"{welcomeMessage}"</p>
-                </div>
-              )}
-
-              <div className="guest-home-upload-secure">
-                <i className="fa-solid fa-lock" />
-                <span>{t('guest.privateSecure')}</span>
-              </div>
-              </div>
-            </section>
+            {eventDate && (
+              <span className="guest-home-hero-date">
+                <i className="fa-regular fa-calendar" />
+                <span>{eventDate}</span>
+              </span>
+            )}
+            <h1 className="guest-home-hero-title">{eventTitle}</h1>
           </div>
         </section>
+
+        {welcomeMessage && (
+          <p className="guest-home-welcome">{welcomeMessage}</p>
+        )}
+
+        <section className="guest-home-actions">
+          {uploadsClosed ? (
+            <div className="guest-home-uploads-closed" role="status">
+              <i className="fa-solid fa-lock" />
+              <span>{textOr('guest.album.noVisibleAlbums', 'Uploads are closed for this event right now.', 'Завантаження для цієї події зараз закрито.')}</span>
+            </div>
+          ) : (
+            <>
+              <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
+                <button type="button" className="guest-home-upload-btn">
+                  <i className="fa-solid fa-camera" />
+                  <span className="guest-home-upload-btn-label">
+                    {textOr('guest.home.uploadPhotosAndVideos', 'Upload Photos & Videos', 'Завантажити фото та відео')}
+                  </span>
+                  <span className="guest-home-btn-arrow"><i className="fa-solid fa-arrow-right" /></span>
+                </button>
+              </FileInput>
+              {/* AM-06: sinir yuklemeye baslamadan gorunsun. */}
+              <p className="guest-home-upload-limit">{textOr('guest.upload.maxPerUpload', 'You can upload up to {{max}} files at a time.', 'За один раз ви можете завантажити до {{max}} файлів.', { max: MAX_FILES_PER_UPLOAD })}</p>
+            </>
+          )}
+
+          {/* Ses kaydi ve ani defteri ayni sayfada (guestbook); iki giris de oraya gider. */}
+          <div className="guest-home-secondary-actions">
+            <Link className="guest-home-secondary-btn" to={`/guest/${packedUid}/guestbook`}>
+              <i className="fa-solid fa-microphone" />
+              <span className="guest-home-secondary-btn-label">{textOr('guest.home.audio', 'Audio', 'Аудіо')}</span>
+              <span className="guest-home-btn-arrow"><i className="fa-solid fa-arrow-right" /></span>
+            </Link>
+            <Link className="guest-home-secondary-btn" to={`/guest/${packedUid}/guestbook`}>
+              <i className="fa-regular fa-comment" />
+              <span className="guest-home-secondary-btn-label">{textOr('guest.home.guestbook', 'Guestbook', 'Побажання')}</span>
+              <span className="guest-home-btn-arrow"><i className="fa-solid fa-arrow-right" /></span>
+            </Link>
+          </div>
+
+          <p className="guest-home-secure">
+            <i className="fa-solid fa-circle-check guest-home-secure-check" />
+            <span className="guest-home-secure-lock"><i className="fa-solid fa-lock" /></span>
+            <span>{textOr('guest.home.privateSecure', '100% private and secure. No account required.', '100% приватно і безпечно. Без реєстрації.')}</span>
+          </p>
+        </section>
+
+        <GuestAdvertorialGrid advertorial={advertorial} />
+
+        {showAlbumCards && (
+          <section className="guest-home-albums" aria-label={textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}>
+            <div className="guest-home-albums-header">
+              <h2 className="guest-home-albums-title">
+                {textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}
+              </h2>
+              {momentsCount !== null && (
+                <span className="guest-home-albums-moments">
+                  {textOr('guest.album.moments', 'Moments', 'Моменти')}
+                  <strong>{momentsCount}</strong>
+                </span>
+              )}
+            </div>
+            <div className="guest-home-albums-grid">
+              {visibleAlbums.map((album) => {
+                const cover = albumCoverUrl(album);
+                const dateText = formatAlbumDate(album.album_date);
+                const locked = isLocked(album);
+                return (
+                  <Link
+                    key={album.uid}
+                    to={`/guest/${packedUid}/album/${album.uid ? packedAlbumUid(album.uid) : ''}`}
+                    className={`guest-home-album-card${locked ? ' locked' : ''}`}
+                  >
+                    <div className="guest-home-album-cover">
+                      {cover
+                        ? <img src={cover} alt="" loading="lazy" />
+                        : <div className="guest-home-album-cover-placeholder"><i className="fa-regular fa-images" /></div>}
+                      {locked && (
+                        <span className="guest-home-album-lock" aria-hidden="true"><i className="fa-solid fa-lock" /></span>
+                      )}
+                    </div>
+                    <div className="guest-home-album-body">
+                      <span className="guest-home-album-name">{album.name}</span>
+                      {(dateText || album.location) && (
+                        <span className="guest-home-album-meta">
+                          {dateText}{dateText && album.location ? ' · ' : ''}{album.location || ''}
+                        </span>
+                      )}
+                      {album.description && (
+                        <span className="guest-home-album-desc">{album.description}</span>
+                      )}
+                      {locked ? (
+                        <span className="guest-home-album-state">
+                          <i className="fa-solid fa-lock" />
+                          {textOr('guest.album.passcodeNeeded', 'Passcode required', 'Потрібен пароль')}
+                        </span>
+                      ) : !album.guest_upload ? (
+                        <span className="guest-home-album-state">
+                          <i className="fa-solid fa-eye" />
+                          {textOr('guest.album.viewOnly', 'View only', 'Лише перегляд')}
+                        </span>
+                      ) : null}
+                    </div>
+                    <span className="guest-home-album-arrow"><i className="fa-solid fa-arrow-right" /></span>
+                  </Link>
+                );
+              })}
+            </div>
+            {hasHiddenAlbums && (
+              <button
+                type="button"
+                className="guest-home-albums-show-all"
+                onClick={() => setAlbumsExpanded(true)}
+                aria-expanded={false}
+              >
+                <i className="fa-solid fa-table-cells-large" />
+                <span className="guest-home-albums-show-all-label">
+                  {textOr('guest.album.showAllAlbums', 'Show all albums', 'Відобразити усі альбоми')}
+                </span>
+                <span className="guest-home-albums-show-all-count">{albums.length}</span>
+                <span className="guest-home-albums-show-all-arrow"><i className="fa-solid fa-arrow-right" /></span>
+              </button>
+            )}
+          </section>
+        )}
 
         {/* Latest Memories Section (disabled intentionally)
         <section className="guest-home-gallery">
