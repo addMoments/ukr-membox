@@ -1,0 +1,322 @@
+#pf-cta {
+  all: initial;
+  display: block;
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  contain: content;
+}
+
+#pf-cta *,
+#pf-cta *::before,
+#pf-cta *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Banner wrapper ── */
+#pf-cta .pc-banner {
+  width: 100%;
+  min-height: 420px;
+  background-color: #dbe0fb;
+  background-image: url('https://addmoments.com.ua/wp-content/uploads/2026/06/digital-memory-bg.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Inner layout ── */
+#pf-cta .pc-inner {
+  --inner-padding-x: 56px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px var(--inner-padding-x);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+/* ── Left: text ── */
+#pf-cta .pc-left {
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  z-index: 2;
+  position: relative;
+}
+
+#pf-cta .pc-heading {
+  font-family: {{{font_heading}}} !important;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #0d0d0d;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+}
+
+#pf-cta .pc-subtext {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.97rem;
+  line-height: 1.65;
+  color: #333;
+  max-width: 450px;
+}
+
+#pf-cta .pc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  background: #d2e823;
+  border-radius: 999px;
+  height: 56px;
+  padding: 0 6px 0 28px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a00;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s ease;
+  margin-top: 8px;
+}
+
+#pf-cta .pc-btn:hover {
+  background: #c3d91c;
+}
+
+#pf-cta .pc-btn .pc-btn-label {
+  margin-right: 16px;
+}
+
+#pf-cta .pc-btn .pc-btn-icon {
+  width: 42px;
+  height: 42px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+#pf-cta .pc-btn .pc-btn-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: #111;
+  stroke-width: 2.2;
+  fill: none;
+}
+
+/* ── Right: photos ── */
+#pf-cta .pc-photos {
+  flex: 1;
+  position: relative;
+  aspect-ratio: 560 / 320;
+  max-width: 560px;
+  width: 100%;
+  container-type: inline-size;
+  z-index: 2;
+}
+
+#pf-cta .pc-photo {
+  position: absolute;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+#pf-cta .pc-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Photo positions & rotations — 4 cards scaled using container query width (cqw) */
+#pf-cta .pc-photo-1 {
+  width: 30.36cqw;
+  height: 39.28cqw;
+  left: 0;
+  bottom: 1.79cqw;
+  transform: rotate(-8deg);
+  z-index: 1;
+}
+
+#pf-cta .pc-photo-2 {
+  width: 33.93cqw;
+  height: 42.86cqw;
+  left: 23cqw;
+  top: 3.57cqw;
+  transform: rotate(-3deg);
+  z-index: 3;
+}
+
+#pf-cta .pc-photo-3 {
+  width: 33.93cqw;
+  height: 41.96cqw;
+  left: 46cqw;
+  bottom: 2.68cqw;
+  transform: rotate(2deg);
+  z-index: 2;
+}
+
+#pf-cta .pc-photo-4 {
+  width: 31.25cqw;
+  height: 39.28cqw;
+  right: 0;
+  top: 2.68cqw;
+  transform: rotate(5deg);
+  z-index: 1;
+}
+
+/* ── Mobile & Tablet responsive design ── */
+@media (max-width: 1024px) {
+  #pf-cta .pc-banner {
+    background-image: none !important;
+    background-color: #dbe0fb;
+    min-height: unset;
+    border-radius: 20px;
+  }
+
+  #pf-cta .pc-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 48px var(--inner-padding-x) 24px;
+    gap: 24px;
+    --inner-padding-x: 28px;
+  }
+
+  #pf-cta .pc-left {
+    max-width: 100%;
+  }
+
+  #pf-cta .pc-btn {
+    width: 100%;
+    height: 60px;
+    justify-content: space-between;
+    padding: 0 8px 0 28px;
+    margin-top: 16px;
+  }
+
+  #pf-cta .pc-btn .pc-btn-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  #pf-cta .pc-photos {
+    width: calc(100% + (2 * var(--inner-padding-x)));
+    margin-left: calc(-1 * var(--inner-padding-x));
+    margin-right: calc(-1 * var(--inner-padding-x));
+    max-width: 500px;
+    aspect-ratio: 375 / 240;
+    align-self: center;
+  }
+
+  #pf-cta .pc-photo-1 {
+    width: 38cqw;
+    height: 48cqw;
+    left: -8cqw;
+    bottom: 8cqw;
+    transform: rotate(-10deg);
+    z-index: 2;
+  }
+
+  #pf-cta .pc-photo-2 {
+    width: 40cqw;
+    height: 52cqw;
+    left: 18cqw;
+    top: 2cqw;
+    transform: rotate(-4deg);
+    z-index: 1;
+  }
+
+  #pf-cta .pc-photo-3 {
+    width: 46cqw;
+    height: 56cqw;
+    left: 45cqw;
+    bottom: 4cqw;
+    transform: rotate(-8deg);
+    z-index: 3;
+  }
+
+  #pf-cta .pc-photo-4 {
+    width: 35cqw;
+    height: 45cqw;
+    right: -10cqw;
+    top: 10cqw;
+    transform: rotate(8deg);
+    z-index: 1;
+  }
+
+  /* Disable animations and transitions on mobile */
+  .am-animate-heading {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+  #pf-cta .pc-photo {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #pf-cta .pc-inner {
+    --inner-padding-x: 20px;
+    padding: 40px var(--inner-padding-x) 20px;
+  }
+}
+
+/* ─── ADDED HOVER EFFECTS FOR CARDS & HEADING ANIMATION ─────── */
+
+/* Smooth transitions for the cards */
+#pf-cta .pc-photo {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Lift hovered card to front with enhanced shadow */
+#pf-cta .pc-photo:hover {
+  z-index: 10 !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
+}
+
+/* Individual card hover offsets and rotations */
+#pf-cta .pc-photo-1:hover {
+  transform: translateY(-12px) rotate(-11deg) scale(1.05);
+}
+#pf-cta .pc-photo-2:hover {
+  transform: translateY(-12px) rotate(-6deg) scale(1.05);
+}
+#pf-cta .pc-photo-3:hover {
+  transform: translateY(-12px) rotate(0deg) scale(1.05);
+}
+#pf-cta .pc-photo-4:hover {
+  transform: translateY(-12px) rotate(8deg) scale(1.05);
+}
+
+/* Viewport-triggered heading entrance animation */
+.am-animate-heading {
+  opacity: 0;
+  transform: translateY(20px);
+  filter: blur(2px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+              filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.am-animate-heading.am-in-view {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}

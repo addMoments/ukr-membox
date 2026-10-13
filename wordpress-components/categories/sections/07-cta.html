@@ -1,0 +1,81 @@
+<style>
+/*@css:cta*/
+/* Kategori sayfasi: tasarimda banner tam genislik degil, yuvarlak koseli kutu;
+   buton beyaz ("View pricing") ve altinda iletisim satiri var. */
+#pf-cta {
+  padding: 120px 60px 100px;
+}
+
+#pf-cta .pc-banner {
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 32px;
+}
+
+#pf-cta .pc-btn.pc-btn--light {
+  background: #fff;
+}
+
+#pf-cta .pc-btn.pc-btn--light .pc-btn-icon {
+  background: #000;
+}
+
+#pf-cta .pc-btn.pc-btn--light .pc-btn-icon svg {
+  stroke: #fff;
+}
+
+#pf-cta .pc-note {
+  margin-top: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #353434;
+}
+
+#pf-cta .pc-note a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 1024px) {
+  #pf-cta {
+    padding: 80px 32px 64px;
+  }
+}
+
+@media (max-width: 768px) {
+  #pf-cta {
+    padding: 64px 16px 48px;
+  }
+
+  #pf-cta .pc-banner {
+    border-radius: 24px;
+  }
+}
+</style>
+<div id="pf-cta" lang="{{lang}}">
+  <div class="pc-banner">
+    <div class="pc-inner">
+      <div class="pc-left">
+        <h2 class="pc-heading">{{cta.title}}</h2>
+        <p class="pc-subtext">{{cta.subtitle}}</p>
+        <a href="{{links.pricing}}" class="pc-btn pc-btn--light">
+          <span class="pc-btn-label">{{cta.btn}}</span>
+          <span class="pc-btn-icon">
+            <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h12M10 4l5 5-5 5"/></svg>
+          </span>
+        </a>
+        <p class="pc-note">{{cta.note_before}} <a href="{{links.instagram}}" target="_blank" rel="noopener">{{cta.handle}}</a></p>
+      </div>
+      <div class="pc-photos">
+        {{#cta.photos}}
+        <div class="pc-photo pc-photo-{{_index}}">
+          <img src="{{img}}" alt="{{alt}}" width="300" height="400" loading="lazy" decoding="async" />
+        </div>
+        {{/cta.photos}}
+      </div>
+    </div>
+  </div>
+</div>

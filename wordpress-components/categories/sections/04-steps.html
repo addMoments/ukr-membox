@@ -1,0 +1,136 @@
+<style>
+/*@css:steps*/
+  /* Kategori sayfasi: tasarimdaki "Learn more" butonu */
+  .am-steps-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .am-steps-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    height: 56px;
+    padding: 0 7px 0 24px;
+    border-radius: var(--radius-pill);
+    background: var(--brand-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--content-high);
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .am-steps-more-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+
+  .am-steps-more-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .am-steps-more-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Kategori sayfasi: bolum cok uzundu. Telefon gorselleri 4:3'te ust kismi kalacak sekilde
+     kirpilir, arka plan cercevesi yuvarlatilir; kartin altina yanlardaki kadar bosluk.
+     Secici bilerek uzun: Elementor'un ".elementor img { border-radius: 0 }" kurali tek sinifi ezer. */
+  .am-step-card {
+    padding-bottom: 24px;
+  }
+
+  .am-steps-section .am-step-card .am-step-mockup {
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 16px;
+    transform: none;
+  }
+
+  @media (max-width: 768px) {
+    .am-step-card {
+      padding-bottom: 20px;
+    }
+  }
+</style>
+<section class="am-steps-section" lang="{{lang}}">
+  <div class="am-steps-header">
+    <div class="am-steps-label">{{steps.eyebrow}}</div>
+    <h2 class="am-steps-title">{{steps.title_line1}}<br>{{steps.title_line2}}</h2>
+  </div>
+  <div class="am-steps-toggles" role="tablist" aria-label="{{steps.toggle_label}}">
+    <button class="am-toggle-btn active" id="am-toggle-hosts" role="tab" aria-selected="true" aria-controls="am-hosts-grid">{{steps.toggle_hosts}}</button>
+    <button class="am-toggle-btn inactive" id="am-toggle-guests" role="tab" aria-selected="false" aria-controls="am-guests-grid">{{steps.toggle_guests}}</button>
+  </div>
+  <div class="am-steps-grid" id="am-hosts-grid" role="tabpanel" aria-labelledby="am-toggle-hosts">
+    {{#steps.hosts}}
+    <div class="am-step-card">
+      <div class="am-step-number">{{_index}}</div>
+      <h3 class="am-step-headline">{{title}}</h3>
+      <p class="am-step-desc">{{text}}</p>
+      <img class="am-step-mockup" src="{{img}}" alt="{{img_alt}}" width="320" height="540" loading="lazy" decoding="async" />
+    </div>
+    {{/steps.hosts}}
+  </div>
+  <div class="am-steps-grid am-hidden" id="am-guests-grid" role="tabpanel" aria-labelledby="am-toggle-guests" aria-hidden="true">
+    {{#steps.guests}}
+    <div class="am-step-card">
+      <div class="am-step-number">{{_index}}</div>
+      <h3 class="am-step-headline">{{title}}</h3>
+      <p class="am-step-desc">{{text}}</p>
+      <img class="am-step-mockup" src="{{img}}" alt="{{img_alt}}" width="320" height="540" loading="lazy" decoding="async" />
+    </div>
+    {{/steps.guests}}
+  </div>
+  <div class="am-steps-more">
+    <a href="{{links.how_it_works}}" class="am-steps-more-btn">
+      {{steps.more}}
+      <span class="am-steps-more-icon"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.167 10h11.666M10 4.167L15.833 10 10 15.833" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+  </div>
+</section>
+<script>
+  (function() {
+    var hostBtn = document.getElementById('am-toggle-hosts');
+    var guestBtn = document.getElementById('am-toggle-guests');
+    var hostsGrid = document.getElementById('am-hosts-grid');
+    var guestsGrid = document.getElementById('am-guests-grid');
+    if (!hostBtn || !guestBtn || !hostsGrid || !guestsGrid) return;
+    hostBtn.addEventListener('click', function() {
+      hostBtn.classList.remove('inactive');
+      hostBtn.classList.add('active');
+      hostBtn.setAttribute('aria-selected', 'true');
+      guestBtn.classList.remove('active');
+      guestBtn.classList.add('inactive');
+      guestBtn.setAttribute('aria-selected', 'false');
+      hostsGrid.classList.remove('am-hidden');
+      guestsGrid.classList.add('am-hidden');
+      guestsGrid.setAttribute('aria-hidden', 'true');
+      hostsGrid.removeAttribute('aria-hidden');
+    });
+    guestBtn.addEventListener('click', function() {
+      guestBtn.classList.remove('inactive');
+      guestBtn.classList.add('active');
+      guestBtn.setAttribute('aria-selected', 'true');
+      hostBtn.classList.remove('active');
+      hostBtn.classList.add('inactive');
+      hostBtn.setAttribute('aria-selected', 'false');
+      guestsGrid.classList.remove('am-hidden');
+      hostsGrid.classList.add('am-hidden');
+      hostsGrid.setAttribute('aria-hidden', 'true');
+      guestsGrid.removeAttribute('aria-hidden');
+    });
+  })();
+</script>

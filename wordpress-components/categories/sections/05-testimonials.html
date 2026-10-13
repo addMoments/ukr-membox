@@ -1,0 +1,78 @@
+<style>
+/*@css:testimonials*/
+</style>
+<div id="pf-testimonials" lang="{{lang}}">
+  <div class="pt-inner">
+    <div class="pt-left">
+      <span class="pt-eyebrow">{{testimonials.eyebrow}}</span>
+      <h2 class="pt-heading">{{testimonials.title}}</h2>
+      <p class="pt-subtext">{{testimonials.subtitle}}</p>
+      <div class="pt-nav">
+        <button class="pt-nav-btn" id="pt-prev" aria-label="{{testimonials.prev}}">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+        </button>
+        <button class="pt-nav-btn active" id="pt-next" aria-label="{{testimonials.next}}">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="pt-track-wrap" id="pt-track-wrap">
+      <div class="pt-track" id="pt-track">
+        {{#testimonials.items}}
+        <div class="pt-card">
+          <div class="pt-card-header">
+            <div class="pt-card-user">
+              <div class="pt-avatar">
+                <img src="{{avatar}}" alt="{{name}}" width="44" height="44" loading="lazy" decoding="async" />
+              </div>
+              <div>
+                <div class="pt-name">{{name}}</div>
+                <div class="pt-role">{{role}}</div>
+              </div>
+            </div>
+            <div class="pt-stars" aria-hidden="true">
+              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+            </div>
+          </div>
+          <p class="pt-quote">{{quote}}</p>
+        </div>
+        {{/testimonials.items}}
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const track     = document.getElementById('pt-track');
+  const wrap      = document.getElementById('pt-track-wrap');
+  const btnNext   = document.getElementById('pt-next');
+  const btnPrev   = document.getElementById('pt-prev');
+  let current = 0;
+  const GAP    = 20;
+  function getStep() {
+    const card = track.querySelector('.pt-card');
+    return card ? card.offsetWidth + GAP : 290;
+  }
+  function getVisible() {
+    return Math.max(1, Math.floor((wrap.offsetWidth + GAP) / getStep()));
+  }
+  function totalCards() {
+    return track.querySelectorAll('.pt-card').length;
+  }
+  function maxIndex() {
+    return Math.max(0, totalCards() - getVisible());
+  }
+  function goTo(index) {
+    current = Math.max(0, Math.min(index, maxIndex()));
+    track.style.transform = `translateX(-${current * getStep()}px)`;
+    btnPrev.disabled = (current === 0);
+    btnNext.disabled = (current >= maxIndex());
+    btnPrev.classList.toggle('active', current > 0);
+    btnNext.classList.toggle('active', current < maxIndex());
+  }
+  btnNext.addEventListener('click', () => goTo(current + 1));
+  btnPrev.addEventListener('click', () => goTo(current - 1));
+  window.addEventListener('resize', () => goTo(current));
+  goTo(0);
+})();
+</script>

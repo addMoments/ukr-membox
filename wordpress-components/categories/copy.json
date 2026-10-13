@@ -1,0 +1,746 @@
+{
+  "en": {
+    "lang": "en",
+    "font_heading": "'Archivo Black', sans-serif",
+    "heading_weight": "400",
+    "links": {
+      "home": "/",
+      "pricing": "/events/services-and-prices?lang=en",
+      "get_started": "/events/services-and-prices/?entry=get-started&lang=en",
+      "how_it_works": "/how-it-works/",
+      "faq": "/faq/",
+      "instagram": "https://www.instagram.com/addmoments.ua"
+    },
+    "hero": {
+      "breadcrumb_label": "Breadcrumb",
+      "breadcrumb_home": "Home",
+      "breadcrumb_current": "Categories",
+      "title": "AddMoments for any event — collect photos from guests via QR code",
+      "subtitle": "One platform — for weddings, birthdays, corporate events, graduations, and dozens of other occasions. Guests upload photos instantly. No apps. No registration.",
+      "btn_choose": "Choose your event",
+      "btn_price": "Find out the price"
+    },
+    "intro": {
+      "title": "One album for every photo your guests take",
+      "text": "Every guest sees your event from their own angle. They scan one QR code and add photos and videos straight from the browser — no app, no sign-up. You get every shot in original quality, together in one private album, whatever you are celebrating.",
+      "img_back": "https://addmoments.com.ua/wp-content/uploads/2026/06/party.webp",
+      "img_back_alt": "Friends laughing at a party",
+      "img_front": "https://addmoments.com.ua/wp-content/uploads/2026/06/girls-selfie-1.webp",
+      "img_front_alt": "Friends taking a selfie together"
+    },
+    "events": {
+      "eyebrow": "Events list",
+      "title": "Select your event",
+      "subtitle": "Click on the event type to learn more",
+      "tabs_label": "Event types",
+      "items": [
+        {
+          "slug": "weddings",
+          "tab": "Weddings and Engagements",
+          "title": "Weddings and Engagements 🤍",
+          "paragraphs": [
+            "From the surprise proposal to the wedding after-party, collect photos and video greetings in one private digital album through a single QR code.",
+            "No more asking guests to send pictures via Viber or Telegram."
+          ],
+          "bullets": [
+            "Quick setup — album ready in 2 minutes",
+            "Guests upload photos and video greetings",
+            "One album for every part of your celebration",
+            "Share your memories with family and friends"
+          ],
+          "cta": "Create a wedding album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Weddings.webp",
+          "img_alt": "Bride and groom at their wedding reception"
+        },
+        {
+          "slug": "concerts",
+          "tab": "Concerts and Festivals",
+          "title": "Concerts and Festivals 🎶",
+          "paragraphs": [
+            "From intimate gigs to massive festivals, collect the crowd’s photos and videos in one digital album through a single QR code.",
+            "Capture every angle, from the stage to the dance floor."
+          ],
+          "bullets": [
+            "Quick setup — album ready in 2 minutes",
+            "Fans upload photos and videos instantly",
+            "Capture the energy through the crowd’s eyes",
+            "Share the album and relive the night"
+          ],
+          "cta": "Create a concert album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Concerts.webp",
+          "img_alt": "Crowd in front of the stage at a concert"
+        },
+        {
+          "slug": "birthdays",
+          "tab": "Birthdays",
+          "title": "Birthdays 🎂",
+          "paragraphs": [
+            "From first birthdays to milestone celebrations, collect your guests’ photos and video greetings in one private digital album through a single QR code.",
+            "Keep every surprise, smile, and candle wish together."
+          ],
+          "bullets": [
+            "Quick setup — album ready in 2 minutes",
+            "Guests upload photos and video greetings",
+            "Perfect for kids and adults",
+            "Share the album with family after the celebration"
+          ],
+          "cta": "Create a birthday album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Birthday-Parties.webp",
+          "img_alt": "Friends around a birthday cake"
+        },
+        {
+          "slug": "holidays",
+          "tab": "Christmas, New Year and Easter",
+          "title": "Christmas, New Year and Easter 🎄✨",
+          "paragraphs": [
+            "From Christmas dinners to New Year countdowns and Easter gatherings, collect everyone’s photos and videos in one private digital album through a single QR code. Keep your holiday traditions and joyful moments together."
+          ],
+          "bullets": [
+            "Quick setup — album ready in 2 minutes",
+            "Guests upload photos and video greetings",
+            "Capture family traditions and festive moments",
+            "Share the album with the people you love"
+          ],
+          "cta": "Create a holiday album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Christmas.webp",
+          "img_alt": "Family celebrating with sparklers"
+        },
+        {
+          "slug": "sport",
+          "tab": "Sport and Fitness",
+          "title": "Sport and Fitness 🏆",
+          "paragraphs": [
+            "From local matches to marathons and championship finals, collect photos and videos from players, fans, and families in one digital album through a single QR code.",
+            "Capture the action, team spirit, and every proud celebration."
+          ],
+          "bullets": [
+            "Quick setup — album ready in 2 minutes",
+            "Players and fans upload photos and videos",
+            "Keep every team’s highlights in one place",
+            "Share the album and relive the victories"
+          ],
+          "cta": "Create a sports album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Sport.webp",
+          "img_alt": "Runners at a city marathon"
+        },
+        {
+          "slug": "education",
+          "tab": "Education and Graduation",
+          "title": "Education and Graduation 🎓",
+          "paragraphs": [
+            "From diploma ceremonies to graduation parties, collect photos and videos from students, teachers, and families in one private digital album through a single QR code.",
+            "Keep every proud smile and milestone together."
+          ],
+          "bullets": [
+            "Quick setup — album ready in 2 minutes",
+            "Students and families upload photos and videos",
+            "Capture ceremonies, celebrations, and friendships",
+            "Share the album with classmates and loved ones"
+          ],
+          "cta": "Create a graduation album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Education.webp",
+          "img_alt": "Graduates taking a selfie in caps and gowns"
+        },
+        {
+          "slug": "business",
+          "tab": "Business and Exhibitions",
+          "title": "Business and Exhibitions 💼",
+          "paragraphs": [
+            "From corporate events and conferences to exhibitions and product launches, collect photos and videos from your team and attendees in one private digital album through a single QR code.",
+            "Keep key moments and new connections together."
+          ],
+          "bullets": [
+            "Quick setup — album ready in 2 minutes",
+            "Teams and attendees upload photos and videos",
+            "Gather event highlights for marketing and PR",
+            "Share the album with colleagues and partners"
+          ],
+          "cta": "Create an event album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Business-.webp",
+          "img_alt": "Attendees networking at an exhibition"
+        },
+        {
+          "slug": "travel",
+          "tab": "Vacation and Travel",
+          "title": "Vacation and Travel 🌴",
+          "paragraphs": [
+            "From beach holidays to mountain adventures and road trips, collect everyone’s photos and videos in one private digital album through a single QR code.",
+            "Keep your travel memories together instead of scattered across different phones."
+          ],
+          "bullets": [
+            "Quick setup — album ready in 2 minutes",
+            "Everyone uploads photos and videos",
+            "Perfect for family vacations and group trips",
+            "Share the album and relive your adventures"
+          ],
+          "cta": "Create a travel album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Vacations.webp",
+          "img_alt": "Couple taking a selfie on the beach"
+        },
+        {
+          "slug": "memorials",
+          "tab": "Memorials and Tributes",
+          "title": "Memorials and Tributes 🕊",
+          "paragraphs": [
+            "Honor a loved one by gathering meaningful photos and videos from family and friends in one private digital album through a single QR code.",
+            "Create a shared space to remember their life with dignity and care."
+          ],
+          "bullets": [
+            "Simple setup — album ready in 2 minutes",
+            "Family and friends contribute photos and videos",
+            "Relatives can share memories from afar",
+            "Keep cherished memories together in a private album"
+          ],
+          "cta": "Create a memorial album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Memorials.webp",
+          "img_alt": "Candles and flowers at a memorial"
+        },
+        {
+          "slug": "special",
+          "tab": "Special Occasions",
+          "title": "Special Occasions 🕊",
+          "paragraphs": [
+            "Addmoments is perfect for all those beautiful, joyful, and meaningful moments that don’t fit into just one category — but still deserve to be remembered."
+          ],
+          "list_intro": "You can collect memories from:",
+          "list": [
+            "👶 Baby showers",
+            "🎉 Private parties & celebrations",
+            "🏢 Corporate events",
+            "🏫 School & university events",
+            "🎈 Kids’ parties",
+            "🏆 Competitions",
+            "🎨 Workshops & creative classes",
+            "🎊 Community celebrations",
+            "🏅 Special ceremonies"
+          ],
+          "cta": "Create your album",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Special.webp",
+          "img_alt": "Family and friends at a baby shower"
+        }
+      ]
+    },
+    "steps": {
+      "eyebrow": "How does Add Moments work?",
+      "title_line1": "Three steps to",
+      "title_line2": "each memory",
+      "toggle_label": "Steps for hosts and guests",
+      "toggle_hosts": "For hosts",
+      "toggle_guests": "For guests",
+      "hosts": [
+        {
+          "title": "Create Your Event",
+          "text": "Add your event date, event title, and a short welcome message for your guests.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/06/Step-1-Create.webp",
+          "img_alt": "Create Event screen mobile mockup"
+        },
+        {
+          "title": "Share Your QR Code & Private Link",
+          "text": "Share your QR code at your event or send your private link to guests digitally.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/06/Step-2-Share.webp",
+          "img_alt": "Share QR Code screen mobile mockup"
+        },
+        {
+          "title": "Enjoy Best Event Moments",
+          "text": "Guests share photos and you can see them instantly.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/06/Step-3-Gallery.png",
+          "img_alt": "View Gallery screen mobile mockup"
+        }
+      ],
+      "guests": [
+        {
+          "title": "Scan QR Code",
+          "text": "Guests scan the QR code or click your private link.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/06/Step-1-Scan.png",
+          "img_alt": "Scan QR Code mobile mockup"
+        },
+        {
+          "title": "Open Interface",
+          "text": "Upload page will be opened.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/06/Step-2-Upload-Interface.png",
+          "img_alt": "Upload Interface mobile mockup"
+        },
+        {
+          "title": "Upload",
+          "text": "Guests can upload their photos and videos, leave voice message and a note.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/06/Step-3-Upload.webp",
+          "img_alt": "Upload screen mobile mockup"
+        }
+      ],
+      "more": "Learn more"
+    },
+    "testimonials": {
+      "eyebrow": "Testimonials",
+      "title": "AddMoments is already being used at various events",
+      "subtitle": "See what our users have to say about their experience.",
+      "prev": "Previous",
+      "next": "Next",
+      "items": [
+        {
+          "name": "Natalia",
+          "role": "Wedding Planner",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Natalia-s.png",
+          "quote": "\"As a wedding planner, I know how often guests' photos get lost across chats. AddMoments brings everything into one album through a browser — no apps or sign-ups required.\""
+        },
+        {
+          "name": "Maria",
+          "role": "Bride",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Maria-s.png",
+          "quote": "\"My husband and I used AddMoments and had all our guests' photos in one place the very next day. Super easy, with no extra stress or hassle.\""
+        },
+        {
+          "name": "Yurii",
+          "role": "Father",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Yurii-s.png",
+          "quote": "\"We celebrated our son's birthday, and all the photos from family and friends ended up in one album. Very convenient, especially since not everyone uses the same messaging apps.\""
+        },
+        {
+          "name": "Nazar",
+          "role": "Event Organizer",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Nazar-s.png",
+          "quote": "\"Photos often get scattered after business events. With AddMoments, we collected everything in one album via QR code — fast, simple, and no registration needed.\""
+        },
+        {
+          "name": "Yuliia",
+          "role": "Granddaughter",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Yuliia-s.png",
+          "quote": "\"It was important for us to gather photos and memories of a loved one in one private place. AddMoments made it simple and respectful.\""
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Frequently Asked Questions",
+      "subtitle": "Have more questions? Contact us and we'll help you with any request!",
+      "more": "Contact us",
+      "link": "/contact-us",
+      "items": [
+        {
+          "q": "Do guests need to download any app?",
+          "a": "No apps required. Guests simply scan your QR code and upload photos directly through their browser."
+        },
+        {
+          "q": "Do guests have to register to upload photos or videos?",
+          "a": "No. Your guests can send content by simply scanning the QR code or clicking on your unique link, without requiring any membership."
+        },
+        {
+          "q": "Who can view submitted content?",
+          "a": "Only you. You can securely view all uploaded photos, videos, and voice messages from your private admin panel."
+        },
+        {
+          "q": "How long does my gallery stay active?",
+          "a": "Your event photo gallery remains active from 30 days to 6 months based on your plan."
+        },
+        {
+          "q": "What is Addmoments?",
+          "a": "AddMoments is a private event photo-sharing platform that helps hosts easily collect photos, videos, and guest messages in one secure digital gallery. Guests simply scan a custom QR code or open a private link to upload content instantly — with no app downloads or account registration required. Designed for weddings, birthdays, corporate events, marathons, and private celebrations, AddMoments keeps all event memories organized, accessible, and private."
+        },
+        {
+          "q": "Why Addmoments?",
+          "a": "AddMoments helps you preserve the most meaningful memories from your event through guest photos, videos, and messages. Using a QR code or private link, guests can instantly share moments from their phones with no app downloads or registration required. Perfect for weddings, engagements, birthdays, baby showers, graduations, sports activities, and corporate events, AddMoments collects everything into one personalized digital gallery. All media is stored in original quality, making it easy to relive every special moment anytime."
+        },
+        {
+          "q": "We have a photographer. Why use Addmoments?",
+          "a": "Professional photographers capture stunning shots on the scene from one point, but Addmoments shows your event through guests' eyes. They capture candid moments your photographer might miss — like backstage moments and more. Even one small moment can go viral in the modern world, and these are the random moments captured by guests. Plus, photographers can upload their photos too, creating one comprehensive collection."
+        }
+      ]
+    },
+    "cta": {
+      "title": "What's your next upcoming event?",
+      "subtitle": "Create a digital album in 2 minutes — and let your guests gather all your memories.",
+      "btn": "View pricing",
+      "note_before": "Have questions? Write to us at",
+      "handle": "@addmoments.ua",
+      "photos": [
+        {
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Page-_Core-features_.webp",
+          "alt": "Friends taking a group photo"
+        },
+        {
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/bg001-home.webp",
+          "alt": "Bride looking at photos on her phone"
+        },
+        {
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/01/Concert-4.webp",
+          "alt": "Crowd at a concert"
+        },
+        {
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/01/event-photo-b5.webp",
+          "alt": "Children at a birthday party"
+        }
+      ]
+    }
+  },
+  "uk": {
+    "lang": "uk",
+    "font_heading": "'Helvetica Neue', -apple-system, BlinkMacSystemFont, Arial, sans-serif",
+    "heading_weight": "900",
+    "links": {
+      "home": "/uk/home-ua/",
+      "pricing": "/events/services-and-prices?lang=ua",
+      "get_started": "/events/services-and-prices/?entry=get-started&lang=ua",
+      "how_it_works": "/uk/how-it-works-addmoments/",
+      "faq": "/uk/faq-addmoments/",
+      "instagram": "https://www.instagram.com/addmoments.ua"
+    },
+    "hero": {
+      "breadcrumb_label": "Навігація",
+      "breadcrumb_home": "Головна",
+      "breadcrumb_current": "Категорії",
+      "title": "AddMoments для будь-якої події — збирайте фото від гостей через QR-код",
+      "subtitle": "Одна платформа — для весіль, днів народження, корпоративів, випускних і десятків інших подій. Гості миттєво завантажують фото. Без додатків. Без реєстрації.",
+      "btn_choose": "Оберіть свою подію",
+      "btn_price": "Дізнатися ціну"
+    },
+    "intro": {
+      "title": "Один альбом для всіх фото ваших гостей",
+      "text": "Кожен гість бачить вашу подію під своїм кутом. Гості сканують один QR-код і додають фото та відео прямо з браузера — без додатку та реєстрації. Ви отримуєте кожен кадр в оригінальній якості в одному приватному альбомі, що б ви не святкували.",
+      "img_back": "https://addmoments.com.ua/wp-content/uploads/2026/06/party.webp",
+      "img_back_alt": "Друзі сміються на вечірці",
+      "img_front": "https://addmoments.com.ua/wp-content/uploads/2026/06/girls-selfie-1.webp",
+      "img_front_alt": "Подруги роблять спільне селфі"
+    },
+    "events": {
+      "eyebrow": "Список подій",
+      "title": "Оберіть свою подію",
+      "subtitle": "Натисніть на тип події, щоб дізнатися більше",
+      "tabs_label": "Типи подій",
+      "items": [
+        {
+          "slug": "weddings",
+          "tab": "Весілля та заручини",
+          "title": "Весілля та заручини",
+          "paragraphs": [
+            "Від несподіваної пропозиції до вечірки після весілля — збирайте фото й відеопривітання в єдиний приватний цифровий альбом за допомогою одного QR-коду.",
+            "Більше не потрібно просити гостей надсилати фото у Viber чи Telegram."
+          ],
+          "bullets": [
+            "Швидке налаштування — альбом готовий за 2 хвилини",
+            "Гості завантажують фото та відеопривітання",
+            "Один альбом для кожної частини вашого свята",
+            "Діліться спогадами з родиною та друзями"
+          ],
+          "cta": "Створити весільний альбом",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Weddings.webp",
+          "img_alt": "Наречені на весільному банкеті"
+        },
+        {
+          "slug": "concerts",
+          "tab": "Концерти та фестивалі",
+          "title": "Концерти та фестивалі",
+          "paragraphs": [
+            "Від камерних виступів до масштабних фестивалів — збирайте фото й відео глядачів у єдиний цифровий альбом за допомогою одного QR-коду.",
+            "Зафіксуйте кожен ракурс, від сцени до танцполу."
+          ],
+          "bullets": [
+            "Швидке налаштування — альбом готовий за 2 хвилини",
+            "Фани миттєво завантажують фото та відео",
+            "Відчуйте енергію події очима аудиторії",
+            "Діліться альбомом і проживайте ніч знову"
+          ],
+          "cta": "Створити альбом концерту",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Concerts.webp",
+          "img_alt": "Глядачі перед сценою на концерті"
+        },
+        {
+          "slug": "birthdays",
+          "tab": "Дні народження",
+          "title": "Дні народження",
+          "paragraphs": [
+            "Від першого рочку до ювілейних дат — збирайте фото й відеопривітання гостей у єдиний приватний цифровий альбом за допомогою одного QR-коду.",
+            "Збережіть кожен сюрприз, посмішку та бажання біля свічок разом."
+          ],
+          "bullets": [
+            "Швидке налаштування — альбом готовий за 2 хвилини",
+            "Гості завантажують фото та відеопривітання",
+            "Чудово підходить для дітей і дорослих",
+            "Діліться альбомом із рідними після свята"
+          ],
+          "cta": "Створити альбом дня народження",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Birthday-Parties.webp",
+          "img_alt": "Друзі біля святкового торта"
+        },
+        {
+          "slug": "holidays",
+          "tab": "Різдво, Новий рік та Великдень",
+          "title": "Різдво, Новий рік та Великдень",
+          "paragraphs": [
+            "Від святкових вечерь до відліку Нового року та Великодня — збирайте фото й відео кожного у єдиний приватний цифровий альбом за допомогою одного QR-коду. Зберігайте сімейні традиції та радісні миті разом."
+          ],
+          "bullets": [
+            "Швидке налаштування — альбом готовий за 2 хвилини",
+            "Гості завантажують фото та відеопривітання",
+            "Фіксуйте сімейні традиції та святкові миті",
+            "Діліться альбомом із тими, кого любите"
+          ],
+          "cta": "Створити святковий альбом",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Christmas.webp",
+          "img_alt": "Родина святкує з бенгальськими вогнями"
+        },
+        {
+          "slug": "sport",
+          "tab": "Спорт і фітнес",
+          "title": "Спорт і фітнес",
+          "paragraphs": [
+            "Від місцевих матчів до марафонів і фіналів чемпіонатів — збирайте фото й відео від гравців, фанатів і родин у єдиний цифровий альбом за допомогою одного QR-коду.",
+            "Зафіксуйте драйв, командний дух та кожну радісну перемогу."
+          ],
+          "bullets": [
+            "Швидке налаштування — альбом готовий за 2 хвилини",
+            "Гравці та вболівальники додають фото й відео",
+            "Зберігайте яскраві моменти команди в одному місці",
+            "Діліться альбомом і проживайте перемоги знову"
+          ],
+          "cta": "Створити спортивний альбом",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Sport.webp",
+          "img_alt": "Бігуни на міському марафоні"
+        },
+        {
+          "slug": "education",
+          "tab": "Освіта та випускні",
+          "title": "Освіта та випускні",
+          "paragraphs": [
+            "Від вручення дипломів до випускних вечірок — збирайте фото й відео від студентів, викладачів і родин у єдиний приватний цифровий альбом за допомогою одного QR-коду.",
+            "Збережіть кожну горду посмішку та важливий момент разом."
+          ],
+          "bullets": [
+            "Швидке налаштування — альбом готовий за 2 хвилини",
+            "Студенти та родини завантажують фото й відео",
+            "Фіксуйте церемонії, святкування та дружбу",
+            "Діліться альбомом із однокласниками та рідними"
+          ],
+          "cta": "Створити альбом випускного",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Education.webp",
+          "img_alt": "Випускники в мантіях роблять селфі"
+        },
+        {
+          "slug": "business",
+          "tab": "Бізнес та виставки",
+          "title": "Бізнес та виставки",
+          "paragraphs": [
+            "Від корпоративів і конференцій до виставок і презентацій — збирайте фото й відео від команди та гостей у єдиний приватний цифровий альбом за допомогою одного QR-коду.",
+            "Зберігайте ключові моменти та нові контакти разом."
+          ],
+          "bullets": [
+            "Швидке налаштування — альбом готовий за 2 хвилини",
+            "Команда та відвідувачі завантажують фото й відео",
+            "Збирайте яскравий контент для маркетингу та PR",
+            "Діліться альбомом із колегами та партнерами"
+          ],
+          "cta": "Створити альбом заходу",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Business-.webp",
+          "img_alt": "Учасники спілкуються на виставці"
+        },
+        {
+          "slug": "travel",
+          "tab": "Відпустки та подорожі",
+          "title": "Відпустки та подорожі",
+          "paragraphs": [
+            "Від пляжного відпочинку до гірських пригод і поїздок — збирайте фото й відео кожного в єдиний приватний цифровий альбом за допомогою одного QR-коду.",
+            "Зберігайте спогади з поїздок разом, а не хаотично на різних телефонах."
+          ],
+          "bullets": [
+            "Швидке налаштування — альбом готовий за 2 хвилини",
+            "Кожен завантажує власні фото та відео",
+            "Ідеально для сімейних та групових подорожей",
+            "Діліться альбомом і проживайте пригоди знову"
+          ],
+          "cta": "Створити альбом подорожі",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Vacations.webp",
+          "img_alt": "Пара робить селфі на пляжі"
+        },
+        {
+          "slug": "memorials",
+          "tab": "Вшанування пам'яті",
+          "title": "Вшанування пам'яті",
+          "paragraphs": [
+            "Вшануйте пам'ять близької людини, зібравши важливі фото й відео від родини та друзів у єдиний приватний цифровий альбом за допомогою одного QR-коду.",
+            "Створіть спільний простір, щоб згадати її життя з гідністю та турботою."
+          ],
+          "bullets": [
+            "Просте налаштування — альбом готовий за 2 хвилини",
+            "Рідні та друзі додають свої фото та відео",
+            "Близькі можуть поділитися спогадами здалеку",
+            "Зберігайте дорогі серцю моменти в приватному альбомі"
+          ],
+          "cta": "Створити альбом пам’яті",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Memorials.webp",
+          "img_alt": "Свічки та квіти на вшануванні пам’яті"
+        },
+        {
+          "slug": "special",
+          "tab": "Особливі події",
+          "title": "Особливі події",
+          "paragraphs": [
+            "Addmoments ідеально підходить для всіх тих красивих, радісних і важливих моментів, які не підпадають під одну категорію, але все одно варті пам'яті."
+          ],
+          "list_intro": "Ви можете збирати спогади з:",
+          "list": [
+            "Бейбі-шауерів (Baby Shower)",
+            "Приватних вечірок та святкувань",
+            "Корпоративних заходів",
+            "Шкільних та університетських подій",
+            "Дитячих свят",
+            "Змагань та турнірів",
+            "Воркшопів та творчих майстер-класів",
+            "Громадських святкувань",
+            "Урочистих церемоній"
+          ],
+          "cta": "Створити свій альбом",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Special.webp",
+          "img_alt": "Родина та друзі на бебі шауері"
+        }
+      ]
+    },
+    "steps": {
+      "eyebrow": "Як працює AddMoments?",
+      "title_line1": "Три кроки до",
+      "title_line2": "кожного спогаду",
+      "toggle_label": "Кроки для організаторів і гостей",
+      "toggle_hosts": "Для організаторів",
+      "toggle_guests": "Для гостей",
+      "hosts": [
+        {
+          "title": "Створіть свою подію",
+          "text": "Додайте дату події, назву та коротке вітання для гостей.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/08/Host-Step-1-Create-UA.png",
+          "img_alt": "Екран створення події на мобільному телефоні"
+        },
+        {
+          "title": "Поділіться QR-кодом та приватним посиланням",
+          "text": "Покажіть QR-код на події або надішліть гостям приватне посилання.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/08/Host-Step-2-Share-UA.png",
+          "img_alt": "Екран обміну QR-кодом на мобільному телефоні"
+        },
+        {
+          "title": "Насолоджуйтеся найкращими моментами події",
+          "text": "Гості діляться фото, і ви бачите їх миттєво.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/08/Host-Step-3-Gallery-UA.png",
+          "img_alt": "Перегляд галереї на мобільному телефоні"
+        }
+      ],
+      "guests": [
+        {
+          "title": "Відскануйте QR-код",
+          "text": "Гості сканують QR-код або переходять за вашим приватним посиланням.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/06/Step-1-Scan.png",
+          "img_alt": "Екран сканування QR-коду гостями"
+        },
+        {
+          "title": "Інтерфейс завантаження",
+          "text": "Відкриється сторінка завантаження.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/08/Step-2-Upload-Interface-UA.png",
+          "img_alt": "Інтерфейс завантаження медіа гостями"
+        },
+        {
+          "title": "Завантаження",
+          "text": "Гості можуть завантажувати свої фото та відео, залишати голосові повідомлення та нотатки.",
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/08/Step-3-Upload-UA.png",
+          "img_alt": "Перегляд і завантаження фото гостями"
+        }
+      ],
+      "more": "Дізнатися більше"
+    },
+    "testimonials": {
+      "eyebrow": "Відгуки",
+      "title": "AddMoments уже використовують на найрізноманітніших подіях",
+      "subtitle": "Дізнайтеся, що наші користувачі кажуть про свій досвід.",
+      "prev": "Попередній",
+      "next": "Наступний",
+      "items": [
+        {
+          "name": "Наталія",
+          "role": "Весільна організаторка",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Natalia-s.png",
+          "quote": "«Як весільна організаторка, я знаю, як часто фото гостей губляться по чатах. addmoments збирає все в один альбом через браузер — без додатків і реєстрації. Це ідеально»"
+        },
+        {
+          "name": "Марія",
+          "role": "Наречена",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Maria-s.png",
+          "quote": "«Ми з чоловіком скористалися addmoments і вже наступного дня мали всі фото від гостей в одному місці. Дуже легко, без зайвого стресу та метушні.»"
+        },
+        {
+          "name": "Юрій",
+          "role": "Батько",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Yurii-s.png",
+          "quote": "«Святкували день народження сина, і всі фото від родини та друзів одразу зібралися в одному альбомі. Дуже зручно, адже не всі користуються однаковими месенджерами.»"
+        },
+        {
+          "name": "Назар",
+          "role": "Організатор конференцій",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Nazar-s.png",
+          "quote": "«Після бізнес-подій фото часто губляться між учасниками. З addmoments ми зібрали весь контент через QR-код в одному альбомі — швидко, просто і без реєстрації.»"
+        },
+        {
+          "name": "Юлія",
+          "role": "Онука",
+          "avatar": "https://addmoments.com.ua/wp-content/uploads/2026/06/Yuliia-s.png",
+          "quote": "«Для нас було важливо зібрати фото й спогади про близьку людину в одному приватному місці. addmoments допоміг зробити це просто й делікатно.»"
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Питання та відповіді",
+      "title": "Часті запитання",
+      "subtitle": "Є ще питання? Зв'яжіться з нами, і ми допоможемо з будь-яким запитом!",
+      "more": "Зв'язатися з нами",
+      "link": "/uk/contact-addmoments/",
+      "items": [
+        {
+          "q": "Чи потрібно гостям завантажувати додаток?",
+          "a": "Додатки не потрібні. Гості просто сканують ваш QR-код і завантажують фото безпосередньо через браузер."
+        },
+        {
+          "q": "Чи потрібно гостям реєструватися для завантаження фото чи відео?",
+          "a": "Ні. Ваші гості можуть надсилати контент, просто відсканувавши QR-код або перейшовши за вашим унікальним посиланням, без необхідності реєстрації."
+        },
+        {
+          "q": "Хто може переглядати надісланий контент?",
+          "a": "Тільки ви. Ви можете безпечно переглядати всі завантажені фотографії, відео та голосові повідомлення зі своєї приватної панелі адміністратора."
+        },
+        {
+          "q": "Як довго моя галерея буде активною?",
+          "a": "Ваша фотогалерея події залишається активною від 30 днів до 6 місяців залежно від вашого тарифного плану."
+        },
+        {
+          "q": "Що таке Addmoments?",
+          "a": "Addmoments — це приватна платформа для збору фотографій, відео та повідомлень від гостей в одному місці. Гості можуть миттєво завантажувати контент через персональний QR-код або приватне посилання — без встановлення додатків і створення акаунтів. Підходить для весіль, днів народження, корпоративних заходів, спортивних подій та будь-яких інших свят, де важливо легко зібрати всі спогади в одному приватному альбомі."
+        },
+        {
+          "q": "Навіщо використовувати Addmoments?",
+          "a": "Найкращі моменти вашої події часто залишаються в телефонах гостей. Addmoments допомагає легко зібрати всі фотографії, відео та побажання в одному приватному альбомі. Гості можуть ділитися спогадами через QR-код або посилання без додатків і реєстрації, а ви отримуєте всі матеріали в оригінальній якості в одному персоналізованому цифровому альбомі. Так ви можете будь-коли повернутися до найцінніших моментів вашої події та пережити їх знову."
+        },
+        {
+          "q": "У нас є фотограф. Навіщо використовувати Addmoments?",
+          "a": "Професійні фотографи роблять чудові знімки на місці з одного ракурсу, але Addmoments показує вашу подію очима гостей. Вони фіксують щирі моменти, які ваш фотограф може пропустити — наприклад, за лаштунками тощо. Крім того, фотографи також можуть завантажувати свої фотографії, створюючи одну повну колекцію."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Яка ваша наступна подія?",
+      "subtitle": "Створіть цифровий альбом за 2 хвилини — і нехай гості зберуть усі ваші спогади разом.",
+      "btn": "Переглянути ціни",
+      "note_before": "Маєте запитання? Напишіть нам:",
+      "handle": "@addmoments.ua",
+      "photos": [
+        {
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/Page-_Core-features_.webp",
+          "alt": "Друзі роблять групове фото"
+        },
+        {
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/02/bg001-home.webp",
+          "alt": "Наречена переглядає фото на телефоні"
+        },
+        {
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/01/Concert-4.webp",
+          "alt": "Глядачі на концерті"
+        },
+        {
+          "img": "https://addmoments.com.ua/wp-content/uploads/2026/01/event-photo-b5.webp",
+          "alt": "Діти на дні народження"
+        }
+      ]
+    }
+  }
+}

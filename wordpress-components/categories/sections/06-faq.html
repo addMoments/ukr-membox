@@ -1,0 +1,55 @@
+<style>
+/*@css:faq*/
+/* Uzun cevaplar dar ekranda 300px'i asiyor ("Why Addmoments?" 320px'te ~400px);
+   ana sayfadaki 300px siniri sonlarini keserdi. */
+#pf-faq .pf-item.open .pf-answer {
+  max-height: 600px;
+}
+</style>
+<div id="pf-faq" lang="{{lang}}">
+  <div class="pf-inner">
+    <div class="pf-left">
+      <span class="pf-eyebrow">{{faq.eyebrow}}</span>
+      <h2 class="pf-heading">{{faq.title}}</h2>
+      <p class="pf-subtext">{{faq.subtitle}}</p>
+      <a href="{{faq.link}}" class="pf-contact-btn">
+        <span class="pf-btn-label">{{faq.more}}</span>
+        <span class="pf-btn-icon">
+          <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h12M10 4l5 5-5 5"/></svg>
+        </span>
+      </a>
+    </div>
+    <div class="pf-accordion">
+      {{#faq.items}}
+      <div class="pf-item">
+        <button class="pf-question" id="faq-q-{{_index}}" aria-expanded="false" aria-controls="faq-a-{{_index}}">
+          {{q}}
+          <span class="pf-icon">+</span>
+        </button>
+        <div class="pf-answer" id="faq-a-{{_index}}" role="region" aria-labelledby="faq-q-{{_index}}">
+          <p>{{a}}</p>
+        </div>
+      </div>
+      {{/faq.items}}
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const items = document.querySelectorAll('#pf-faq .pf-item');
+  function setOpen(item, open) {
+    item.classList.toggle('open', open);
+    item.querySelector('.pf-question').setAttribute('aria-expanded', open ? 'true' : 'false');
+    item.querySelector('.pf-icon').textContent = open ? '−' : '+';
+  }
+  items.forEach(function (item) {
+    item.querySelector('.pf-question').addEventListener('click', function () {
+      const isOpen = item.classList.contains('open');
+      items.forEach(function (el) { setOpen(el, false); });
+      if (!isOpen) setOpen(item, true);
+    });
+  });
+  // Tasarimdaki gibi ilk soru acik baslar.
+  if (items.length) setOpen(items[0], true);
+})();
+</script>

@@ -1,0 +1,114 @@
+/* Kategori sayfasinin yeni bolumleri (hero, intro, events) icin ortak temel.
+   Her widget bu dosyayi kendi kok sinifiyla gomer: sablondaki "@css:new(.amc-hero)" isaretiyle
+   build.py kok yer tutucusunu o sinifla degistirir. Boylece bir widget'taki kopya digerinin
+   kurallarini ezmez; genel bir .amc secicisi olsaydi sonraki widget'in all: initial'i
+   oncekileri sifirlardi. */
+__ROOT__ {
+  all: initial;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  color: #14141c;
+  -webkit-font-smoothing: antialiased;
+  --amc-lime: #d2e823;
+  --amc-dark: #14141c;
+  --amc-text: #353434;
+  --amc-muted: #6b6b75;
+  --amc-line: #d9d9de;
+  --amc-font-heading: {{{font_heading}}};
+  --amc-heading-weight: {{heading_weight}};
+}
+
+__ROOT__ *,
+__ROOT__ *::before,
+__ROOT__ *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+__ROOT__ img {
+  display: block;
+  max-width: 100%;
+}
+
+__ROOT__ a {
+  color: inherit;
+}
+
+__ROOT__ .amc-heading {
+  font-family: var(--amc-font-heading);
+  font-weight: var(--amc-heading-weight);
+  text-transform: uppercase;
+  color: var(--amc-dark);
+  line-height: 1.08;
+}
+
+__ROOT__ .amc-eyebrow {
+  display: inline-block;
+  border: 1px solid var(--amc-lime);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #7a8f00;
+  background: #f8fbdc;
+}
+
+/* Ana sayfa butonlariyla ayni olculer: 56px hap, sagda 42px beyaz daire icinde ok. */
+__ROOT__ .amc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+  padding: 0 7px 0 24px;
+  border: 2px solid var(--amc-lime);
+  border-radius: 999px;
+  background: var(--amc-lime);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  color: #000;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+__ROOT__ .amc-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+__ROOT__ .amc-btn:focus-visible {
+  outline: 2px solid var(--amc-dark);
+  outline-offset: 3px;
+}
+
+__ROOT__ .amc-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+__ROOT__ .amc-btn-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+__ROOT__ .amc-btn--outline {
+  background: #fff;
+}
+
+__ROOT__ .amc-btn--outline .amc-btn-icon {
+  background: transparent;
+}

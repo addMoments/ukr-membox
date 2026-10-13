@@ -1,0 +1,228 @@
+#pf-faq {
+  all: initial;
+  display: block;
+  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+  color: #111;
+  width: 100%;
+  box-sizing: border-box;
+  contain: content;
+}
+
+#pf-faq *,
+#pf-faq *::before,
+#pf-faq *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#pf-faq .pf-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 32px 96px;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+/* ── Left column ── */
+#pf-faq .pf-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: sticky;
+  top: 40px;
+}
+
+#pf-faq .pf-eyebrow {
+  display: inline-block;
+  border: 2px solid #b5d000;
+  border-radius: 999px;
+  padding: 5px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  color: #7a8f00;
+  background: #f0f7b2;
+  line-height: 1.4;
+}
+
+#pf-faq .pf-heading {
+  font-family: {{{font_heading}}} !important;
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  color: #0d0d0d;
+  font-weight: {{heading_weight}};
+  margin-bottom: 20px;
+}
+
+#pf-faq .pf-subtext {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #555;
+  margin-bottom: 40px;
+  max-width: 280px;
+}
+
+/* Contact button */
+#pf-faq .pf-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  background: #d2e823;
+  border-radius: 999px;
+  padding: 6px 6px 6px 28px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a00;
+  text-decoration: none;
+  transition: background 0.18s ease;
+  cursor: pointer;
+  border: none;
+}
+
+#pf-faq .pf-contact-btn:hover {
+  background: #c3d91c;
+}
+
+#pf-faq .pf-contact-btn .pf-btn-label {
+  margin-right: 16px;
+}
+
+#pf-faq .pf-contact-btn .pf-btn-icon {
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+#pf-faq .pf-contact-btn .pf-btn-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: #111;
+  stroke-width: 2.2;
+}
+
+/* ── Right: accordion ── */
+#pf-faq .pf-accordion {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+#pf-faq .pf-item {
+  border-bottom: 1.5px solid #e2e2e2;
+  overflow: hidden;
+}
+
+#pf-faq .pf-item:first-child {
+  border-top: none;
+}
+
+/* Question row */
+#pf-faq .pf-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #888;
+  line-height: 1.4;
+  transition: color 0.18s ease;
+}
+
+#pf-faq .pf-item.open .pf-question,
+#pf-faq .pf-question:hover {
+  color: #111;
+}
+
+/* First item open by default */
+#pf-faq .pf-item.open {
+  background: #eef1fb;
+  border-radius: 16px;
+  border-bottom: none;
+  margin-bottom: 0;
+  padding: 0 24px;
+}
+
+#pf-faq .pf-item.open .pf-question {
+  padding: 28px 0 16px;
+}
+
+/* +/— icon */
+#pf-faq .pf-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: #999;
+  line-height: 1;
+  transition: color 0.18s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+#pf-faq .pf-item.open .pf-icon {
+  color: #333;
+}
+
+/* Answer */
+#pf-faq .pf-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.2s ease;
+  padding: 0;
+}
+
+#pf-faq .pf-item.open .pf-answer {
+  max-height: 300px;
+  padding-bottom: 28px;
+}
+
+#pf-faq .pf-answer p {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #444;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  #pf-faq .pf-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  #pf-faq .pf-left {
+    position: static;
+  }
+}
+
+@media (max-width: 540px) {
+  #pf-faq .pf-inner { padding: 56px 16px 72px; }
+  #pf-faq .pf-subtext { max-width: 100%; }
+}
