@@ -87,7 +87,16 @@ function GuestAdvertorialGrid({ advertorial }: { advertorial?: AdvertorialRespon
       <span className="guest-advertorial-label">{textOr('guest.home.sponsored', 'Promotions', 'Промоції')}</span>
       <div className={`guest-advertorial-grid guest-advertorial-grid-${layout}`}>
         {cells.map((cell) => {
-          const image = <img src={cell.image_url} alt="" loading="lazy" />;
+          // Hucre tasarimdaki 2:1 sekilde; reklam her zaman butun gorunur. Baska oranda (eski
+          // yonergedeki 16:9) yanlarda kalan ince bosluk gorselin kendi sol / sag kenar seridinin
+          // uzatilmasiyla dolar; duz zeminli reklamlarda dikis gorunmez.
+          const image = (
+            <>
+              <span className="guest-advertorial-edge left" aria-hidden="true"><img src={cell.image_url} alt="" loading="lazy" /></span>
+              <span className="guest-advertorial-edge right" aria-hidden="true"><img src={cell.image_url} alt="" loading="lazy" /></span>
+              <img className="guest-advertorial-img" src={cell.image_url} alt="" loading="lazy" />
+            </>
+          );
           return (
             <div key={cell.index} className="guest-advertorial-cell">
               {cell.link_url ? (

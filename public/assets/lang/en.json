@@ -229,11 +229,11 @@
             },
             "imageGuidance": {
                 "none": "No image is needed when advertising is hidden.",
-                "single": "Upload 1 landscape image in 16:9 ratio, for example 1600x900 px.",
-                "1x1": "Upload 1 landscape image in 16:9 ratio, for example 1600x900 px.",
-                "2x1": "Upload 2 landscape images side by side. Each image should be 16:9, for example 1600x900 px.",
-                "1x2": "Upload 2 landscape images stacked vertically. Each image should be 16:9, for example 1600x900 px.",
-                "2x2": "Upload 4 landscape images in a 2x2 grid. Each image should be 16:9, for example 1600x900 px."
+                "single": "Upload 1 landscape image in 2:1 ratio, for example 1600x800 px. Other shapes are shown whole, with soft edges.",
+                "1x1": "Upload 1 landscape image in 2:1 ratio, for example 1600x800 px. Other shapes are shown whole, with soft edges.",
+                "2x1": "Upload 2 landscape images side by side. Each image should be 2:1, for example 1600x800 px. Other shapes are shown whole, with soft edges.",
+                "1x2": "Upload 2 landscape images stacked vertically. Each image should be 2:1, for example 1600x800 px. Other shapes are shown whole, with soft edges.",
+                "2x2": "Upload 4 landscape images in a 2x2 grid. Each image should be 2:1, for example 1600x800 px. Other shapes are shown whole, with soft edges."
             },
             "errors": {
                 "loadFailed": "Failed to load advertising settings.",

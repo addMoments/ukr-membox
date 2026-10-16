@@ -358,6 +358,7 @@
 }
 
 .guest-advertorial-cell {
+  position: relative;
   min-width: 0;
   aspect-ratio: 41 / 20;
   border-radius: 8px;
@@ -379,12 +380,52 @@
   text-decoration: none;
 }
 
-.guest-advertorial-cell img {
+/* Reklam gorseli butun (contain): musterinin canli 16:9 reklamlari kirpilmasin. 2:1 olmayan
+   gorselde yanlarda kalan bosluk, gorselin en sol / en sag %1'lik seridinin yariya kadar
+   uzatilmasiyla dolar (kenar uzatma); 2:1 gorselde bu katmanlar tamamen ortulur. */
+.guest-advertorial-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
   display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
+.guest-advertorial-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  overflow: hidden;
+}
+
+.guest-advertorial-edge.left {
+  left: 0;
+}
+
+.guest-advertorial-edge.right {
+  right: 0;
+}
+
+.guest-advertorial-edge img {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 10000%;
+  max-width: none;
+  object-fit: fill;
+  display: block;
+  filter: blur(1px);
+}
+
+.guest-advertorial-edge.left img {
+  left: 0;
+}
+
+.guest-advertorial-edge.right img {
+  right: 0;
 }
 
 
