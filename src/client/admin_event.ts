@@ -33,17 +33,29 @@ export async function getAdminEvents(search: string): Promise<AdminEvent[]> {
   return Array.isArray(data) ? (data as AdminEvent[]) : [];
 }
 
-// Yalnizca activation_date gonderilir; active_until'i DB kendisi hesaplayip geri doner.
+// Yalnizca activation_date gonderilir; active_until / storage_until'i DB kendisi hesaplayip geri doner.
+// Aktive olmus event'te de calisir (2.1d); depolama bitisi gecmise dusecekse backend 409 doner.
 export async function updateAdminEventActivationDate(
   eventUID: string,
   activationDate: string,
-): Promise<{ activation_date: string; active_until: string }> {
+): Promise<{ activation_date: string; active_until: string; storage_until: string }> {
   const res = await authFetch(`${SERV_ROOT}/api/admin/events/${eventUID}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ activation_date: activationDate }),
   });
   await throwIfNotOk(res, 'PATCH /api/admin/events');
+  return res.json();
+}
+
+// Kapatilmis event'i tamamen kaldirir (2.15): kayit, albumler, misafirler, ani defteri ve kalan dosyalar.
+// Siparis kaydi kalir. Kapatilmamis event'te backend 409 doner.
+export async function deleteAdminEventPermanently(eventUID: string): Promise<{ removed: Record<string, number> }> {
+  const res = await authFetch(`${SERV_ROOT}/api/admin/events/${eventUID}/permanent`, {
+    method: 'DELETE',
+    headers: { Accept: 'application/json' },
+  });
+  await throwIfNotOk(res, 'DELETE /api/admin/events/permanent');
   return res.json();
 }
 

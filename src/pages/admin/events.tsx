@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AdminEvent, deleteAdminEvent, getAdminEvents, updateAdminEventActivationDate } from '../../client/admin_event';
+import { AdminEvent, deleteAdminEvent, deleteAdminEventPermanently, getAdminEvents, updateAdminEventActivationDate } from '../../client/admin_event';
 import { adminText } from '../../utils/admin_i18n';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
@@ -24,28 +24,38 @@ function toDateInputValue(value: string) {
   return parsed.toISOString().slice(0, 10);
 }
 
-// Ne: Bir event satiri; aktivasyon tarihini duzenler ve event'i kapatir.
-// Nasil: Tarih kaydedildiginde backend yeni active_until'i de dondurur, satir
+// Ne: Bir event satiri; aktivasyon tarihini duzenler, event'i kapatir, kapatilmis event'i tamamen siler.
+// Nasil: Tarih kaydedildiginde backend yeni active_until / storage_until'i de dondurur, satir
 //        onunla guncellenir.
-// Neden: active_until'i DB trigger'i paketin activation_days degerine gore
+// Neden: Bitis tarihlerini DB trigger'i paketin activation_days / storage_days degerine gore
 //        hesapliyor; burada tekrar hesaplamak iki yerde ayri kural olurdu.
-function EventRow({ event, onChanged }: { event: AdminEvent; onChanged: (next: AdminEvent) => void }) {
+function EventRow({ event, onChanged, onRemoved }: { event: AdminEvent; onChanged: (next: AdminEvent) => void; onRemoved: (uid: string) => void }) {
   const [dateValue, setDateValue] = useState(toDateInputValue(event.activation_date));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   const isClosed = !!event.deleted_at;
-  // Aktive olmus event'in tarihi DB trigger'i tarafindan kilitleniyor.
+  // Host icin aktive olmus event'in tarihi kilitli; admin (2.1d) yine de degistirebilir, once onay alinir.
   const isActivated = !!event.activation_date && new Date(event.activation_date).getTime() <= Date.now();
-  const dateLocked = isClosed || isActivated;
+  const dateLocked = isClosed;
 
   const saveDate = async () => {
     if (!dateValue) return;
+    if (isActivated) {
+      const label = event.name || event.uid.slice(0, 8);
+      const warning = at(
+        'admin.events.dateLiveConfirm',
+        `"${label}" is already live. Moving its activation date also moves the date guests can upload until and the storage end date, calculated from the package. Continue?`,
+        `«${label}» вже активна. Зміна дати активації також зсуне дату, до якої гості можуть завантажувати, і дату завершення зберігання (за тривалістю пакета). Продовжити?`,
+        { label },
+      );
+      if (!window.confirm(warning)) return;
+    }
     setBusy(true);
     setMessage(null);
     try {
       const updated = await updateAdminEventActivationDate(event.uid, dateValue);
-      onChanged({ ...event, activation_date: updated.activation_date, active_until: updated.active_until });
+      onChanged({ ...event, activation_date: updated.activation_date, active_until: updated.active_until, storage_until: updated.storage_until || event.storage_until });
       setMessage({ ok: true, text: at('admin.events.dateSaved', 'Activation date saved.', 'Дату активації збережено.') });
     } catch (err) {
       setMessage({ ok: false, text: err instanceof Error ? err.message : 'Failed' });
@@ -82,6 +92,31 @@ function EventRow({ event, onChanged }: { event: AdminEvent; onChanged: (next: A
     }
   };
 
+  // Ne: Kapatilmis event'i tamamen kaldirir (2.15). Geri donusu yok: onay icin event adi yazilir.
+  const removePermanently = async () => {
+    const expected = (event.name || event.uid.slice(0, 8)).trim();
+    const typed = window.prompt(at(
+      'admin.events.purgeConfirm',
+      `This permanently removes "${expected}" and everything left of it: albums, guests, guestbook messages, the upload summary and any remaining files. The order stays. This cannot be undone.\n\nType the event name to confirm:`,
+      `Це назавжди видалить «${expected}» і все, що від неї залишилося: альбоми, гостей, побажання, підсумок завантажень і решту файлів. Замовлення залишиться. Цю дію не можна скасувати.\n\nВведіть назву події для підтвердження:`,
+      { label: expected },
+    ));
+    if (typed === null) return;
+    if (typed.trim() !== expected) {
+      setMessage({ ok: false, text: at('admin.events.purgeMismatch', 'The name did not match; nothing was deleted.', 'Назва не збігається; нічого не видалено.') });
+      return;
+    }
+    setBusy(true);
+    setMessage(null);
+    try {
+      await deleteAdminEventPermanently(event.uid);
+      onRemoved(event.uid);
+    } catch (err) {
+      setMessage({ ok: false, text: err instanceof Error ? err.message : 'Failed' });
+      setBusy(false);
+    }
+  };
+
   return (
     <article className="admin-panel-row">
       <div className="admin-panel-row-main">
@@ -114,9 +149,9 @@ function EventRow({ event, onChanged }: { event: AdminEvent; onChanged: (next: A
         {isActivated && !isClosed && (
           <small>
             {at(
-              'admin.events.dateLocked',
-              'Already activated — the activation date can no longer be changed.',
-              'Вже активовано — дату активації більше не можна змінити.',
+              'admin.events.dateLive',
+              'Already live — changing the date also moves the upload and storage end dates.',
+              'Вже активна — зміна дати також зсуне кінець завантажень і зберігання.',
             )}
           </small>
         )}
@@ -126,6 +161,11 @@ function EventRow({ event, onChanged }: { event: AdminEvent; onChanged: (next: A
       {!isClosed && (
         <button type="button" className="admin-panel-delete-btn" onClick={remove} disabled={busy}>
           {at('admin.events.delete', 'Close event', 'Закрити подію')}
+        </button>
+      )}
+      {isClosed && (
+        <button type="button" className="admin-panel-delete-btn" onClick={removePermanently} disabled={busy}>
+          {at('admin.events.purge', 'Delete permanently', 'Видалити назавжди')}
         </button>
       )}
     </article>
@@ -158,6 +198,18 @@ function AdminEvents() {
 
   const onRowChanged = (next: AdminEvent) => {
     setEvents((prev) => prev.map((item) => (item.uid === next.uid ? next : item)));
+  };
+
+  const [removedNote, setRemovedNote] = useState('');
+  const onRowRemoved = (uid: string) => {
+    const removed = events.find((item) => item.uid === uid);
+    setEvents((prev) => prev.filter((item) => item.uid !== uid));
+    setRemovedNote(at(
+      'admin.events.purged',
+      `"${removed?.name || uid.slice(0, 8)}" was deleted permanently. Its order is still listed under Orders.`,
+      `«${removed?.name || uid.slice(0, 8)}» видалено назавжди. Замовлення залишається в розділі «Замовлення».`,
+      { label: removed?.name || uid.slice(0, 8) },
+    ));
   };
 
   return (
@@ -199,6 +251,7 @@ function AdminEvents() {
             </button>
           </form>
           {error && <p className="admin-panel-message-error">{error}</p>}
+          {removedNote && <p className="admin-panel-message-ok">{removedNote}</p>}
         </section>
 
         {loading && <div className="admin-empty">{at('admin.events.loading', 'Loading events...', 'Завантаження подій...')}</div>}
@@ -210,7 +263,7 @@ function AdminEvents() {
         {!loading && events.length > 0 && (
           <div className="admin-panel-list">
             {events.map((event) => (
-              <EventRow key={event.uid} event={event} onChanged={onRowChanged} />
+              <EventRow key={event.uid} event={event} onChanged={onRowChanged} onRemoved={onRowRemoved} />
             ))}
           </div>
         )}
