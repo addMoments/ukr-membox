@@ -267,16 +267,29 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
         )}
 
         {sponsoredAddOn && (
-          <section className="event-new-section event-new-section-border">
+          <section className="event-new-section event-new-section-border event-new-section-pro">
+            {/* 2.4: musteri "daha iyi bir baslik tasarimi" istedi. Diger bolumler gibi baslik + alt
+                baslik, ustte giris blogundaki rozetle ayni dilde bir "isletmeler icin" etiketi. */}
             <div className="event-new-section-header">
               <div>
-                <h2 className="event-new-section-title">
+                <span className="event-new-intro-badge event-new-pro-badge">
+                  <i className="fa-solid fa-briefcase" aria-hidden="true" />
+                  {textOr('paywall.sponsoredBadge', 'For business', 'Для бізнесу')}
+                </span>
+                <h2 className="event-new-section-title event-new-pro-title">
                   {textOr(
                     'paywall.sponsoredHeading',
                     'For Professionals and Event Organizers',
                     'Для професіоналів та організаторів подій',
                   )}
                 </h2>
+                <p className="event-new-section-subtitle">
+                  {textOr(
+                    'paywall.sponsoredSubtitle',
+                    'Show your brand to every guest of the event, right on the page where they share their photos.',
+                    'Покажіть свій бренд кожному гостю події — просто на сторінці, де вони діляться фото.',
+                  )}
+                </p>
               </div>
             </div>
             <SponsoredAddOnBand
@@ -285,6 +298,8 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
               displayBullets={resolveDisplayBullets(sponsoredAddOn)}
               price={sponsoredAddOn.price}
               icon={sponsoredAddOn.options?.icon}
+              image={sponsoredAddOn.options?.image}
+              mobileImage={sponsoredAddOn.options?.mobile_image}
               isSelected={getCartQty(SPONSORED_ADDON_ID) > 0}
               isDisabled={isPremiumSelected && isPremiumSponsoredIncluded}
               onToggle={() => addonClick(SPONSORED_ADDON_ID)}
@@ -418,29 +433,41 @@ interface SponsoredAddOnBandProps {
   displayBullets?: string[];
   price: number;
   icon?: string;
+  image?: string;
+  mobileImage?: string;
   isSelected: boolean;
   isDisabled?: boolean;
   onToggle: () => void;
 }
 
-// Ne: Reklam alani add-on'unu tam genislikte, metne dayali bir seritte gosterir.
-// Nasil: Basligi, aciklamayi ve maddeleri urun kaydindaki display_* alanlarindan
-//        alir; hicbir gorsel kullanmaz.
-// Neden: Blok eskiden tek bir PNG'ydi. Metin gorselin icine gomulu oldugu icin
-//        Ukraynaca yazi Ingilizce ziyaretciye de gorunuyordu ve tek kelime
-//        degistirmek tasarimci gerektiriyordu. Alanlar zaten iki dilde tutuluyor.
-function SponsoredAddOnBand({ displayName, displayDescription, displayBullets = [], price, icon, isSelected, isDisabled = false, onToggle }: SponsoredAddOnBandProps) {
+// Ne: Reklam alani add-on'unu tam genislikte bir seritte gosterir; urun kaydinda fotograf varsa
+//     solda (telefonda ustte) fotografla, diger ek hizmet kartlari gibi.
+// Nasil: Baslik, aciklama ve maddeler urun kaydindaki display_* alanlarindan; fotograf
+//        options.image / options.mobile_image'dan (admin > Urunler'den degistirilebilir).
+// Neden: Blok eskiden metni gomulu tek bir PNG'ydi (2.23'te kaldirildi). Musteri 14 Ekim'de
+//        diger kartlardaki gibi bir fotograf istedi; metin yine gercek metin olarak kaliyor.
+function SponsoredAddOnBand({ displayName, displayDescription, displayBullets = [], price, icon, image, mobileImage, isSelected, isDisabled = false, onToggle }: SponsoredAddOnBandProps) {
   const bandClass = [
     'event-new-sponsored-band',
+    image ? 'has-photo' : '',
     isSelected ? 'selected' : '',
     isDisabled ? 'disabled' : '',
   ].filter(Boolean).join(' ');
 
   return (
     <div className={bandClass} onClick={isDisabled ? undefined : onToggle}>
-      <div className="event-new-sponsored-mark" aria-hidden="true">
-        {icon ? <ProductIcon icon={icon} /> : <i className="fa-solid fa-bullhorn" />}
-      </div>
+      {image ? (
+        <div className="event-new-sponsored-photo">
+          <picture>
+            {mobileImage && <source media="(max-width: 767px)" srcSet={mobileImage} />}
+            <img src={image} alt={displayName || ''} loading="lazy" />
+          </picture>
+        </div>
+      ) : (
+        <div className="event-new-sponsored-mark" aria-hidden="true">
+          {icon ? <ProductIcon icon={icon} /> : <i className="fa-solid fa-bullhorn" />}
+        </div>
+      )}
 
       <div className="event-new-sponsored-body">
         <h3 className="event-new-sponsored-name">{displayName}</h3>
