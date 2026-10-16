@@ -446,3 +446,16 @@ textarea.settings-field-input {
 .settings-btn-preview i {
   font-size: 16px;
 }
+
+/* Karsilama metni: misafir sayfasindaki satir sayaci (en fazla 3, bkz. WelcomeMessageField). */
+.settings-welcome-counter {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #71716a;
+  text-align: right;
+}
+
+.settings-welcome-counter.over {
+  color: #dc2626;
+}

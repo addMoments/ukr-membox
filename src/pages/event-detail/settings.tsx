@@ -5,6 +5,7 @@ import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import ColoredSettingsBox from '../../v2-components/ColoredSettingsBox';
 import AdvertorialSettings from '../../v2-components/AdvertorialSettings';
 import SettingsFieldNote from '../../v2-components/SettingsFieldNote';
+import WelcomeMessageField from '../../v2-components/WelcomeMessageField';
 import Button from '../../components/Button';
 import '../../v2-styles/Settings.css';
 import { parse_submit_event } from '../../utils/form_event_parse';
@@ -104,6 +105,8 @@ function EventSettingsInner({event}: {event: Event}) {
     const eventUid = unpackUUID(packedUid || "");
 
     const { activation_date, event_date, ...rest } = form;
+    // Sondaki bos satir/bosluk misafir sayfasinda gorunmuyor ama 3 satir sinirini zorluyor; kaydedilmez.
+    if (typeof rest.welcome_message === 'string') rest.welcome_message = rest.welcome_message.replace(/\s+$/, '');
 
     setGeneralStatus({ state: 'saving' });
     setDateStatus(null);
@@ -390,16 +393,13 @@ function EventSettingsInner({event}: {event: Event}) {
             {dateStatus?.state === 'error' && <span style={{color: '#dc2626', fontSize: '0.8rem'}}>✗ {dateStatus.message}</span>}
             {dateStatus?.state === 'success' && <span style={{color: '#16a34a', fontSize: '0.8rem'}}>✓ {t('settings.saved')}</span>}
           </div>
-          <div className="settings-field full-width">
-            <label className="settings-field-label">{t('settings.generalDetails.welcomeMessageLabel')}</label>
-            <textarea 
-              name="welcome_message"
-              className="settings-field-input"
-              defaultValue={event.welcome_message || ''}
-              placeholder={t('settings.generalDetails.welcomeMessagePlaceholder')}
-              rows={4}
-            />
-          </div>
+          <WelcomeMessageField
+            name="welcome_message"
+            label={t('settings.generalDetails.welcomeMessageLabel')}
+            placeholder={t('settings.generalDetails.welcomeMessagePlaceholder')}
+            initialValue={event.welcome_message || ''}
+            fontId={event.settings?.font}
+          />
         </div>
         <div style={{marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
           <Button text={t('settings.saveChanges')} type="submit" loading={generalStatus?.state === 'saving'} />

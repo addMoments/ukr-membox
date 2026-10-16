@@ -11,7 +11,10 @@ import { t } from '../packages/i18n';
 export function textOr(key: string, en: string, uk: string, values?: Record<string, string | number>) {
   const value = t(key, values);
   if (value !== null && value !== undefined && value !== key) return String(value);
-  return t('lang_code') === 'uk' ? uk : en;
+  const fallback = t('lang_code') === 'uk' ? uk : en;
+  // Yedek metindeki {{ad}} yer tutuculari da doldurulur; yoksa JSON gecikince "{{max}}" ekranda kalirdi.
+  if (!values) return fallback;
+  return fallback.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, name: string) => (name in values ? String(values[name]) : match));
 }
 
 // Admin ekranlarinin kullandigi mevcut ad; davranis textOr ile birebir ayni.
