@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import QRCode from 'qrcode';
 import { fetch as authFetch } from '../../client/core';
 import { getAdminRole } from '../../client/admin';
-import { SERV_ROOT } from '../../consts';
+import { S3_ROOT, SERV_ROOT, SITE_ROOT } from '../../consts';
+import { saveUrl } from '../../utils/download';
 import { adminText } from '../../utils/admin_i18n';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
@@ -50,6 +50,7 @@ interface OrderAccount {
   guest_limit: number;
   total_size_mb: number | null;
   storage_expiration: string | null;
+  event_closed?: boolean;
 }
 
 interface ShippingAddress {
@@ -417,45 +418,7 @@ function ResendActivationCard({
 }) {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  // QR tarayicida uretilir; sunucudan data-URI tasimaya gerek yok.
-  useEffect(() => {
-    if (!activationLink) { setQrDataUrl(null); return; }
-    let cancelled = false;
-    QRCode.toDataURL(activationLink, { width: 220, margin: 1, color: { dark: '#1E2330', light: '#FFFFFF' } })
-      .then(url => { if (!cancelled) setQrDataUrl(url); })
-      .catch(() => { if (!cancelled) setQrDataUrl(null); });
-    return () => { cancelled = true; };
-  }, [activationLink]);
-
-  useEffect(() => {
-    if (!copied) return;
-    const timer = setTimeout(() => setCopied(false), 2000);
-    return () => clearTimeout(timer);
-  }, [copied]);
-
-  const copyLink = async () => {
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(activationLink);
-      } else {
-        // http ve eski Safari yolu: clipboard API'si yoksa gecici textarea.
-        const ta = document.createElement('textarea');
-        ta.value = activationLink;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-      }
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  };
+  const [copied, copyLink] = useCopyText(activationLink);
 
   const resend = async () => {
     setSending(true);
@@ -517,8 +480,9 @@ function ResendActivationCard({
           )}
         </p>
 
-        {/* Linkin kendisi ve QR'i: mail hic ulasmadiginda destek elemani linki ekrandan
-            okuyup musteriye verebilsin ya da QR'i telefona okutabilsin. */}
+        {/* Linkin kendisi: mail hic ulasmadiginda destek elemani linki ekrandan okuyup
+            musteriye verebilsin. Bu ekrandaki QR artik etkinligin kendi QR'i (EventQrCard);
+            musteri 14 Ekim'de giris linkinin QR'ini "etkinlik kodu degil" diye bildirdi. */}
         <div className="admin-activation-link-row">
           <code className="admin-activation-link">{activationLink}</code>
           <button type="button" className="admin-activation-copy-btn" onClick={copyLink}>
@@ -534,19 +498,123 @@ function ResendActivationCard({
       </div>
 
       <div className="admin-activation-actions">
-        {qrDataUrl && (
-          <img
-            className="admin-activation-qr"
-            src={qrDataUrl}
-            alt={at('admin.orderDetail.linkQrAlt', 'Activation link QR code', 'QR-код посилання для активації')}
-          />
-        )}
         <button type="button" className="admin-save-btn" onClick={resend} disabled={sending || !purchaseUid}>
           {sending
             ? at('admin.orderDetail.resendSending', 'Sending…', 'Надсилання…')
             : at('admin.orderDetail.resend', 'Resend', 'Надіслати ще раз')}
         </button>
       </div>
+    </div>
+  );
+}
+
+// Panoya kopyalar; clipboard API'si yoksa (http, eski Safari) gecici textarea. 2 sn "kopyalandi" durumu.
+function useCopyText(text: string): [boolean, () => Promise<void>] {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  const copy = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return [copied, copy];
+}
+
+// Ne: Siparise bagli etkinligin QR kodu: misafirlerin okuttugu, QR kartlara basilan kod.
+// Nasil: Hostun QR sayfasindan indirdigi dosyanin aynisi (S3 /events/<packed>/qr.png, hostun
+//        renk/logo ayarlariyla) ve misafir linki (/l/q<packed>). Etkinlik yoksa ya da kapaliysa
+//        sebep yazilir.
+// Neden: Excel 2.2, musteri 14 Ekim: "QR code is not event code. QR code is sign-in code for client."
+//        Bu ekrandaki eski QR musterinin giris linkini kodluyordu; baski ve destek icin gereken etkinlik QR'i.
+function EventQrCard({ account, hasActivationLink }: { account: OrderAccount | null; hasActivationLink: boolean }) {
+  const packed = account?.event_packed_uid || '';
+  const guestLink = packed ? `${SITE_ROOT}/l/q${packed}` : '';
+  const [copied, copyLink] = useCopyText(guestLink);
+  const [qrFailed, setQrFailed] = useState(false);
+  // Host QR'i yeniden olusturdugunda dosya adi ayni kalir; tarayici eskisini gostermesin.
+  const [stamp] = useState(() => Date.now());
+  const qrUrl = packed ? `${S3_ROOT}/events/${packed}/qr.png?t=${stamp}` : '';
+
+  const title = at('admin.orderDetail.eventQrTitle', 'Event QR code', 'QR-код події');
+  let note = '';
+  if (!packed) {
+    note = hasActivationLink
+      ? at('admin.orderDetail.eventQrNotYet', 'The client has not created the event yet. Its QR code appears here once they set up their account with the activation link above.', 'Клієнт ще не створив подію. QR-код з’явиться тут, щойно клієнт створить обліковий запис за посиланням для активації вище.')
+      : at('admin.orderDetail.eventQrNone', 'There is no event for this order yet.', 'Для цього замовлення ще немає події.');
+  } else if (account?.event_closed) {
+    note = at('admin.orderDetail.eventQrClosed', 'This event is closed, so its QR code now opens a "this event is closed" page.', 'Цю подію закрито, тож її QR-код тепер відкриває сторінку «Подію закрито».');
+  }
+
+  return (
+    <div className="admin-resend-activation admin-event-qr">
+      <div className="admin-resend-activation-text">
+        <div className="admin-order-account-title">{title}</div>
+        {note ? (
+          <p className="admin-resend-activation-hint">{note}</p>
+        ) : (
+          <>
+            <p className="admin-resend-activation-hint">
+              {at(
+                'admin.orderDetail.eventQrHint',
+                'The code guests scan to open the event: the same file the client downloads from their QR page, with their colours and logo. Use it for printed QR cards and the welcome board.',
+                'Код, який гості сканують, щоб відкрити подію: той самий файл, що клієнт завантажує на своїй сторінці QR, з його кольорами та логотипом. Використовуйте його для друку QR-карток і вітального банера.',
+              )}
+            </p>
+            <div className="admin-activation-link-row">
+              <code className="admin-activation-link">{guestLink}</code>
+              <button type="button" className="admin-activation-copy-btn" onClick={copyLink}>
+                {copied
+                  ? at('admin.orderDetail.linkCopied', 'Copied', 'Скопійовано')
+                  : at('admin.orderDetail.linkCopy', 'Copy link', 'Копіювати')}
+              </button>
+            </div>
+            {qrFailed && (
+              <p className="admin-resend-activation-err">
+                {at('admin.orderDetail.eventQrMissing', 'The QR image could not be loaded. The client can regenerate it on their QR page.', 'Не вдалося завантажити зображення QR. Клієнт може створити його знову на своїй сторінці QR.')}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      {!note && !qrFailed && (
+        <div className="admin-activation-actions">
+          <img
+            className="admin-activation-qr"
+            src={qrUrl}
+            alt={title}
+            onError={() => setQrFailed(true)}
+          />
+          <button
+            type="button"
+            className="admin-save-btn"
+            onClick={() => { saveUrl(qrUrl, `qr-${packed}.png`).catch(() => window.open(qrUrl, '_blank')); }}
+          >
+            {at('admin.orderDetail.eventQrDownload', 'Download PNG', 'Завантажити PNG')}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -635,6 +703,8 @@ function AdminOrderDetail() {
               activationLink={order.activation_link || ''}
               blockedReason={order.activation_blocked_reason || ''}
             />
+
+            <EventQrCard account={order.order_account} hasActivationLink={!!order.activation_link} />
 
             {isSuperAdmin && order.payment_summary && <PaymentSummaryCard summary={order.payment_summary} />}
 
