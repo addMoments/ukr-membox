@@ -22,9 +22,10 @@ import ImageCropModal from '../../v2-components/ImageCropModal';
 import { t } from '../../packages/i18n';
 import { textOr } from '../../utils/admin_i18n';
 
-// Misafir sayfasindaki etkinlik gorseli masaustunde ~848x280 (3:1), telefonda ~2.2:1 kutuda
-// cover ile gosteriliyor; kirpma 3:1'e gore, telefon yanlardan biraz keser (AM-14).
-const EVENT_IMAGE_ASPECT = 3;
+// Etkinlik gorseli her yerde (misafir hero'su, misafir defteri, host ana sayfasi) 20:9 kutuda;
+// kirpma da ayni oranda, boylece misafir tam kirpilan alani gorur (AM-14). 20:9, onayli
+// tasarimdaki 347x156 hero'dan geliyor (2026-10-16; oncesinde 3:1).
+const EVENT_IMAGE_ASPECT = 20 / 9;
 const EVENT_IMAGE_MAX_WIDTH = 1800;
 const EVENT_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 
@@ -138,7 +139,7 @@ function EventThemeInner({event}: {event: Event}) {
             </div>
             <h3 className="theme-upload-title">{t('theme.uploadTitle')}</h3>
             <p className="theme-upload-subtitle">{t('theme.uploadSubtitle')}</p>
-            <p className="theme-upload-specs">{textOr('theme.uploadSpecs', 'Recommended 1800×600 px (3:1). JPG, PNG or WEBP, up to 10 MB. Guests see exactly the area you crop, on phones and computers alike.', 'Рекомендовано 1800×600 px (3:1). JPG, PNG або WEBP, до 10 МБ. Гості бачать саме ту частину, яку ви обрізали, — і на телефоні, і на комп’ютері.')}</p>
+            <p className="theme-upload-specs">{textOr('theme.uploadSpecs', 'Recommended 1800×810 px (20:9). JPG, PNG or WEBP, up to 10 MB. Guests see exactly the area you crop, on phones and computers alike.', 'Рекомендовано 1800×810 px (20:9). JPG, PNG або WEBP, до 10 МБ. Гості бачать саме ту частину, яку ви обрізали, — і на телефоні, і на комп’ютері.')}</p>
             <button className="theme-upload-btn">{t('theme.browseGallery')}</button>
           </div>
           </FileInput>

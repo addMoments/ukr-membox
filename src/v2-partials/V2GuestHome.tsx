@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import V2Header from '../v2-components/V2Header';
 import V2Footer from '../v2-components/V2Footer';
@@ -17,7 +17,8 @@ import { AdvertorialCell, AdvertorialLayout, AdvertorialResponse } from '../type
 import { GuestAlbum, albumCoverUrl } from '../types/albums';
 import { guestCanUploadTo, guestOpenedAlbumUids } from '../client/albums';
 import { packUUID as packedAlbumUid } from '../packages/uuid';
-import GuestUploadModal, { GuestUploadModalHandle, MAX_FILES_PER_UPLOAD } from './GuestUploadModal';
+import GuestUploadModal, { GuestUploadModalHandle } from './GuestUploadModal';
+import { ArrowRightIcon, CalendarIcon, CameraIcon, CheckIcon, LockFilledIcon, MessageCircleIcon, MicIcon } from '../v2-components/GuestLineIcons';
 
 export interface V2GuestHomeProps {
   bannerImageUrl: string | null;
@@ -83,7 +84,7 @@ function GuestAdvertorialGrid({ advertorial }: { advertorial?: AdvertorialRespon
 
   return (
     <section className="guest-advertorial">
-      <span className="guest-advertorial-label">{textOr('guest.home.sponsored', 'Sponsored', 'Промоція')}</span>
+      <span className="guest-advertorial-label">{textOr('guest.home.sponsored', 'Promotions', 'Промоції')}</span>
       <div className={`guest-advertorial-grid guest-advertorial-grid-${layout}`}>
         {cells.map((cell) => {
           const image = <img src={cell.image_url} alt="" loading="lazy" />;
@@ -99,6 +100,41 @@ function GuestAdvertorialGrid({ advertorial }: { advertorial?: AdvertorialRespon
         })}
       </div>
     </section>
+  );
+}
+
+// Ne: Hostun karsilama metni; en fazla 3 satir gorunur, tasarsa "Більше" ile acilir.
+// Neden: Onayli tasarimda baslik, metin, butonlar, 4 reklam ve albumlerin basi tek ekrana
+//        sigmali. Host formu da 3 satiri asan metni kabul etmiyor (WELCOME_MAX_LINES); bu
+//        kesme, sinirdan once yazilmis uzun metinler ve daha genis bir yazi tipi icin.
+function GuestWelcomeText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const ref = useRef<HTMLParagraphElement>(null);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = ref.current;
+      if (el && !expanded) setOverflows(el.scrollHeight > el.clientHeight + 1);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    // Misafir yazi tipi sonradan yuklenince satir sayisi degisebilir.
+    document.fonts?.ready.then(measure).catch(() => {});
+    return () => window.removeEventListener('resize', measure);
+  }, [text, expanded]);
+
+  return (
+    <div className="guest-home-welcome-wrap">
+      <p ref={ref} className={`guest-home-welcome${expanded ? '' : ' clamped'}`}>{text}</p>
+      {(overflows || expanded) && (
+        <button type="button" className="guest-home-welcome-toggle" onClick={() => setExpanded((v) => !v)}>
+          {expanded
+            ? textOr('guest.album.readLess', 'Show less', 'Згорнути')
+            : textOr('guest.album.readMore', 'Show more', 'Більше')}
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -211,7 +247,7 @@ function V2GuestHome({
             <div className="guest-home-hero-image-overlay" />
             {eventDate && (
               <span className="guest-home-hero-date">
-                <i className="fa-regular fa-calendar" />
+                <CalendarIcon size={18} strokeWidth={1.6} />
                 <span>{eventDate}</span>
               </span>
             )}
@@ -219,9 +255,7 @@ function V2GuestHome({
           </div>
         </section>
 
-        {welcomeMessage && (
-          <p className="guest-home-welcome">{welcomeMessage}</p>
-        )}
+        {welcomeMessage && <GuestWelcomeText text={welcomeMessage} />}
 
         <section className="guest-home-actions">
           {uploadsClosed ? (
@@ -230,38 +264,36 @@ function V2GuestHome({
               <span>{textOr('guest.album.noVisibleAlbums', 'Uploads are closed for this event right now.', 'Завантаження для цієї події зараз закрито.')}</span>
             </div>
           ) : (
-            <>
-              <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
-                <button type="button" className="guest-home-upload-btn">
-                  <i className="fa-solid fa-camera" />
-                  <span className="guest-home-upload-btn-label">
-                    {textOr('guest.home.uploadPhotosAndVideos', 'Upload Photos & Videos', 'Завантажити фото та відео')}
-                  </span>
-                  <span className="guest-home-btn-arrow"><i className="fa-solid fa-arrow-right" /></span>
-                </button>
-              </FileInput>
-              {/* AM-06: sinir yuklemeye baslamadan gorunsun. */}
-              <p className="guest-home-upload-limit">{textOr('guest.upload.maxPerUpload', 'You can upload up to {{max}} files at a time.', 'За один раз ви можете завантажити до {{max}} файлів.', { max: MAX_FILES_PER_UPLOAD })}</p>
-            </>
+            // AM-06 "35 dosyaya kadar" notu onayli tasarimda yok; yukleme penceresinde
+            // ("N файлів · до 35 за раз") ve album sayfasinda gorunmeye devam ediyor.
+            <FileInput onFile={(file) => uploadModalRef.current?.addFiles([file])} multiple accept="image/*,video/*">
+              <button type="button" className="guest-home-upload-btn">
+                <CameraIcon size={20} strokeWidth={1.75} className="guest-home-upload-btn-icon" />
+                <span className="guest-home-upload-btn-label">
+                  {textOr('guest.home.uploadPhotosAndVideos', 'Upload Photos & Videos', 'Завантажити фото та відео')}
+                </span>
+                <span className="guest-home-btn-arrow"><ArrowRightIcon size={22} strokeWidth={1.75} /></span>
+              </button>
+            </FileInput>
           )}
 
           {/* Ses kaydi ve ani defteri ayni sayfada (guestbook); iki giris de oraya gider. */}
           <div className="guest-home-secondary-actions">
             <Link className="guest-home-secondary-btn" to={`/guest/${packedUid}/guestbook`}>
-              <i className="fa-solid fa-microphone" />
+              <MicIcon size={18} strokeWidth={1.75} className="guest-home-secondary-btn-icon" />
               <span className="guest-home-secondary-btn-label">{textOr('guest.home.audio', 'Audio', 'Аудіо')}</span>
-              <span className="guest-home-btn-arrow"><i className="fa-solid fa-arrow-right" /></span>
+              <ArrowRightIcon size={20} strokeWidth={1.75} className="guest-home-secondary-btn-arrow" />
             </Link>
-            <Link className="guest-home-secondary-btn" to={`/guest/${packedUid}/guestbook`}>
-              <i className="fa-regular fa-comment" />
+            <Link className="guest-home-secondary-btn guest-home-secondary-btn-guestbook" to={`/guest/${packedUid}/guestbook`}>
+              <MessageCircleIcon size={18} strokeWidth={1.75} className="guest-home-secondary-btn-icon" />
               <span className="guest-home-secondary-btn-label">{textOr('guest.home.guestbook', 'Guestbook', 'Побажання')}</span>
-              <span className="guest-home-btn-arrow"><i className="fa-solid fa-arrow-right" /></span>
+              <ArrowRightIcon size={20} strokeWidth={1.75} className="guest-home-secondary-btn-arrow" />
             </Link>
           </div>
 
           <p className="guest-home-secure">
-            <i className="fa-solid fa-circle-check guest-home-secure-check" />
-            <span className="guest-home-secure-lock"><i className="fa-solid fa-lock" /></span>
+            <span className="guest-home-secure-check"><CheckIcon size={9} strokeWidth={3.5} /></span>
+            <span className="guest-home-secure-lock"><LockFilledIcon size={11} strokeWidth={2.5} /></span>
             <span>{textOr('guest.home.privateSecure', '100% private and secure. No account required.', '100% приватно і безпечно. Без реєстрації.')}</span>
           </p>
         </section>
@@ -322,7 +354,7 @@ function V2GuestHome({
                         </span>
                       ) : null}
                     </div>
-                    <span className="guest-home-album-arrow"><i className="fa-solid fa-arrow-right" /></span>
+                    <span className="guest-home-album-arrow"><ArrowRightIcon size={18} strokeWidth={1.75} /></span>
                   </Link>
                 );
               })}
@@ -339,7 +371,7 @@ function V2GuestHome({
                   {textOr('guest.album.showAllAlbums', 'Show all albums', 'Відобразити усі альбоми')}
                 </span>
                 <span className="guest-home-albums-show-all-count">{albums.length}</span>
-                <span className="guest-home-albums-show-all-arrow"><i className="fa-solid fa-arrow-right" /></span>
+                <span className="guest-home-albums-show-all-arrow"><ArrowRightIcon size={18} strokeWidth={1.75} /></span>
               </button>
             )}
           </section>

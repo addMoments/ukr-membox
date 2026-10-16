@@ -1,5 +1,7 @@
-/* Misafir ana sayfasi (2026-10-13 yeni tasarim): telefon oncelikli tek sutun.
-   Hero gorseli -> karsilama metni -> yukleme / ses / ani defteri -> sponsorlu alan -> albumler. */
+/* Misafir ana sayfasi: onayli Figma (375 pt telefon cercevesi) olculeriyle.
+   Hero -> karsilama metni -> yukleme / ses / ani defteri -> guvenlik satiri -> promosyonlar -> albumler.
+   Musteri istegi: baslik, metin, butonlar, 4 reklam ve albumlerin basi tek ekranda gorunmeli; bu yuzden
+   bloklar arasi bosluklar tek tek tasarimdaki degerler (ortak gap yok). */
 .guest-home {
   background-color: var(--base);
   min-height: 100vh;
@@ -13,10 +15,9 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
-  padding: 24px 16px 40px;
+  padding: 24px 14px 40px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
   /* Yazi boyutlari ekrana degil bu sutuna gore: host tema onizlemesi ayni sayfayi dar telefon cercevesinde gosterir. */
   container-type: inline-size;
 }
@@ -27,11 +28,12 @@
   }
 }
 
-/* Hero: gorsel karti, tarih ustte, etkinlik adi altta gorselin uzerinde.
-   AM-14: Etkinlik gorseli 3:1 kirpiliyor; kutu da her ekranda 3:1, yoksa telefon/tablet
-   kirpilan alanin farkli bir dilimini gosteriyordu. overflow: aspect-ratio kutusu resimle uzamasin. */
+/* Hero: tarih ustte, etkinlik adi altta gorselin uzerinde.
+   Oran tasarimdaki 347x156 kutu (20:9). AM-14: etkinlik gorseli de 20:9 kirpiliyor ve her
+   ekranda ayni oranda gosteriliyor, yoksa telefon/tablet kirpilan alanin farkli bir dilimini
+   gosterirdi. overflow: aspect-ratio kutusu resimle uzamasin. */
 .guest-home-hero-image {
-  aspect-ratio: 3 / 1;
+  aspect-ratio: 20 / 9;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -49,32 +51,40 @@
 .guest-home-hero-image-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 35%, transparent 45%, rgba(0, 0, 0, 0.6));
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.32), transparent 30%, transparent 45%, rgba(0, 0, 0, 0.55));
 }
 
 .guest-home-hero-date {
   position: absolute;
-  top: 12px;
-  left: 16px;
+  top: 11px;
+  left: 18px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: #fff;
-  font-size: 13px;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
   font-weight: 500;
+  line-height: 18px;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
+.guest-home-hero-date svg {
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+}
+
+/* Tasarimda baslik gorselin sol ~%75'ini kullaniyor (yuzleri kapatmasin diye uzun ad iki satira iner). */
 .guest-home-hero-title {
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: 12px;
+  bottom: 14px;
+  max-width: 75%;
   margin: 0;
   color: #fff;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 22px;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -83,46 +93,72 @@
   overflow-wrap: anywhere;
 }
 
-/* Dar telefonda 3:1 kutu alcak kaliyor; ucuncu satir tarihin ustune binmesin. */
-@container (max-width: 420px) {
-  .guest-home-hero-title {
-    -webkit-line-clamp: 2;
-  }
-}
-
-@media (min-width: 480px) {
+/* Genis sutunda (tablet / masaustu, en fazla 560 px) hero 532 px'e kadar buyur; yazi telefon olcusunde kucuk kalmasin. */
+@container (min-width: 480px) {
   .guest-home-hero-date {
-    top: 16px;
+    top: 14px;
     left: 20px;
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .guest-home-hero-title {
     left: 20px;
-    right: 20px;
-    bottom: 16px;
-    font-size: 20px;
+    bottom: 18px;
+    font-size: 19px;
+    line-height: 26px;
   }
 }
 
-/* Karsilama metni: hostun yazdigi satir sonlari korunur. */
+/* Karsilama metni: hostun yazdigi satir sonlari korunur; en fazla 3 satir (bkz. GuestWelcomeText). */
+.guest-home-welcome-wrap {
+  margin-top: 7px;
+  padding: 0 17px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 .guest-home-welcome {
   margin: 0;
-  padding: 0 4px;
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--text);
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.015em;
+  /* Renkler tasarimdan olculdu; tema metin renginden turetilir ki koyu temada da okunsun. */
+  color: color-mix(in srgb, var(--text) 85%, transparent);
   /* index.html'deki global p { text-align: center } kuralini ezer; tasarimda sola dayali. */
   text-align: left;
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
 
-/* Eylemler: tam genislik yukleme hapi + yan yana Ses / Ani defteri */
+.guest-home-welcome.clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.guest-home-welcome-toggle {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 20px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Eylemler: tam genislik yukleme hapi + yan yana Ses / Ani defteri + guvenlik satiri */
 .guest-home-actions {
+  margin-top: 3px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .guest-home-actions .file-input-wrapper {
@@ -132,15 +168,16 @@
 
 .guest-home-upload-btn {
   width: 100%;
-  min-height: 60px;
+  height: 48px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 6px 6px 18px;
+  gap: 9px;
+  padding: 4px 4px 4px 17px;
   border-radius: 9999px;
-  border: 2px solid var(--primary);
+  border: none;
   background: var(--primary);
   color: var(--primary-text);
+  box-shadow: 0 2px 7px -1px color-mix(in srgb, var(--primary) 60%, transparent);
   font: inherit;
   cursor: pointer;
   box-sizing: border-box;
@@ -151,46 +188,50 @@
   transform: scale(0.98);
 }
 
-.guest-home-upload-btn > i {
-  font-size: 18px;
+.guest-home-upload-btn-icon {
+  flex-shrink: 0;
 }
 
 .guest-home-upload-btn-label {
   flex: 1;
   min-width: 0;
   text-align: left;
-  font-size: clamp(14px, 4.1vw, 18px);
-  font-size: clamp(13px, 4.5cqi, 18px);
+  font-size: 16px;
   font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .guest-home-btn-arrow {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: #fff;
   color: #1c1917;
-  font-size: 18px;
 }
 
 .guest-home-secondary-actions {
+  margin-top: 9px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .guest-home-secondary-btn {
-  min-height: 52px;
+  height: 38px;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 4px 4px 10px;
+  padding: 0 10px 0 16px;
   border-radius: 9999px;
-  border: 2px solid var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 55%, #c4c4c4);
   background: var(--base-card);
   color: var(--text);
   text-decoration: none;
@@ -203,80 +244,112 @@
   transform: scale(0.98);
 }
 
-.guest-home-secondary-btn > i {
-  font-size: 15px;
+.guest-home-secondary-btn-icon,
+.guest-home-secondary-btn-arrow {
+  flex-shrink: 0;
+}
+
+.guest-home-secondary-btn-arrow {
+  margin-left: auto;
+}
+
+/* Konusma balonunun cizimi kutusunda mikrofondan genis; tasarimdaki hizaya cekilir. */
+.guest-home-secondary-btn-guestbook .guest-home-secondary-btn-icon {
+  margin-left: -2px;
 }
 
 .guest-home-secondary-btn-label {
   flex: 1;
   min-width: 0;
-  /* 360px telefonda "Побажання" da sigsin */
-  font-size: clamp(13px, 3.9vw, 17px);
-  font-size: clamp(12px, 4.25cqi, 17px);
+  font-size: 15px;
   font-weight: 700;
+  line-height: 20px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.guest-home-secondary-btn .guest-home-btn-arrow {
-  width: 28px;
-  height: 28px;
-  font-size: 13px;
-  background: color-mix(in srgb, var(--text) 6%, transparent);
-  color: var(--text);
+/* Tasarim 375 pt genislikte; 320-360 px telefonlarda buton yazilari kesilmesin. */
+@container (max-width: 340px) {
+  .guest-home-upload-btn {
+    padding-left: 14px;
+    gap: 7px;
+  }
+
+  .guest-home-upload-btn-label {
+    font-size: 14px;
+  }
+
+  .guest-home-secondary-btn {
+    padding: 0 7px 0 11px;
+    gap: 4px;
+  }
+
+  .guest-home-secondary-btn-label {
+    font-size: 13px;
+  }
 }
 
 .guest-home-secure {
-  margin: 0;
+  margin: 10px 0 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 4px;
-  font-size: 13px;
-  color: var(--text-secondary);
+  padding: 0 12px;
+  font-size: 11px;
+  line-height: 16px;
+  color: color-mix(in srgb, var(--text) 50%, transparent);
   text-align: left;
 }
 
 .guest-home-secure-check {
-  color: var(--primary);
-  font-size: 16px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #fff;
   flex-shrink: 0;
 }
 
 .guest-home-secure-lock {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
+  width: 15px;
+  height: 15px;
+  margin: 0 -2px 0 2px;
+  border-radius: 5px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--text) 8%, transparent);
-  color: var(--text-secondary);
-  font-size: 10px;
+  background: #e3e4ef;
+  color: #8a8da3;
   flex-shrink: 0;
 }
 
-/* Sponsorlu alan: reklam yoksa (layout none / eksik gorsel) hic render edilmez. */
+/* Promosyonlar: reklam yoksa (layout none / eksik gorsel) hic render edilmez.
+   Tasarimda 2x2, hucreler ~160x78 (41:20) ve gorsel hucreyi doldurur. */
 .guest-advertorial {
-  padding: 12px;
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--primary) 12%, var(--base-card));
-  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+  margin-top: 6px;
+  padding: 11px 10px 9px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--primary) 7%, #f5f5f0);
+  border: 1px solid color-mix(in srgb, var(--primary) 10%, #e8e8e2);
 }
 
 .guest-advertorial-label {
   display: block;
-  margin: 2px 4px 10px;
-  font-size: 14px;
+  margin: 0 5px 9px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text-secondary);
+  line-height: 14px;
+  color: color-mix(in srgb, var(--text) 75%, transparent);
 }
 
 .guest-advertorial-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 7px;
 }
 
 .guest-advertorial-grid-2x1,
@@ -286,11 +359,16 @@
 
 .guest-advertorial-cell {
   min-width: 0;
-  aspect-ratio: 16 / 9;
-  border-radius: 12px;
+  aspect-ratio: 41 / 20;
+  border-radius: 8px;
   overflow: hidden;
   background: var(--base-card);
-  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.25);
+}
+
+/* Tek reklam tam genislikte; 41:20 seritte cok alcak kalmasin. */
+.guest-advertorial-grid-single .guest-advertorial-cell,
+.guest-advertorial-grid-1x1 .guest-advertorial-cell {
+  aspect-ratio: 2 / 1;
 }
 
 .guest-advertorial-cell a {
@@ -304,7 +382,7 @@
 .guest-advertorial-cell img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   display: block;
 }
@@ -1020,8 +1098,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 60px;
-  padding: 12px 20px;
+  min-height: 48px;
+  padding: 10px 20px;
   border-radius: 9999px;
   background: var(--base-card);
   border: 2px dashed color-mix(in srgb, var(--text) 18%, transparent);
@@ -1033,7 +1111,7 @@
 }
 
 .guest-home-albums {
-  margin: 8px 0 0;
+  margin: 14px 0 0;
 }
 
 .guest-home-albums-header {
@@ -1041,27 +1119,29 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin: 0 4px 12px;
+  margin: 0 4px 7px 5px;
 }
 
 .guest-home-albums-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
+  line-height: 24px;
   color: var(--text);
 }
 
-/* "Moments 306": misafirin gorebildigi albumlerdeki foto + video sayisi */
+/* "Моменти 306": misafirin gorebildigi albumlerdeki foto + video sayisi */
 .guest-home-albums-moments {
   display: inline-flex;
   align-items: baseline;
-  gap: 12px;
-  font-size: 15px;
-  color: var(--text-secondary);
+  gap: 16px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--text) 75%, transparent);
   white-space: nowrap;
 }
 
 .guest-home-albums-moments strong {
+  font-size: 13px;
   color: var(--text);
   font-weight: 700;
 }
@@ -1069,17 +1149,17 @@
 .guest-home-albums-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .guest-home-album-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 7px;
-  border-radius: 20px;
+  gap: 12px;
+  padding: 6px;
+  border-radius: 16px;
   background: var(--base-card);
-  border: 1.5px solid color-mix(in srgb, var(--text) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
   text-decoration: none;
   color: var(--text);
   transition: transform 0.15s, box-shadow 0.15s;
@@ -1091,12 +1171,12 @@
   box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* AM-14: Kapak 4:3 kirpiliyor, kucuk resim de 4:3 (kare kenarlari kesiyordu). */
+/* AM-14: Kapak 4:3 kirpiliyor, kucuk resim de 4:3. */
 .guest-home-album-cover {
   position: relative;
-  width: 108px;
-  height: 81px;
-  border-radius: 13px;
+  width: 82px;
+  height: 61.5px;
+  border-radius: 11px;
   overflow: hidden;
   flex-shrink: 0;
   background: color-mix(in srgb, var(--text) 6%, transparent);
@@ -1116,7 +1196,7 @@
   align-items: center;
   justify-content: center;
   color: var(--text-tertiary);
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .guest-home-album-body {
@@ -1131,7 +1211,8 @@
 .guest-home-album-name {
   max-width: 100%;
   font-weight: 700;
-  font-size: 17px;
+  font-size: 14px;
+  line-height: 20px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1139,15 +1220,16 @@
 
 .guest-home-album-meta {
   max-width: 100%;
-  font-size: 14px;
-  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .guest-home-album-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1160,8 +1242,8 @@
   flex-shrink: 0;
   margin-left: auto;
   padding: 0 12px 0 4px;
+  display: inline-flex;
   color: var(--text);
-  font-size: 16px;
 }
 
 /* Kilitli (protected, passcode girilmemis) ve yalnizca-goruntule kart durumlari */
@@ -1173,7 +1255,7 @@
   justify-content: center;
   background: rgba(0, 0, 0, 0.45);
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .guest-home-album-state {
@@ -1185,12 +1267,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 4px;
-  padding: 3px 10px;
+  margin-top: 3px;
+  padding: 2px 9px;
   border-radius: 9999px;
   background: color-mix(in srgb, var(--primary) 18%, var(--base-card));
   border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text);
 }
@@ -1205,15 +1287,15 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-height: 56px;
-  margin-top: 10px;
-  padding: 8px 0 8px 18px;
-  border-radius: 20px;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 6px 0 6px 18px;
+  border-radius: 16px;
   background: var(--base-card);
-  border: 2px solid var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 60%, transparent);
   color: var(--text);
   font: inherit;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
@@ -1274,12 +1356,4 @@
 
 .upload-modal-album-locked i {
   color: #888;
-}
-
-/* AM-06: tek seferde yuklenebilecek dosya sayisi, yukleme dugmesinin altinda. */
-.guest-home-upload-limit {
-  margin: -4px 0 0;
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-align: center;
 }

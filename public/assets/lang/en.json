@@ -158,7 +158,7 @@
         "previewText": "Preview text",
         "previewHeadline": "Capturing Every Beat of the Celebration",
         "previewSubtext": "Share your favorite photos and videos with everyone instantly.",
-        "uploadSpecs": "Recommended 1800×600 px (3:1). JPG, PNG or WEBP, up to 10 MB. Guests see exactly the area you crop, on phones and computers alike.",
+        "uploadSpecs": "Recommended 1800×810 px (20:9). JPG, PNG or WEBP, up to 10 MB. Guests see exactly the area you crop, on phones and computers alike.",
         "fileTooLarge": "This image is larger than 10 MB. Crop it or choose a smaller file."
     },
     "settings": {
@@ -590,7 +590,7 @@
             "audio": "Audio",
             "guestbook": "Guestbook",
             "privateSecure": "100% private and secure. No account required.",
-            "sponsored": "Sponsored"
+            "sponsored": "Promotions"
         },
         "album": {
             "sectionTitle": "Albums",
