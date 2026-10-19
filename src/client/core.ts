@@ -41,11 +41,18 @@ export const setAuthToken = async (token: string) => set_key(await currentStorag
 export const clearAuthToken = async () => rm_key(await currentStorageKey());
 
 let keyinitPromise: Promise<void> | null = null;
+let keyinitGuestKey = "";
 let currKey = "";
 const updateCurrKey = async ()=>{
-    if (keyinitPromise){
+    // Ne: Anahtar, onbellege alindigi andaki misafir event'i hala gecerliyse yeniden kullanilir.
+    // Neden: SPA icinde /guest/A'dan /guest/B'ye sayfa yenilenmeden gecilince A'nin token'i
+    //        B'ye gidiyordu; B'deki paylasimlar A'nin participant'ina yaziliyor ve A kalici
+    //        silinemiyordu (19 Ekim, uploads_client_uid_fkey).
+    const guestKeyNow = isGuest() ? guestPackedEventUid() : "";
+    if (keyinitPromise && keyinitGuestKey === guestKeyNow){
         return keyinitPromise;
     }
+    keyinitGuestKey = guestKeyNow;
 
     keyinitPromise = (async () => {
         // Ne: /guest/... altinda hesap token'i ("tkn") olsa bile her zaman event'e ozel
