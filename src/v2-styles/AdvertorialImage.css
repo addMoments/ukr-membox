@@ -1,0 +1,19 @@
+/* Reklam gorseli butun (contain), kirpilmaz. 2:1 olmayan gorselde kalan bosluk, kutunun
+   arka planinda gorselin o kenarindaki rengin duz tonuyla dolar (AdvertorialImage.tsx,
+   advertorialEdgeFill); renk okunamazsa hucrenin sade zemini kalir. Kutu, oranini veren
+   hucreyi (misafir hucresi ya da host onizlemesi) tamamen kaplar. */
+.advertorial-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.advertorial-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+}

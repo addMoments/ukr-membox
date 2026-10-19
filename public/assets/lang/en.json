@@ -587,6 +587,8 @@
             "reasonLimit": "Upload limit reached",
             "reasonAlbumClosed": "Uploads to this album are closed",
             "maxPerUpload": "You can upload up to {{max}} files at a time.",
+            "maxPerUploadChip": "max {{max}} at a time",
+            "unsupportedSkipped": "Only photos and videos can be uploaded. Not added: {{names}}",
             "maxPerUploadShort": "up to {{max}} at a time",
             "limitSkipped": "You can upload up to {{max}} files at a time. Not added: {{count}}. Select them again after these finish uploading."
         },

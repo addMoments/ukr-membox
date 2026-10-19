@@ -54,21 +54,30 @@
   min-width: 0;
 }
 
+/* Onizleme misafir hucresiyle ayni oranda ve ayni gorsel bileseniyle (AdvertorialImage):
+   tek reklam 2:1, digerleri 41:20 (GuestHome.css .guest-advertorial-cell). Eskiden 16:9
+   kutuda 1600x800 reklam ust/altta bosluk birakiyor, host gorseli eksik saniyordu
+   (Solomiia 19 Ekim aksami). */
 .advertorial-cell-preview {
-  aspect-ratio: 16 / 9;
+  position: relative;
+  aspect-ratio: 41 / 20;
   width: 100%;
-  border-radius: 18px;
+  border-radius: 12px;
   background: #F5F3F1;
   border: 1px dashed #D6D3D1;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
-.advertorial-cell-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  display: block;
+.advertorial-cell-list-single .advertorial-cell-preview,
+.advertorial-cell-list-1x1 .advertorial-cell-preview {
+  aspect-ratio: 2 / 1;
+}
+
+/* Gorsel varken kesikli cerceve yok; misafirdeki hafif golge. */
+.advertorial-cell-preview.has-image {
+  border: 0;
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .advertorial-cell-placeholder {

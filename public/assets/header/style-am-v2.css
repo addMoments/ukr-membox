@@ -552,22 +552,24 @@ padding: 25px;
   /* Misafir sayfasi (Solomiia 19 Ekim, madde 2-3): header, sayfanin 560 px icerik sutunuyla
      ayni genislikte ve ayni 14 px kenarla durur. Logo etkinlik gorselinin sol kenarina,
      balon icindeki menu ikonu sag kenarina hizalanir. guest-route sinifini hfSetup.js
-     setMobileGuestMenuMode ekler. */
+     setMobileGuestMenuMode ekler.
+     Balon Figma'daki gibi 56x40 hap, #F1F5F6 (Solomiia 19 Ekim aksami, madde 3; once 36 px
+     daireydi). Header yuksekligi degismesin, etkinlik gorseli yerinde kalsin diye ust/alt
+     bosluk 8 -> 6 px. */
   nav.v2-header.guest-route .v2-header-container {
     max-width: 560px;
-    padding-left: 14px;
-    padding-right: 14px;
+    padding: 6px 14px;
   }
 
   nav.v2-header.guest-route .v2-header-mobile-toggle {
-    width: 36px;
-    height: 36px;
+    width: 56px;
+    height: 40px;
     padding: 0;
-    border-radius: 50%;
+    border-radius: 9999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #f1f1ef;
+    background: #f1f5f6;
   }
 
   nav.v2-header.guest-route .v2-header-mobile-toggle .header-icon {

@@ -67,6 +67,15 @@ const AUTO_RETRY_DELAYS_MS = [15000, 30000, 60000, 120000, 300000];
 //      degisirse isim cekimine bakmak gerekir.
 export const MAX_FILES_PER_UPLOAD = 35;
 
+// Ne: Yalniz foto ve video kabul edilir; digerleri listeye eklenmez, adlari bildirimde yazar.
+// Neden: Secicideki accept="image/*,video/*" iPhone'da "Dosya sec" ile ve surukle-birakta asiliyor.
+//        Solomiia 19 Ekim'de bir PDF yukledi; 'photo' diye kaydedildi ve galeride "Не вдалося
+//        завантажити" kutusu olarak gorundu (galeri, goruntuleyici, host ana sayfasi yalniz foto/video
+//        gosterir). Bazi tarayicilar HEIC gibi dosyalarda tipi bos verir: o zaman uzantiya bakilir.
+const MEDIA_EXTENSIONS = /\.(jpe?g|png|gif|webp|heic|heif|avif|bmp|tiff?|mp4|mov|m4v|3gp|webm|mkv|avi|hevc)$/i;
+const isPhotoOrVideo = (file: File) =>
+  file.type ? /^(image|video)\//.test(file.type) : MEDIA_EXTENSIONS.test(file.name);
+
 // TS 4.9'un lib.dom'unda Screen Wake Lock API tipi yok; kullandigimiz kadarini tanimliyoruz.
 type ScreenWakeLock = { release: () => Promise<void> };
 type WakeLockNavigator = Navigator & { wakeLock?: { request: (type: 'screen') => Promise<ScreenWakeLock> } };
@@ -112,6 +121,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
     // Ayni secimin dosyalari ayni gorevde art arda gelir; sinira takilanlar tek bildirimde toplanir.
     selecting: false,
     skipped: 0,
+    unsupported: [] as string[],
   }).current;
   const nameInputRef = useRef<HTMLInputElement>(null);
   const albumSelectRef = useRef<HTMLSelectElement>(null);
@@ -127,6 +137,8 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
   const [uploadDone, setUploadDone] = useState<{ count: number; bytes: number; duplicates: number } | null>(null);
   // AM-06: son secimde sinir yuzunden eklenmeyen dosya sayisi (0 = bildirim yok).
   const [limitSkipped, setLimitSkipped] = useState(0);
+  // Son secimde foto/video olmadigi icin eklenmeyen dosyalarin adlari.
+  const [unsupportedNames, setUnsupportedNames] = useState<string[]>([]);
 
   const getLocalizedText = (key: string, fallback: string) => {
     const value = t(key);
@@ -154,10 +166,18 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
     if (!runtime.selecting) {
       runtime.selecting = true;
       runtime.skipped = 0;
+      runtime.unsupported = [];
       queueMicrotask(() => {
         runtime.selecting = false;
         setLimitSkipped(runtime.skipped);
+        setUnsupportedNames(runtime.unsupported);
+        // Yalniz desteklenmeyen dosya secildiyse de pencere acilir, yoksa misafir hicbir sey gormez.
+        if (runtime.unsupported.length > 0) setModalOpen(true);
       });
+    }
+    if (!isPhotoOrVideo(file)) {
+      runtime.unsupported.push(file.name);
+      return;
     }
     if (elemRef.entries.filter(e => !isFinished(e)).length >= MAX_FILES_PER_UPLOAD) {
       runtime.skipped += 1;
@@ -192,6 +212,7 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
     setUploadDone(null);
     setUploadErrorMessage('');
     setLimitSkipped(0);
+    setUnsupportedNames([]);
   };
 
   // "Durdur": suren dosya kesilir ve sirada kalir; misafir sonra devam ettirebilir ya da vazgecer.
@@ -586,6 +607,12 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
             <span>{textOr('guest.upload.limitSkipped', 'You can upload up to {{max}} files at a time. Not added: {{count}}. Select them again after these finish uploading.', 'За один раз можна завантажити до {{max}} файлів. Не додано: {{count}}. Виберіть їх ще раз, коли ці завантажаться.', { max: MAX_FILES_PER_UPLOAD, count: limitSkipped })}</span>
           </div>
         ) : null}
+        {unsupportedNames.length > 0 && !isUploading ? (
+          <div className="upload-modal-notice" role="status">
+            <i className="fa-solid fa-circle-info" />
+            <span>{textOr('guest.upload.unsupportedSkipped', 'Only photos and videos can be uploaded. Not added: {{names}}', 'Завантажувати можна лише фото та відео. Не додано: {{names}}', { names: unsupportedNames.join(', ') })}</span>
+          </div>
+        ) : null}
         {/* AM-04: kesintide ne oldugu ve ne olacagi. */}
         {isUploading && offlineNow ? (
           <div className="upload-modal-notice" role="status">
@@ -642,7 +669,14 @@ const GuestUploadModal = forwardRef<GuestUploadModalHandle, GuestUploadModalProp
         )}
 
         <div className="upload-modal-list-header">
-          <span>{fileEntries.length} {t('common.files')} · {textOr('guest.upload.maxPerUploadShort', 'up to {{max}} at a time', 'до {{max}} за раз', { max: MAX_FILES_PER_UPLOAD })}</span>
+          {/* Sinir bir kosul oldugu belli olsun diye ayri, renkli etiket (Solomiia 19 Ekim aksami). */}
+          <span className="upload-modal-list-count">
+            <span>{fileEntries.length} {t('common.files')}</span>
+            <span className="upload-modal-limit-chip">
+              <i className="fa-solid fa-circle-info" aria-hidden="true" />
+              {textOr('guest.upload.maxPerUploadChip', 'max {{max}} at a time', 'макс. {{max}} за раз', { max: MAX_FILES_PER_UPLOAD })}
+            </span>
+          </span>
           {!isUploading && unfinishedCount < MAX_FILES_PER_UPLOAD && (
             <FileInput onFile={handleFileSelect} multiple accept="image/*,video/*">
               <button type="button" className="upload-modal-add-btn">

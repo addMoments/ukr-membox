@@ -18,6 +18,7 @@ import { GuestAlbum, albumCoverUrl } from '../types/albums';
 import { guestCanUploadTo, guestOpenedAlbumUids } from '../client/albums';
 import { packUUID as packedAlbumUid } from '../packages/uuid';
 import GuestUploadModal, { GuestUploadModalHandle } from './GuestUploadModal';
+import AdvertorialImage from '../v2-components/AdvertorialImage';
 import { ArrowRightIcon, CalendarIcon, CameraIcon, CheckIcon, LockFilledIcon, MessageCircleIcon, MicIcon } from '../v2-components/GuestLineIcons';
 
 export interface V2GuestHomeProps {
@@ -46,6 +47,28 @@ export interface V2GuestHomeProps {
   galleryOn?: boolean;
   // Album basina misafirin okuyabildigi medya adedi (RLS suzer); "Moments N" sayaci bundan.
   albumMediaCounts?: Record<string, number> | null;
+  // Host tema onizlemesi (telefon cercevesindeki iframe). Gercek sayfadaki header index.html'de,
+  // React disinda; iframe'de yok. Onizleme gercek sayfaya benzesin diye durum cubugu payi ve
+  // header'in kopyasi (logo + burger balonu) cizilir.
+  preview?: boolean;
+}
+
+// Ne: Tema onizlemesinin ustu: telefonun durum cubugu / dinamik ada payi ve misafir header'inin
+//     kopyasi (style-am-v2.css nav.v2-header.guest-route ile ayni olculer).
+// Neden: Onizlemede header olmadigi icin etkinlik gorseli ekranin en ustune, dinamik adanin
+//        altina giriyordu (Solomiia 19 Ekim aksami: "the preview went off").
+function GuestPreviewHeader() {
+  const assets = `${process.env.PUBLIC_URL || ''}/assets/header`;
+  return (
+    <div className="guest-home-preview-header" aria-hidden="true">
+      <div className="guest-home-preview-header-inner">
+        <img className="guest-home-preview-logo" src={`${assets}/addmoments_logo.svg`} alt="" />
+        <span className="guest-home-preview-burger">
+          <img src={`${assets}/burger.svg`} alt="" />
+        </span>
+      </div>
+    </div>
+  );
 }
 
 // Misafir ana sayfasinda "Show all albums"a basilmadan gorunen album sayisi.
@@ -77,89 +100,6 @@ const getRenderableAdvertorialCells = (advertorial?: AdvertorialResponse | null)
     .sort((a, b) => a.index - b.index);
 };
 
-// Ne: Gorselin bosluk kalan iki kenarinin (yan yana ya da ust/alt) ortalama rengi; hucrenin
-//     bu kenarlardaki bos seridi bu duz renklerle boyanir.
-// Nasil: Gorsel hucreden darsa en sol ve en sag piksel sutunu, genisse en ust ve en alt satir
-//        kucuk bir canvas'ta ortalanir. S3 CORS'u herkese acik; canvas yine de okunamazsa
-//        (baska kaynak) null doner ve hucrenin sade zemini kalir.
-const advertorialEdgeFill = (img: HTMLImageElement | null, cell: HTMLElement | null): string | null => {
-  if (!img || !cell || !img.naturalWidth || !img.naturalHeight || !cell.clientWidth || !cell.clientHeight) return null;
-  const sideBands = img.naturalWidth / img.naturalHeight < cell.clientWidth / cell.clientHeight;
-  const size = 64;
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return null;
-    ctx.drawImage(img, 0, 0, size, size);
-    // Seffaf kenarli (PNG logo) gorselde renk alfa ile agirliklanir; kenar cogunlukla
-    // seffafsa null doner ve hucrenin kendi zemini kalir (siyah serit olusmasin).
-    const average = (x: number, y: number, w: number, h: number) => {
-      const data = ctx.getImageData(x, y, w, h).data;
-      let r = 0, g = 0, b = 0, a = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        const alpha = data[i + 3];
-        r += data[i] * alpha; g += data[i + 1] * alpha; b += data[i + 2] * alpha; a += alpha;
-      }
-      if (a < (data.length / 4) * 255 * 0.5) return null;
-      return `rgb(${Math.round(r / a)}, ${Math.round(g / a)}, ${Math.round(b / a)})`;
-    };
-    const first = sideBands ? average(0, 0, 1, size) : average(0, 0, size, 1);
-    const last = sideBands ? average(size - 1, 0, 1, size) : average(0, size - 1, size, 1);
-    if (!first || !last) return null;
-    return `linear-gradient(${sideBands ? 'to right' : 'to bottom'}, ${first} 50%, ${last} 50%)`;
-  } catch {
-    return null;
-  }
-};
-
-// Ne: Reklam gorseli hucrede butun gorunur (kirpilmaz); 2:1 olmayan gorselde kalan bosluk,
-//     gorselin o kenarindaki rengin duz tonuyla dolar.
-// Neden: 16 Ekim'de bosluk gorselin kenar seridi uzatilarak dolduruluyordu; kenarinda acik
-//        cerceve olan reklamlarda (Monako, Prestige) bu bulanik leke gibi gorundu (Solomiia,
-//        19 Ekim). Kirpma da denendi: canli 16:9 reklamlarin bazilarinda yazi kenara %5 yakin
-//        (Monako'nun soru isareti), hucreyi doldurmak icin gereken ~%7 kirpma onu kesiyordu.
-// Ne: Renk okunabilsin diye gorsel CORS ile, ayri bir onbellek anahtariyla (?am=c) yuklenir.
-// Neden: S3, Origin basligi olmayan istege CORS basligi ve Vary donmuyor. Ayni URL daha once
-//        CORS'suz yuklendiyse (eski surum, admin ekrani) tarayici o yaniti CORS istegine verir
-//        ve gorsel hic gorunmez. Bu anahtari yalnizca bu bilesen, her zaman CORS ile ister.
-const advertorialCorsSrc = (src: string) => `${src}${src.includes('?') ? '&' : '?'}am=c`;
-
-function GuestAdvertorialImage({ src }: { src: string }) {
-  const [fill, setFill] = useState<string | null>(null);
-  const [corsFailed, setCorsFailed] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
-  const boxRef = useRef<HTMLSpanElement>(null);
-
-  const measure = () => setFill(advertorialEdgeFill(imgRef.current, boxRef.current));
-
-  // Onbellekten gelen gorselde onLoad, React baglanmadan once tetiklenmis olabilir.
-  useEffect(() => {
-    if (imgRef.current?.complete) setFill(advertorialEdgeFill(imgRef.current, boxRef.current));
-  }, [src, corsFailed]);
-
-  // CORS yuklemesi basarisizsa reklam kaybolmasin: gorsel eski yolla, renksiz zeminde yuklenir.
-  return (
-    <span ref={boxRef} className="guest-advertorial-box" style={fill ? { background: fill } : undefined}>
-      {corsFailed ? (
-        <img className="guest-advertorial-img" src={src} alt="" loading="lazy" />
-      ) : (
-        <img
-          ref={imgRef}
-          className="guest-advertorial-img"
-          src={advertorialCorsSrc(src)}
-          alt=""
-          loading="lazy"
-          crossOrigin="anonymous"
-          onLoad={measure}
-          onError={() => setCorsFailed(true)}
-        />
-      )}
-    </span>
-  );
-}
-
 function GuestAdvertorialGrid({ advertorial }: { advertorial?: AdvertorialResponse | null }) {
   const cells = getRenderableAdvertorialCells(advertorial);
   const layout = advertorial?.config?.layout;
@@ -170,7 +110,7 @@ function GuestAdvertorialGrid({ advertorial }: { advertorial?: AdvertorialRespon
       <span className="guest-advertorial-label">{textOr('guest.home.sponsored', 'Promotions', 'Промоції')}</span>
       <div className={`guest-advertorial-grid guest-advertorial-grid-${layout}`}>
         {cells.map((cell) => {
-          const image = <GuestAdvertorialImage src={cell.image_url} />;
+          const image = <AdvertorialImage src={cell.image_url} />;
           return (
             <div key={cell.index} className="guest-advertorial-cell">
               {cell.link_url ? (
@@ -239,6 +179,7 @@ function V2GuestHome({
   albumsLoaded = false,
   galleryOn = false,
   albumMediaCounts = null,
+  preview = false,
 }: V2GuestHomeProps) {
   // Yukleme modali ayri bilesende (GuestUploadModal); dosyalar ref uzerinden verilir.
   const uploadModalRef = useRef<GuestUploadModalHandle>(null);
@@ -331,6 +272,8 @@ function V2GuestHome({
       />
 
       <V2Header />
+
+      {preview && <GuestPreviewHeader />}
 
       <main className="guest-home-main">
         <section className="guest-home-hero">

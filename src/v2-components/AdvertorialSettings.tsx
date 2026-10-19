@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import Button from '../components/Button';
 import FileInput from '../components/FileInput';
+import AdvertorialImage from './AdvertorialImage';
 import {
   getAdvertorialConfig,
   getAdvertorialUploadUrl,
@@ -403,9 +404,9 @@ function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
         <div className={`advertorial-cell-list advertorial-cell-list-${layout}`}>
           {cells.map((cell) => (
             <div key={cell.index} className="advertorial-cell-card">
-              <div className="advertorial-cell-preview">
+              <div className={`advertorial-cell-preview${cell.image_url ? ' has-image' : ''}`}>
                 {cell.image_url ? (
-                  <img src={cell.image_url} alt={advertorialText('settings.advertorial.cellImageAlt', { index: cell.index + 1 })} />
+                  <AdvertorialImage src={cell.image_url} alt={advertorialText('settings.advertorial.cellImageAlt', { index: cell.index + 1 })} />
                 ) : (
                   <div className="advertorial-cell-placeholder">
                     <i className="fa-regular fa-image" />

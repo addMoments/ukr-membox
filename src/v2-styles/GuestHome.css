@@ -28,6 +28,46 @@
   }
 }
 
+/* Host tema onizlemesi (V2GuestHome preview): 48 px durum cubugu / dinamik ada payi, sonra
+   misafir header'inin kopyasi. Olculer style-am-v2.css nav.v2-header.guest-route ile ayni
+   (beyaz zemin, 560 px sutun, 6/14 px bosluk, 36 px logo, 56x40 burger balonu). */
+.guest-home-preview-header {
+  background: #fff;
+  padding-top: 48px;
+}
+
+.guest-home-preview-header-inner {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 6px 14px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.guest-home-preview-logo {
+  height: 36px;
+  width: auto;
+  display: block;
+}
+
+.guest-home-preview-burger {
+  width: 56px;
+  height: 40px;
+  border-radius: 9999px;
+  background: #f1f5f6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guest-home-preview-burger img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
 /* Hero: tarih ustte, etkinlik adi altta gorselin uzerinde.
    Oran tasarimdaki 347x156 kutu (20:9). AM-14: etkinlik gorseli de 20:9 kirpiliyor ve her
    ekranda ayni oranda gosteriliyor, yoksa telefon/tablet kirpilan alanin farkli bir dilimini
@@ -400,26 +440,6 @@
   text-decoration: none;
 }
 
-/* Reklam gorseli butun (contain), kirpilmaz. 2:1 olmayan gorselde kalan bosluk, kutunun
-   arka planinda gorselin o kenarindaki rengin duz tonuyla dolar (V2GuestHome.tsx,
-   advertorialEdgeFill); renk okunamazsa hucrenin sade zemini kalir. */
-.guest-advertorial-box {
-  position: absolute;
-  inset: 0;
-  display: block;
-}
-
-.guest-advertorial-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: contain;
-  object-position: center;
-}
-
-
 /* File input hidden */
 .guest-home-file-input {
   display: none;
@@ -567,6 +587,34 @@
   font-size: 13px;
   color: #666;
   font-weight: 500;
+}
+
+.upload-modal-list-count {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  min-width: 0;
+}
+
+/* Tek seferlik dosya siniri: duz yazi arasinda kayboluyordu, kosul oldugu belli olsun diye
+   bildirimlerle ayni amber tonunda etiket. */
+.upload-modal-limit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.upload-modal-limit-chip i {
+  font-size: 11px;
 }
 
 .upload-modal-add-btn {

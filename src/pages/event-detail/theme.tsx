@@ -193,6 +193,7 @@ function EventThemeInner({event}: {event: Event}) {
               onFileSelect={() => {}}
               font={activeFont}
               theme={theme}
+              preview
             />
           </Mockup2>
 
