@@ -328,11 +328,13 @@
     };
 
     const setMobileGuestMenuMode = ()=>{
+      const guestMode = isGuestRoute();
+      // Misafir sayfasinda header icerik sutununa hizalanir (style-am-v2.css, nav.v2-header.guest-route).
+      root.classList[guestMode ? 'add' : 'remove']('guest-route');
       const mobileMenu = qs('.v2-header-mobile-menu');
       if (!mobileMenu){
         return;
       }
-      const guestMode = isGuestRoute();
       mobileMenu.classList[guestMode ? 'add' : 'remove']('guest-mobile-minimal');
       if (!guestMode){
         return;

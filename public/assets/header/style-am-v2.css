@@ -548,6 +548,32 @@ padding: 25px;
   .v2-header-mobile-lang .v2-lang-swap-btn {
     padding: 10px 0 2px;
   }
+
+  /* Misafir sayfasi (Solomiia 19 Ekim, madde 2-3): header, sayfanin 560 px icerik sutunuyla
+     ayni genislikte ve ayni 14 px kenarla durur. Logo etkinlik gorselinin sol kenarina,
+     balon icindeki menu ikonu sag kenarina hizalanir. guest-route sinifini hfSetup.js
+     setMobileGuestMenuMode ekler. */
+  nav.v2-header.guest-route .v2-header-container {
+    max-width: 560px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  nav.v2-header.guest-route .v2-header-mobile-toggle {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f1ef;
+  }
+
+  nav.v2-header.guest-route .v2-header-mobile-toggle .header-icon {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 @media (min-width: 901px) {

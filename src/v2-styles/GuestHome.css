@@ -229,7 +229,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 10px 0 16px;
+  padding: 0 4px 0 16px;
   border-radius: 9999px;
   border: 1px solid color-mix(in srgb, var(--primary) 55%, #c4c4c4);
   background: var(--base-card);
@@ -249,8 +249,17 @@
   flex-shrink: 0;
 }
 
+/* Ok, yukleme hapindaki beyaz daire gibi gri bir dairede (Figma; Solomiia 19 Ekim, madde 4).
+   38 px hapin icinde her yandan 4 px. */
 .guest-home-secondary-btn-arrow {
   margin-left: auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--text) 7%, var(--base-card));
 }
 
 /* Konusma balonunun cizimi kutusunda mikrofondan genis; tasarimdaki hizaya cekilir. */
@@ -281,8 +290,13 @@
   }
 
   .guest-home-secondary-btn {
-    padding: 0 7px 0 11px;
+    padding: 0 4px 0 11px;
     gap: 4px;
+  }
+
+  .guest-home-secondary-btn-arrow {
+    width: 26px;
+    height: 26px;
   }
 
   .guest-home-secondary-btn-label {
@@ -290,8 +304,10 @@
   }
 }
 
+/* Ustteki butonlarla alttaki promosyon karti arasinda tam ortada: iki bosluk esit (8 px),
+   .guest-advertorial margin-top ile birlikte (Solomiia 19 Ekim, madde 5). */
 .guest-home-secure {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -314,10 +330,11 @@
   flex-shrink: 0;
 }
 
+/* Kilit onay isaretine yakin (Figma; madde 6): aradaki bosluk 3 px. */
 .guest-home-secure-lock {
   width: 15px;
   height: 15px;
-  margin: 0 -2px 0 2px;
+  margin: 0 -2px 0 -5px;
   border-radius: 5px;
   display: inline-flex;
   align-items: center;
@@ -330,7 +347,7 @@
 /* Promosyonlar: reklam yoksa (layout none / eksik gorsel) hic render edilmez.
    Tasarimda 2x2, hucreler ~160x78 (41:20) ve gorsel hucreyi doldurur. */
 .guest-advertorial {
-  margin-top: 6px;
+  margin-top: 8px;
   padding: 11px 10px 9px;
   border-radius: 16px;
   background: color-mix(in srgb, var(--primary) 7%, #f5f5f0);
@@ -357,6 +374,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+/* Hafif golge: ilk Figma'daki gibi (Solomiia 19 Ekim, madde 1). overflow kutunun kendi
+   golgesini kesmez. */
 .guest-advertorial-cell {
   position: relative;
   min-width: 0;
@@ -364,6 +383,7 @@
   border-radius: 8px;
   overflow: hidden;
   background: var(--base-card);
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 /* Tek reklam tam genislikte; 41:20 seritte cok alcak kalmasin. */
@@ -1240,15 +1260,6 @@
   text-overflow: ellipsis;
 }
 
-.guest-home-album-desc {
-  font-size: 12px;
-  color: var(--text-secondary);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .guest-home-album-arrow,
 .guest-home-albums-show-all-arrow {
   flex-shrink: 0;
@@ -1322,6 +1333,11 @@
 
 .guest-home-albums-show-all-count {
   color: var(--text-secondary);
+}
+
+/* Acik listenin altindaki "Show less": ayni buton, ok yukari (listeyi ilk 3'e toplar). */
+.guest-home-albums-show-less .guest-home-albums-show-all-arrow svg {
+  transform: rotate(-90deg);
 }
 
 

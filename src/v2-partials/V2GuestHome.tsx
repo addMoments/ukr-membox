@@ -268,9 +268,20 @@ function V2GuestHome({
   const showAlbumCards = albums.length > 1
     || albums.some((album) => !album.is_default)
     || (galleryOn && albums.some((album) => album.guest_view));
-  // Ilk 3 album gorunur; fazlasi varsa "Show all albums N" butonu listeyi yerinde acar.
+  // Ilk 3 album gorunur; fazlasi varsa "Show all albums N" butonu listeyi yerinde acar,
+  // acildiktan sonra "Show less" ilk 3'e geri toplar (Solomiia, 19 Ekim).
   const [albumsExpanded, setAlbumsExpanded] = useState(false);
-  const hasHiddenAlbums = albums.length > ALBUM_PREVIEW_COUNT && !albumsExpanded;
+  const albumsCollapsible = albums.length > ALBUM_PREVIEW_COUNT;
+  const hasHiddenAlbums = albumsCollapsible && !albumsExpanded;
+  const albumsSectionRef = useRef<HTMLElement>(null);
+  const collapseAlbums = () => {
+    setAlbumsExpanded(false);
+    // Uzun listeden sonra buton ekranin cok altinda kalir; bolumun basina donulur.
+    const section = albumsSectionRef.current;
+    if (section && section.getBoundingClientRect().top < 0) {
+      section.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+  };
   const visibleAlbums = hasHiddenAlbums ? albums.slice(0, ALBUM_PREVIEW_COUNT) : albums;
   const isLocked = (album: GuestAlbum) => album.privacy === 'protected' && !openedAlbums.has(album.uid);
   // Ne: "Moments N" — misafirin acip bakabildigi albumlerdeki foto + video sayisi.
@@ -365,12 +376,12 @@ function V2GuestHome({
             <Link className="guest-home-secondary-btn" to={`/guest/${packedUid}/guestbook`}>
               <MicIcon size={18} strokeWidth={1.75} className="guest-home-secondary-btn-icon" />
               <span className="guest-home-secondary-btn-label">{textOr('guest.home.audio', 'Audio', 'Аудіо')}</span>
-              <ArrowRightIcon size={20} strokeWidth={1.75} className="guest-home-secondary-btn-arrow" />
+              <span className="guest-home-secondary-btn-arrow"><ArrowRightIcon size={18} strokeWidth={1.75} /></span>
             </Link>
             <Link className="guest-home-secondary-btn guest-home-secondary-btn-guestbook" to={`/guest/${packedUid}/guestbook`}>
               <MessageCircleIcon size={18} strokeWidth={1.75} className="guest-home-secondary-btn-icon" />
               <span className="guest-home-secondary-btn-label">{textOr('guest.home.guestbook', 'Guestbook', 'Побажання')}</span>
-              <ArrowRightIcon size={20} strokeWidth={1.75} className="guest-home-secondary-btn-arrow" />
+              <span className="guest-home-secondary-btn-arrow"><ArrowRightIcon size={18} strokeWidth={1.75} /></span>
             </Link>
           </div>
 
@@ -384,7 +395,7 @@ function V2GuestHome({
         <GuestAdvertorialGrid advertorial={advertorial} />
 
         {showAlbumCards && (
-          <section className="guest-home-albums" aria-label={textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}>
+          <section ref={albumsSectionRef} className="guest-home-albums" aria-label={textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}>
             <div className="guest-home-albums-header">
               <h2 className="guest-home-albums-title">
                 {textOr('guest.album.sectionTitle', 'Albums', 'Альбоми')}
@@ -422,20 +433,14 @@ function V2GuestHome({
                           {dateText}{dateText && album.location ? ' · ' : ''}{album.location || ''}
                         </span>
                       )}
-                      {album.description && (
-                        <span className="guest-home-album-desc">{album.description}</span>
-                      )}
-                      {locked ? (
+                      {/* Solomiia 19 Ekim: kartta yalnizca ad, tarih + yer ve (varsa) kilit.
+                          Aciklama ve "View only" album sayfasinda gorunmeye devam ediyor. */}
+                      {locked && (
                         <span className="guest-home-album-state">
                           <i className="fa-solid fa-lock" />
                           {textOr('guest.album.passcodeNeeded', 'Passcode required', 'Потрібен пароль')}
                         </span>
-                      ) : !album.guest_upload ? (
-                        <span className="guest-home-album-state">
-                          <i className="fa-solid fa-eye" />
-                          {textOr('guest.album.viewOnly', 'View only', 'Лише перегляд')}
-                        </span>
-                      ) : null}
+                      )}
                     </div>
                     <span className="guest-home-album-arrow"><ArrowRightIcon size={18} strokeWidth={1.75} /></span>
                   </Link>
@@ -454,6 +459,20 @@ function V2GuestHome({
                   {textOr('guest.album.showAllAlbums', 'Show all albums', 'Відобразити усі альбоми')}
                 </span>
                 <span className="guest-home-albums-show-all-count">{albums.length}</span>
+                <span className="guest-home-albums-show-all-arrow"><ArrowRightIcon size={18} strokeWidth={1.75} /></span>
+              </button>
+            )}
+            {albumsCollapsible && albumsExpanded && (
+              <button
+                type="button"
+                className="guest-home-albums-show-all guest-home-albums-show-less"
+                onClick={collapseAlbums}
+                aria-expanded={true}
+              >
+                <i className="fa-solid fa-table-cells-large" />
+                <span className="guest-home-albums-show-all-label">
+                  {textOr('guest.album.showLess', 'Show less', 'Показати менше')}
+                </span>
                 <span className="guest-home-albums-show-all-arrow"><ArrowRightIcon size={18} strokeWidth={1.75} /></span>
               </button>
             )}

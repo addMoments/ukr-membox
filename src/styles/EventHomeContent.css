@@ -523,21 +523,44 @@
   text-align: left;
 }
 
+/* Son 4 paylasim esit kare kutularda: masaustunde 4, dar ekranda 2 sutun.
+   Eskiden kart genisligi gorselin kendi piksel genisliginden geliyordu (width: auto,
+   flex-shrink: 0); telefon fotografi tek basina tum seridi kapliyordu (Solomiia 19 Ekim). */
 .ehc-memories-grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
-  overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  .ehc-memories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
 }
 
 .ehc-memories-grid .media-card {
-  flex-shrink: 0;
-  height: 200px;
+  aspect-ratio: 1;
   margin-bottom: 0;
 }
 
+.ehc-memories-grid .media-card-media {
+  position: absolute;
+  inset: 0;
+}
+
 .ehc-memories-grid .media-card-image {
+  width: 100%;
   height: 100%;
-  width: auto;
+  min-height: 0;
+  object-fit: cover;
+}
+
+/* Acilamayan dosyanin kutusu da kareyi doldursun (altta beyaz serit kalmasin). */
+.ehc-memories-grid .media-card-error {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
 }
 
 .ehc-memory-more {
