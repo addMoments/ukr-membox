@@ -16,6 +16,11 @@ function formatDate(value: string) {
   return parsed.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+// Kalici silme onayi: harf buyuklugu ve fazla bosluk eslesmeyi bozmasin.
+function normalizeConfirmName(value: string) {
+  return value.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+}
+
 // date input "YYYY-MM-DD" ister; backend hem bu bicimi hem RFC3339'u kabul ediyor.
 function toDateInputValue(value: string) {
   if (!value) return '';
@@ -94,7 +99,8 @@ function EventRow({ event, onChanged, onRemoved }: { event: AdminEvent; onChange
 
   // Ne: Kapatilmis event'i tamamen kaldirir (2.15). Geri donusu yok: onay icin event adi yazilir.
   const removePermanently = async () => {
-    const expected = (event.name || event.uid.slice(0, 8)).trim();
+    // Adsiz event'te onay, kartta gorunen "Untitled event" basligidir (uid parcasi degil).
+    const expected = event.name?.trim() || at('admin.events.untitled', 'Untitled event', 'Подія без назви');
     const typed = window.prompt(at(
       'admin.events.purgeConfirm',
       `This permanently removes "${expected}" and everything left of it: albums, guests, guestbook messages, the upload summary and any remaining files. The order stays. This cannot be undone.\n\nType the event name to confirm:`,
@@ -102,7 +108,7 @@ function EventRow({ event, onChanged, onRemoved }: { event: AdminEvent; onChange
       { label: expected },
     ));
     if (typed === null) return;
-    if (typed.trim() !== expected) {
+    if (normalizeConfirmName(typed) !== normalizeConfirmName(expected)) {
       setMessage({ ok: false, text: at('admin.events.purgeMismatch', 'The name did not match; nothing was deleted.', 'Назва не збігається; нічого не видалено.') });
       return;
     }
