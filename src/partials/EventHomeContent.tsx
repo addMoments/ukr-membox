@@ -511,7 +511,11 @@ function EventHomeContent({
       {/* Latest Memories */}
       <div className="ehc-section ehc-section-bordered">
         <div className="ehc-section-header">
-          <h2 className="ehc-section-title">{t('eventHome.latestMemories.title')}</h2>
+          {/* Solomiia 19 Ekim: alanin ne oldugu anlasilmiyordu; basligin altinda kisa aciklama. */}
+          <div className="ehc-section-heading">
+            <h2 className="ehc-section-title">{t('eventHome.latestMemories.title')}</h2>
+            <p className="ehc-section-subtitle">{t('eventHome.latestMemories.subtitle')}</p>
+          </div>
           <Link to={`/event/${packedUid}/gallery`} className="ehc-section-link">{t('eventHome.latestMemories.viewAllGallery')}</Link>
         </div>
         <div className="ehc-memories-grid" style={latestUploads.length === 0 ? {display: "flex", justifyContent: "center", alignItems: "center"} : undefined}>

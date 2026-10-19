@@ -444,7 +444,21 @@
   letter-spacing: -0.025em;
 }
 
+.ehc-section-heading {
+  min-width: 0;
+}
+
+.ehc-section-subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #78716C;
+  text-align: left;
+}
+
 .ehc-section-link {
+  flex-shrink: 0;
   font-size: 14px;
   font-weight: 700;
   color: #3E4C92;

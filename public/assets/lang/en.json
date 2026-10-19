@@ -383,6 +383,7 @@
         },
         "latestMemories": {
             "title": "Latest Memories",
+            "subtitle": "The last 4 photos and videos your guests have shared. Click one to see it full size.",
             "viewAllGallery": "View All Gallery",
             "noPhotosYet": "No photos yet",
             "photosWillAppear": "Photos uploaded by your guests will appear here"
