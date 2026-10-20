@@ -12,7 +12,7 @@ import { parse_submit_event } from '../../utils/form_event_parse';
 import { unpackUUID } from '../../packages/uuid';
 import { pgErr } from '../../client/postgrest';
 import { Event } from '../../types/events';
-import { Job } from '../../types/jobs';
+import { Job, exportZipAvailable } from '../../types/jobs';
 import { saveUrl } from '../../utils/download';
 import { S3_ROOT, SERV_ROOT } from '../../consts';
 import { dbWhoAmI } from '../../client/auth';
@@ -500,6 +500,8 @@ function EventSettingsInner({event}: {event: Event}) {
         descriptionS={[
           t('settings.export.description'), 
           exportJob && exportJob.status === 'succeeded' ? `${t('settings.export.latestExport')} ${exoprtDateFormat(exportJob.updated_at)}` : '',
+          exportZipAvailable(exportJob) && typeof exportJob?.output["zip_expires_at"] === 'string' ? `${t('settings.export.availableUntil')} ${exoprtDateFormat(exportJob.output["zip_expires_at"])}` : '',
+          exportJob && exportJob.status === 'succeeded' && !exportZipAvailable(exportJob) ? t('settings.export.expired') : '',
           exportJob && exportJob.status === 'failed' ? `${t('settings.export.latestExportFailed')} ${exportJob.output["err"] || JSON.stringify(exportJob.output)}` : '',
           exportJob && exportJob.status === 'running' ? `${t('settings.export.exportStarted')} ${exoprtDateFormat(exportJob.locked_at || exportJob.created_at)}` : '',
           exportJob && exportJob.status === 'queued' ? t('settings.export.exportQueued') : '',
@@ -511,7 +513,7 @@ function EventSettingsInner({event}: {event: Event}) {
             onClick: handleExportEvent, 
             loading: ["running", "queued"].includes(exportJob?.status || '') 
           }, 
-          (exportJob && exportJob.status === 'succeeded') ? { 
+          (exportJob && exportZipAvailable(exportJob)) ? {
             text: t('settings.export.downloadButton'), 
             loading: downloadLoading,
             onClick: ()=>{

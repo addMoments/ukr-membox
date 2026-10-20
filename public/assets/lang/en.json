@@ -252,7 +252,9 @@
             "exportStarted": "Export started running at",
             "exportQueued": "Your export is queued and will be started soon.",
             "exportButton": "Export Event",
-            "downloadButton": "Download Export"
+            "downloadButton": "Download Export",
+            "availableUntil": "Available to download until",
+            "expired": "Export files are deleted 3 days after they are created. Export again to download."
         },
         "removeData": {
             "title": "Remove My Data",
@@ -1105,7 +1107,9 @@
             "ready": "Download ZIP",
             "preparing": "Preparing…",
             "failed": "Export failed",
-            "latest": "Latest export: {{date}}"
+            "latest": "Latest export: {{date}}",
+            "until": "available until {{date}}",
+            "expired": "ZIP deleted after 3 days"
         },
         "uploadsClosedBadge": "Uploads closed"
     },

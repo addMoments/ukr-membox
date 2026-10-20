@@ -5,7 +5,7 @@ import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import Button from '../../components/Button';
 import { Event } from '../../types/events';
 import { Album, AlbumListSort, albumCoverUrl, albumGuestUrl, albumQrImageUrl, sortAlbums } from '../../types/albums';
-import { Job } from '../../types/jobs';
+import { Job, exportZipAvailable } from '../../types/jobs';
 import { adjustAlbumQR, albumMediaCounts, deleteAlbum, ensureAlbumQRs, listAlbums } from '../../client/albums';
 import { pgErr } from '../../client/postgrest';
 import { dbWhoAmI } from '../../client/auth';
@@ -246,6 +246,8 @@ function EventAlbumsInner({ event }: { event: Event }) {
             const cover = albumCoverUrl(album);
             const count = counts[album.uid] || 0;
             const job = jobs[album.uid];
+            const zipReady = exportZipAvailable(job);
+            const zipExpiresAt = job?.output?.zip_expires_at;
             const dateText = formatDate(album.album_date);
             return (
               <div className="album-card" key={album.uid}>
@@ -281,6 +283,8 @@ function EventAlbumsInner({ event }: { event: Event }) {
                 {job && (
                   <div className={`album-card-export${job.status === 'failed' ? ' failed' : ''}`}>
                     {job.status === 'succeeded' && textOr('albums.download.latest', 'Latest export: {{date}}', 'Останній експорт: {{date}}', { date: exportDateFormat(job.updated_at) })}
+                    {zipReady && typeof zipExpiresAt === 'string' && <> · {textOr('albums.download.until', 'available until {{date}}', 'доступний до {{date}}', { date: exportDateFormat(zipExpiresAt) })}</>}
+                    {job.status === 'succeeded' && !zipReady && <> · {textOr('albums.download.expired', 'ZIP deleted after 3 days', 'ZIP видалено через 3 дні')}</>}
                     {(job.status === 'queued' || job.status === 'running') && textOr('albums.download.preparing', 'Preparing…', 'Підготовка…')}
                     {job.status === 'failed' && textOr('albums.download.failed', 'Export failed', 'Помилка експорту')}
                   </div>
@@ -295,7 +299,7 @@ function EventAlbumsInner({ event }: { event: Event }) {
                   <button type="button" className="album-card-action" onClick={() => { setCopied(false); setShareAlbum(album); }}>
                     <i className="fa-solid fa-qrcode" />{textOr('albums.actions.share', 'Share & QR', 'Поділитися та QR')}
                   </button>
-                  {job && job.status === 'succeeded' ? (
+                  {zipReady ? (
                     <button type="button" className="album-card-action" onClick={() => saveUrl(S3_ROOT + String(job.output?.zip_path || ''), `${album.name}.zip`)}>
                       <i className="fa-solid fa-file-zipper" />{textOr('albums.download.ready', 'Download ZIP', 'Зберегти ZIP')}
                     </button>
