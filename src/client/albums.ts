@@ -116,6 +116,14 @@ export const guestListAlbums = async (eventUid: string): Promise<GuestAlbum[]> =
   return Array.isArray(res) ? res : [];
 };
 
+// Ne: Host'un album listesinden, sayfayi ilk kez acan bir misafirin ana sayfada gordugu alt kume.
+// Nasil: albums_guest_select ile ayni kural; private album linkten acilmadikca listede yok.
+// Neden: Tema onizlemesi misafir ekranini birebir gostersin (Solomiia, 20 Ekim).
+export const albumsListedForNewGuest = (albums: Album[], galleryOn: boolean): GuestAlbum[] => {
+  return albums.filter((album) => (album.guest_upload || (album.guest_view && galleryOn))
+    && album.privacy !== 'private');
+};
+
 // Ne: Misafirin acmis oldugu (passcode girdigi / linkten actigi) private-protected album
 //     UID'leri; misafir token'inin "al" claim'inden okunur.
 // Nasil: JWT govdesi base64url JSON'dur, imza dogrulamaya gerek yok — karar sunucuda ve

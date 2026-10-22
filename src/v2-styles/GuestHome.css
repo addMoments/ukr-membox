@@ -153,10 +153,6 @@
 .guest-home-welcome-wrap {
   margin-top: 7px;
   padding: 0 17px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
 }
 
 .guest-home-welcome {
@@ -172,18 +168,44 @@
   overflow-wrap: anywhere;
 }
 
+/* 3 satir = 3 x 22 px. -webkit-line-clamp kullanilmiyor: -webkit-box icinde float'lar yuzmuyor
+   (Chromium ve WebKit), "Більше" metni asagi itip tek basina kaliyordu. */
 .guest-home-welcome.clamped {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
+  max-height: 66px;
   overflow: hidden;
+}
+
+/* Iki satir yuksekliginde, genisliksiz bir ayirac; arkasindan gelen "Більше" ona temizlenip
+   ucuncu satirin sagina yuzer, metin onun etrafindan akar. Ucuncu satira sigmayan kelimeler
+   gizli dorduncu satira iner; ucuncu satiri bu yuzden dugmedeki "…" bitirir. Yalnizca metin
+   tasarken (has-more): overflow:hidden kutu float'u icine aldigi icin kisa metni 2 satira uzatirdi. */
+.guest-home-welcome.clamped.has-more::before {
+  content: '';
+  float: right;
+  height: 44px;
+}
+
+.guest-home-welcome.clamped .guest-home-welcome-toggle {
+  float: right;
+  clear: both;
+  margin-left: 6px;
+  line-height: 22px;
+}
+
+/* inline-block: dugmenin alt cizgisi uc noktaya gecmesin. */
+.guest-home-welcome.clamped .guest-home-welcome-toggle::before {
+  content: '…';
+  display: inline-block;
+  margin-right: 6px;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--text) 85%, transparent);
 }
 
 .guest-home-welcome-toggle {
   border: none;
   background: none;
   padding: 0;
+  margin-left: 6px;
   color: var(--text);
   font-family: inherit;
   font-size: 13px;

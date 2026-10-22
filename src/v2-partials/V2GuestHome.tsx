@@ -136,27 +136,41 @@ function GuestWelcomeText({ text }: { text: string }) {
   const ref = useRef<HTMLParagraphElement>(null);
 
   useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
     const measure = () => {
-      const el = ref.current;
-      if (el && !expanded) setOverflows(el.scrollHeight > el.clientHeight + 1);
+      if (!expanded) setOverflows(el.scrollHeight > el.clientHeight + 1);
     };
     measure();
-    window.addEventListener('resize', measure);
+    // Kutu boyu degisince (ekran donmesi, stiller sonradan uygulaninca) yeniden olculur.
+    // Tema onizlemesinde metin iframe'de: WebKit oraya kopyalanan stilleri ilk olcumden sonra
+    // uyguluyordu ve "Більше" hic cikmiyordu; o yuzden pencere ve fontlar metnin kendi belgesinden.
+    const view = el.ownerDocument.defaultView || window;
+    const observer = view.ResizeObserver ? new view.ResizeObserver(measure) : null;
+    observer?.observe(el);
     // Misafir yazi tipi sonradan yuklenince satir sayisi degisebilir.
-    document.fonts?.ready.then(measure).catch(() => {});
-    return () => window.removeEventListener('resize', measure);
+    el.ownerDocument.fonts?.ready.then(measure).catch(() => {});
+    return () => observer?.disconnect();
   }, [text, expanded]);
+
+  // Kapaliyken "… Більше" ucuncu satirin sagina oturur (metinden once, saga yuzen; CSS'teki
+  // ::before ayiraci onu ucuncu satira iter), boylece ayri bir satir harcanmaz (20 Ekim istegi).
+  // Acikken "Згорнути" metnin hemen sonunda durur.
+  const toggle = (overflows || expanded) && (
+    <button type="button" className="guest-home-welcome-toggle" onClick={() => setExpanded((v) => !v)}>
+      {expanded
+        ? textOr('guest.album.readLess', 'Show less', 'Згорнути')
+        : textOr('guest.album.readMore', 'Show more', 'Більше')}
+    </button>
+  );
 
   return (
     <div className="guest-home-welcome-wrap">
-      <p ref={ref} className={`guest-home-welcome${expanded ? '' : ' clamped'}`}>{text}</p>
-      {(overflows || expanded) && (
-        <button type="button" className="guest-home-welcome-toggle" onClick={() => setExpanded((v) => !v)}>
-          {expanded
-            ? textOr('guest.album.readLess', 'Show less', 'Згорнути')
-            : textOr('guest.album.readMore', 'Show more', 'Більше')}
-        </button>
-      )}
+      <p ref={ref} className={`guest-home-welcome${expanded ? '' : ' clamped'}${!expanded && overflows ? ' has-more' : ''}`}>
+        {!expanded && toggle}
+        {text}
+        {expanded && toggle}
+      </p>
     </div>
   );
 }
@@ -257,8 +271,13 @@ function V2GuestHome({
   //   photoViewerState.open = true;
   // };
 
+  // Onizleme yalnizca gosterir: album ve ani defteri baglantilari host panelini misafir
+  // sayfasina goturur, yukleme dugmesi dosya sectirir. "Більше" / "Show all" gibi
+  // type=button dugmelerin varsayilan eylemi yok, onlar calismaya devam eder.
+  const blockPreviewClicks = preview ? (event: React.MouseEvent) => event.preventDefault() : undefined;
+
   return (
-    <div className="guest-home" style={{ ...theme, fontFamily: fonts.find(f => f.id === font)?.fontFamily }}>
+    <div className="guest-home" style={{ ...theme, fontFamily: fonts.find(f => f.id === font)?.fontFamily }} onClickCapture={blockPreviewClicks}>
       <PhotoViewerModal />
 
       <GuestUploadModal

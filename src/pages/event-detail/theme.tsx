@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import EventDetailLayout from '../../v2-partials/EventDetailLayout';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
@@ -21,6 +21,10 @@ import Mockup2 from '../../components/Mockup2';
 import ImageCropModal from '../../v2-components/ImageCropModal';
 import { t } from '../../packages/i18n';
 import { textOr } from '../../utils/admin_i18n';
+import { getAdvertorialConfig } from '../../client/advertorial';
+import { AdvertorialResponse } from '../../types/advertorial';
+import { albumMediaCounts, albumsListedForNewGuest, listAlbums } from '../../client/albums';
+import { GuestAlbum } from '../../types/albums';
 
 // Etkinlik gorseli her yerde (misafir hero'su, misafir defteri, host ana sayfasi) 20:9 kutuda;
 // kirpma da ayni oranda, boylece misafir tam kirpilan alani gorur (AM-14). 20:9, onayli
@@ -41,6 +45,32 @@ function EventThemeInner({event}: {event: Event}) {
   const [loading, setLoading] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState('');
+
+  // Ne: Onizlemedeki reklamlar ve albumler, misafir sayfasindakiyle ayni veriden.
+  // Neden: Onizleme yalnizca ust kismi gosteriyordu; Solomiia ekranin birebir yansimasini
+  //        istedi: paketteyse Promotions, altinda albumler (20 Ekim).
+  const galleryOn = !!event.settings?.guest_gallery;
+  const [advertorial, setAdvertorial] = useState<AdvertorialResponse | null>(null);
+  const [albums, setAlbums] = useState<GuestAlbum[]>([]);
+  const [albumsLoaded, setAlbumsLoaded] = useState(false);
+  const [mediaCounts, setMediaCounts] = useState<Record<string, number> | null>(null);
+  useEffect(() => {
+    if (!packedUid) return;
+    const eventUid = unpackUUID(packedUid);
+    let active = true;
+    Promise.all([
+      getAdvertorialConfig(packedUid).catch(() => null),
+      listAlbums(eventUid).then((list) => ({ ok: true, list })).catch(() => ({ ok: false, list: [] })),
+      albumMediaCounts(eventUid).catch(() => null),
+    ]).then(([advertorialData, albumsData, counts]) => {
+      if (!active) return;
+      setAdvertorial(advertorialData);
+      setAlbums(albumsListedForNewGuest(albumsData.list, galleryOn));
+      setAlbumsLoaded(albumsData.ok);
+      setMediaCounts(counts);
+    });
+    return () => { active = false; };
+  }, [packedUid, galleryOn]);
 
   // Kirpilmis ya da orijinal dosya; "Maks. 10 MB" yaziyordu ama hic kontrol edilmiyordu.
   const handleImageReady = (file: File) => {
@@ -193,6 +223,11 @@ function EventThemeInner({event}: {event: Event}) {
               onFileSelect={() => {}}
               font={activeFont}
               theme={theme}
+              advertorial={advertorial}
+              albums={albums}
+              albumsLoaded={albumsLoaded}
+              galleryOn={galleryOn}
+              albumMediaCounts={mediaCounts}
               preview
             />
           </Mockup2>
