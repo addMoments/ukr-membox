@@ -13,6 +13,7 @@ import { fonts } from '../types/fonts';
 import PhotoViewerModal from '../partials/PhotoViewerModal';
 import { t } from '../packages/i18n';
 import { textOr } from '../utils/admin_i18n';
+import { WELCOME_MAX_LINES } from '../utils/welcomeMessage';
 import { AdvertorialCell, AdvertorialLayout, AdvertorialResponse } from '../types/advertorial';
 import { GuestAlbum, albumCoverUrl } from '../types/albums';
 import { guestCanUploadTo, guestOpenedAlbumUids } from '../client/albums';
@@ -124,21 +125,71 @@ function GuestAdvertorialGrid({ advertorial }: { advertorial?: AdvertorialRespon
   );
 }
 
+// Ne: Kapali karsilama metninin ekrana sigan kismi: "Більше" ucuncu satirin sagindayken
+//     "…" ile birlikte 3 satira sigan en uzun bastaki kelimeler. Metin zaten sigiyorsa null.
+// Nasil: Gorunmez bir kopya paragrafta ayni siniflarla (clamped has-more) ve ayni genislikte
+//        kelime sonlari ikili aramayla denenir; tek kelime bile sigmiyorsa harf harf.
+// Neden: "…" dugmenin yaninda, metinden bosluklu duruyordu; Solomiia 22 Ekim: "…" metne ait.
+function fitWelcomeText(el: HTMLElement, text: string, moreLabel: string): string | null {
+  const doc = el.ownerDocument;
+  const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 22;
+  const maxHeight = lineHeight * WELCOME_MAX_LINES + 1;
+  const probe = doc.createElement('p');
+  probe.className = 'guest-home-welcome';
+  probe.setAttribute('aria-hidden', 'true');
+  probe.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;width:${el.clientWidth}px`;
+  (el.parentElement || doc.body).appendChild(probe);
+  try {
+    probe.textContent = text;
+    if (probe.scrollHeight <= maxHeight) return null;
+
+    probe.className = 'guest-home-welcome clamped has-more';
+    probe.textContent = '';
+    // Gercek dugme: tarayicinin dugme varsayilanlari (harf araligi vb.) genisligi degistiriyor.
+    const more = doc.createElement('button');
+    more.className = 'guest-home-welcome-toggle';
+    more.textContent = moreLabel;
+    const node = doc.createTextNode('');
+    probe.append(more, node);
+    const shorten = (end: number) => text.slice(0, end).replace(/[\s,.;:!?…—–-]+$/, '') + '…';
+    const fits = (end: number) => {
+      node.data = shorten(end);
+      return probe.scrollHeight <= maxHeight;
+    };
+    const search = (ends: number[]) => {
+      let lo = 0, hi = ends.length - 1, best = -1;
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        if (fits(ends[mid])) { best = mid; lo = mid + 1; } else { hi = mid - 1; }
+      }
+      return best < 0 ? null : ends[best];
+    };
+    const wordEnds: number[] = [];
+    for (let i = 1; i < text.length; i++) {
+      if (/\s/.test(text[i]) && !/\s/.test(text[i - 1])) wordEnds.push(i);
+    }
+    const end = search(wordEnds) ?? search(Array.from({ length: text.length - 1 }, (_, i) => i + 1)) ?? 1;
+    return shorten(end);
+  } finally {
+    probe.remove();
+  }
+}
+
 // Ne: Hostun karsilama metni; en fazla 3 satir gorunur, tasarsa "Більше" ile acilir.
 // Neden: Onayli tasarimda baslik, metin, butonlar, 4 reklam ve albumlerin basi tek ekrana
 //        sigmali. Host formu da 3 satiri asan metni kabul etmiyor (WELCOME_MAX_LINES); bu
 //        kesme, sinirdan once yazilmis uzun metinler ve daha genis bir yazi tipi icin.
 function GuestWelcomeText({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
-  const [overflows, setOverflows] = useState(false);
+  // Kapaliyken gosterilen kisaltilmis metin ("…" dahil); null = metin 3 satira sigiyor.
+  const [shortText, setShortText] = useState<string | null>(null);
   const ref = useRef<HTMLParagraphElement>(null);
+  const moreLabel = textOr('guest.album.readMore', 'Show more', 'Більше');
 
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const measure = () => {
-      if (!expanded) setOverflows(el.scrollHeight > el.clientHeight + 1);
-    };
+    if (!el || expanded) return;
+    const measure = () => setShortText(fitWelcomeText(el, text, moreLabel));
     measure();
     // Kutu boyu degisince (ekran donmesi, stiller sonradan uygulaninca) yeniden olculur.
     // Tema onizlemesinde metin iframe'de: WebKit oraya kopyalanan stilleri ilk olcumden sonra
@@ -146,29 +197,38 @@ function GuestWelcomeText({ text }: { text: string }) {
     const view = el.ownerDocument.defaultView || window;
     const observer = view.ResizeObserver ? new view.ResizeObserver(measure) : null;
     observer?.observe(el);
-    // Misafir yazi tipi sonradan yuklenince satir sayisi degisebilir.
-    el.ownerDocument.fonts?.ready.then(measure).catch(() => {});
-    return () => observer?.disconnect();
-  }, [text, expanded]);
+    // Misafir yazi tipi sonradan yuklenince kelimeler baska satira duser. Kutu o zaman buyudugu
+    // icin boyut gozlemcisi yakalar; WebKit Kiril alt kumesini gec yukleyip 'loadingdone'
+    // yollamiyor, asil guvence bu. Yollayan tarayicilarda olay da yeniden olcer.
+    const fonts = el.ownerDocument.fonts;
+    fonts?.ready.then(measure).catch(() => {});
+    fonts?.addEventListener?.('loadingdone', measure);
+    return () => {
+      observer?.disconnect();
+      fonts?.removeEventListener?.('loadingdone', measure);
+    };
+  }, [text, expanded, moreLabel]);
 
-  // Kapaliyken "… Більше" ucuncu satirin sagina oturur (metinden once, saga yuzen; CSS'teki
+  // Kapaliyken "Більше" ucuncu satirin sagina oturur (metinden once, saga yuzen; CSS'teki
   // ::before ayiraci onu ucuncu satira iter), boylece ayri bir satir harcanmaz (20 Ekim istegi).
-  // Acikken "Згорнути" metnin hemen sonunda durur.
-  const toggle = (overflows || expanded) && (
-    <button type="button" className="guest-home-welcome-toggle" onClick={() => setExpanded((v) => !v)}>
-      {expanded
-        ? textOr('guest.album.readLess', 'Show less', 'Згорнути')
-        : textOr('guest.album.readMore', 'Show more', 'Більше')}
-    </button>
-  );
+  // Acikken "Згорнути" metnin altinda, sol kenarda (Solomiia, 22 Ekim).
+  const truncated = !expanded && shortText !== null;
 
   return (
     <div className="guest-home-welcome-wrap">
-      <p ref={ref} className={`guest-home-welcome${expanded ? '' : ' clamped'}${!expanded && overflows ? ' has-more' : ''}`}>
-        {!expanded && toggle}
-        {text}
-        {expanded && toggle}
+      <p ref={ref} className={`guest-home-welcome${expanded ? '' : ' clamped'}${truncated ? ' has-more' : ''}`}>
+        {truncated && (
+          <button type="button" className="guest-home-welcome-toggle" onClick={() => setExpanded(true)}>
+            {moreLabel}
+          </button>
+        )}
+        {truncated ? shortText : text}
       </p>
+      {expanded && (
+        <button type="button" className="guest-home-welcome-toggle guest-home-welcome-less" onClick={() => setExpanded(false)}>
+          {textOr('guest.album.readLess', 'Show less', 'Згорнути')}
+        </button>
+      )}
     </div>
   );
 }

@@ -149,9 +149,12 @@
   }
 }
 
-/* Karsilama metni: hostun yazdigi satir sonlari korunur; en fazla 3 satir (bkz. GuestWelcomeText). */
+/* Karsilama metni: hostun yazdigi satir sonlari korunur; en fazla 3 satir (bkz. GuestWelcomeText).
+   Ust ve alt bosluk ayni (7px): alttaki 4px + .guest-home-actions'in 3px'i. Solomiia 22 Ekim:
+   gorsel ile metin arasi olcu birimi, metin ile yukleme dugmesi arasi da o kadar. */
 .guest-home-welcome-wrap {
   margin-top: 7px;
+  margin-bottom: 4px;
   padding: 0 17px;
 }
 
@@ -168,17 +171,19 @@
   overflow-wrap: anywhere;
 }
 
-/* 3 satir = 3 x 22 px. -webkit-line-clamp kullanilmiyor: -webkit-box icinde float'lar yuzmuyor
-   (Chromium ve WebKit), "Більше" metni asagi itip tek basina kaliyordu. */
+/* Kapali metni 3 satira fitWelcomeText kisaltir; burada yukseklik siniri bilerek yok: yazi tipi
+   sonradan yuklenip bir kelime dorduncu satira duserse kutu buyur ve boyut gozlemcisi metni
+   yeniden kisaltir (max-height'ta kutu ayni kaldigi icin WebKit'te "…" gizli satirda kaliyordu).
+   overflow:hidden float'lari kutunun icine alir. -webkit-line-clamp kullanilmiyor: -webkit-box
+   icinde float'lar yuzmuyor (Chromium ve WebKit), "Більше" metni asagi itip tek basina kaliyordu. */
 .guest-home-welcome.clamped {
-  max-height: 66px;
   overflow: hidden;
 }
 
 /* Iki satir yuksekliginde, genisliksiz bir ayirac; arkasindan gelen "Більше" ona temizlenip
-   ucuncu satirin sagina yuzer, metin onun etrafindan akar. Ucuncu satira sigmayan kelimeler
-   gizli dorduncu satira iner; ucuncu satiri bu yuzden dugmedeki "…" bitirir. Yalnizca metin
-   tasarken (has-more): overflow:hidden kutu float'u icine aldigi icin kisa metni 2 satira uzatirdi. */
+   ucuncu satirin sagina yuzer, metin onun etrafindan akar. Metin, "…" ile ucuncu satirda bitecek
+   kadar kisaltilir (fitWelcomeText). Yalnizca metin tasarken (has-more): overflow:hidden kutu
+   float'u icine aldigi icin kisa metni 2 satira uzatirdi. */
 .guest-home-welcome.clamped.has-more::before {
   content: '';
   float: right;
@@ -192,20 +197,10 @@
   line-height: 22px;
 }
 
-/* inline-block: dugmenin alt cizgisi uc noktaya gecmesin. */
-.guest-home-welcome.clamped .guest-home-welcome-toggle::before {
-  content: '…';
-  display: inline-block;
-  margin-right: 6px;
-  font-weight: 400;
-  color: color-mix(in srgb, var(--text) 85%, transparent);
-}
-
 .guest-home-welcome-toggle {
   border: none;
   background: none;
   padding: 0;
-  margin-left: 6px;
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -214,6 +209,12 @@
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
+}
+
+/* Acik metnin altinda, metnin sol kenarinda (Solomiia 22 Ekim: "Згорнути" hizali olsun). */
+.guest-home-welcome-less {
+  display: block;
+  margin-top: 2px;
 }
 
 /* Eylemler: tam genislik yukleme hapi + yan yana Ses / Ani defteri + guvenlik satiri */

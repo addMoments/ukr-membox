@@ -16,6 +16,30 @@
   display: block;
 }
 
+/* Onizleme iframe'inin kaydirma cubugu: varsayilanin yarisi kadar ince (Solomiia, 22 Ekim).
+   Bu dosya Mockup2'nin iframe'ine kopyalaniyor; html.iframe yalniz orada var.
+   scrollbar-width Chrome 121+'da ::-webkit-scrollbar'i devre disi biraktigi icin yalniz
+   onu tanimayan tarayicilarda (Firefox) kullaniliyor. */
+html.iframe ::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+html.iframe ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html.iframe ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 7px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  html.iframe body {
+    scrollbar-width: thin;
+  }
+}
+
 @media (max-width: 768px) {
   .mockup2 {
     max-width: 100%;
