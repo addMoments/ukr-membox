@@ -38,11 +38,18 @@ const parseJsonOrThrow = async (res: Response, endpointLabel: string): Promise<u
   }
 };
 
+const UPGRADE_KINDS = ['package', 'storage', 'time'] as const;
+const optionalString = (value: unknown) => (typeof value === 'string' && value ? value : undefined);
+
 const normalizeOptions = (value: unknown): AdminProductOptions => {
   const raw = asRecord(value);
   return {
     guest_count: parseNumber(raw.guest_count),
     media_count: parseNumber(raw.media_count),
+    // 2.17 limitleri: eskiden burada okunmuyordu, paket kartindaki uc alan hep bos gorunuyordu.
+    storage_gb: parseNumber(raw.storage_gb),
+    guest_media_count: parseNumber(raw.guest_media_count),
+    guest_storage_gb: parseNumber(raw.guest_storage_gb),
     activation_days: parseNumber(raw.activation_days),
     storage_days: parseNumber(raw.storage_days),
     voice_included: parseBoolean(raw.voice_included),
@@ -50,6 +57,12 @@ const normalizeOptions = (value: unknown): AdminProductOptions => {
     sponsored_included: parseBoolean(raw.sponsored_included),
     image: typeof raw.image === 'string' ? raw.image : undefined,
     mobile_image: typeof raw.mobile_image === 'string' ? raw.mobile_image : undefined,
+    upgrade_kind: UPGRADE_KINDS.find((kind) => kind === raw.upgrade_kind),
+    upgrade_from: optionalString(raw.upgrade_from),
+    upgrade_to: optionalString(raw.upgrade_to),
+    upgrade_for: optionalString(raw.upgrade_for),
+    extra_storage_gb: parseNumber(raw.extra_storage_gb),
+    extra_storage_months: parseNumber(raw.extra_storage_months),
   };
 };
 

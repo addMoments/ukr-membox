@@ -61,8 +61,31 @@ export default function CheckoutPending() {
             message: 'Your payment was not successful.',
             subtext: 'Please try again or contact support.',
             image: 'https://addmoments.com.ua/ui/assets/err.svg',
-            buttons: [{ text: 'Try Again', href: '/checkout' }],
+            // Yukseltme odemesi (Excel 2.18) etkinlik sayfasindan tekrar denenir, sepetten degil.
+            buttons: [{ text: 'Try Again', href: data.return_url || '/checkout' }],
           });
+          return;
+        }
+
+        // Ne: Yukseltme odemesi (Excel 2.18): kayit linki yok; yukseltme etkinlige islenince host
+        //     etkinlik sayfasina doner. Odeme alindi ama henuz islenmediyse beklemeye devam edilir.
+        // Neden: Bu sayfa yeni siparis icin "kayit linki gonderildi" diyor; yukseltmede yanlis olurdu.
+        if (data.status === 'success' && data.upgrade) {
+          if (data.applied) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            window.location.replace(data.return_url || '/events');
+            return;
+          }
+          if (pollCount.current >= MAX_POLLS) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            sendToMsg({
+              title: 'Payment Received',
+              message: 'Your upgrade is being applied to your event.',
+              subtext: 'If it does not appear within a few minutes, please contact support.',
+              image: 'https://addmoments.com.ua/ui/assets/checkmark.svg',
+              buttons: [{ text: 'Back to my event', href: data.return_url || '/events' }],
+            });
+          }
           return;
         }
 

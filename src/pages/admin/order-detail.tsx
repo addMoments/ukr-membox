@@ -84,6 +84,15 @@ interface OrderDetail {
   // activation_blocked_reason'da yazar (odeme onaylanmamis, basarisiz, alici e-postasi yok).
   activation_link?: string;
   activation_blocked_reason?: string;
+  // Excel 2.18: siparis mevcut bir etkinligin yukseltmesiyse doludur. Bu siparisin kendi
+  // etkinligi ve aktivasyon linki yoktur.
+  upgrade?: {
+    event_uid: string;
+    event_packed_uid: string;
+    event_name: string;
+    paid: boolean;
+    applied_at: string | null;
+  };
 }
 
 const STATUS_OPTIONS = ['purchased', 'client-action', 'admin-action', 'shipped', 'fulfilled', 'cancelled'];
@@ -405,6 +414,73 @@ function ItemCard({ item, orderAccount, showFinancials, canEditItems, onSaved }:
 // Ne: Siparisin aktivasyon (signup) mailini yeniden gonderen kart.
 // Nasil: Admin ucuna POST atar, sonucu satir ici bir mesajla gosterir.
 // Neden: Mail alicinin tarafinda kaybolabiliyor; destegin elinde baska bir yol yoktu.
+// Ne: Yukseltme siparisinin durumu: hangi etkinlik, odendi mi, uygulandi mi. Odenmis ama
+//     uygulanamamissa (odeme donusunde hata) "Simdi uygula" yukseltmeyi uygular.
+// Neden: Yukseltme siparisinde aktivasyon linki ve etkinlik QR'i anlamsiz; panelin bunun yerine
+//        yukseltmenin etkinlige islenip islenmedigini gostermesi gerekiyor (Excel 2.18).
+function UpgradeCard({
+  purchaseUid,
+  upgrade,
+  onApplied,
+}: {
+  purchaseUid: string;
+  upgrade: NonNullable<OrderDetail['upgrade']>;
+  onApplied: () => void;
+}) {
+  const [applying, setApplying] = useState(false);
+  const [error, setError] = useState('');
+
+  const apply = async () => {
+    setApplying(true);
+    setError('');
+    try {
+      const res = await authFetch(`${SERV_ROOT}/api/admin/orders/${purchaseUid}/apply-upgrade`, { method: 'POST' });
+      if (!res.ok) {
+        setError((await res.text()).trim() || at('admin.orderDetail.upgradeApplyFailed', 'Could not apply the upgrade', 'Не вдалося застосувати покращення'));
+        return;
+      }
+      onApplied();
+    } catch {
+      setError(at('admin.orderDetail.upgradeApplyFailed', 'Could not apply the upgrade', 'Не вдалося застосувати покращення'));
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  let state: string;
+  if (upgrade.applied_at) {
+    state = at('admin.orderDetail.upgradeApplied', 'Applied to the event on {{date}}.', 'Застосовано до події {{date}}.', {
+      date: new Date(upgrade.applied_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    });
+  } else if (upgrade.paid) {
+    state = at('admin.orderDetail.upgradePaidNotApplied', 'Paid, but not applied to the event yet.', 'Оплачено, але ще не застосовано до події.');
+  } else {
+    state = at('admin.orderDetail.upgradeNotPaid', 'Payment has not been confirmed.', 'Оплату не підтверджено.');
+  }
+
+  return (
+    <div className="admin-resend-activation">
+      <div className="admin-resend-activation-text">
+        <h3 className="admin-resend-activation-title">
+          {at('admin.orderDetail.upgradeTitle', 'Upgrade of an existing event', 'Покращення наявної події')}
+        </h3>
+        <p className="admin-resend-activation-hint">
+          {upgrade.event_name || at('admin.orderDetail.untitledEvent', 'Untitled event', 'Подія без назви')} · {upgrade.event_packed_uid}
+        </p>
+        <p className={upgrade.paid && !upgrade.applied_at ? 'admin-resend-activation-err' : 'admin-resend-activation-hint'}>{state}</p>
+        {error && <p className="admin-resend-activation-err">{error}</p>}
+      </div>
+      {upgrade.paid && !upgrade.applied_at && (
+        <button type="button" className="admin-save-btn" onClick={apply} disabled={applying}>
+          {applying
+            ? at('admin.orderDetail.upgradeApplying', 'Applying…', 'Застосування…')
+            : at('admin.orderDetail.upgradeApply', 'Apply now', 'Застосувати зараз')}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function ResendActivationCard({
   purchaseUid,
   buyerEmail,
@@ -697,14 +773,20 @@ function AdminOrderDetail() {
               )}
             </div>
 
-            <ResendActivationCard
-              purchaseUid={uid || ''}
-              buyerEmail={order.buyer_email}
-              activationLink={order.activation_link || ''}
-              blockedReason={order.activation_blocked_reason || ''}
-            />
+            {order.upgrade ? (
+              <UpgradeCard purchaseUid={uid || ''} upgrade={order.upgrade} onApplied={load} />
+            ) : (
+              <>
+                <ResendActivationCard
+                  purchaseUid={uid || ''}
+                  buyerEmail={order.buyer_email}
+                  activationLink={order.activation_link || ''}
+                  blockedReason={order.activation_blocked_reason || ''}
+                />
 
-            <EventQrCard account={order.order_account} hasActivationLink={!!order.activation_link} />
+                <EventQrCard account={order.order_account} hasActivationLink={!!order.activation_link} />
+              </>
+            )}
 
             {isSuperAdmin && order.payment_summary && <PaymentSummaryCard summary={order.payment_summary} />}
 

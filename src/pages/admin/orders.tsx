@@ -22,6 +22,9 @@ interface OrderSummary {
   promo_code_uid?: string | null;
   promo_code_text_snapshot?: string | null;
   worst_status: string;
+  // Excel 2.18: mevcut bir etkinligin yukseltmesi; uygulanmadiysa applied_at bos.
+  upgrade_event_uid?: string | null;
+  upgrade_applied_at?: string | null;
 }
 
 interface OrderFilters {
@@ -250,6 +253,13 @@ function AdminOrders() {
                   <div className="admin-order-card-buyer">
                     <span className="admin-orders-email">{order.buyer_email || '—'}</span>
                     {order.buyer_name && <span className="admin-order-card-name">{order.buyer_name}</span>}
+                    {order.upgrade_event_uid && (
+                      <span className="admin-order-card-name">
+                        {order.upgrade_applied_at
+                          ? at('admin.orders.upgradeApplied', 'Upgrade · applied', 'Покращення · застосовано')
+                          : at('admin.orders.upgradeNotApplied', 'Upgrade · not applied', 'Покращення · не застосовано')}
+                      </span>
+                    )}
                   </div>
                   <span className={`admin-status-badge ${statusClass(order.worst_status)}`}>
                     {statusLabel(order.worst_status)}

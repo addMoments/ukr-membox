@@ -24,6 +24,9 @@ import '../../v2-styles/AdminProducts.css';
 const PREMIUM_PACKAGE_ID = 'premium';
 const at = adminText;
 
+// Yukseltme urunleri (Excel 2.18): host etkinlik sayfasindan alir, Services & Prices'ta gorunmez.
+const isUpgrade = (product: AdminProduct) => Boolean(product.options.upgrade_kind);
+
 const isVoiceIncluded = (product: AdminProduct) => {
   return product.voice_included === true
     || (product.voice_included === undefined && Array.isArray(product.granted_features) && product.granted_features.includes(FEATURE_VOICE));
@@ -57,7 +60,13 @@ function AdminProducts() {
   }, []);
 
   const packageProducts = products.filter((p) => !p.is_add_on);
-  const addOnProducts = products.filter((p) => p.is_add_on);
+  const addOnProducts = products.filter((p) => p.is_add_on && !isUpgrade(p));
+  // Once paket yukseltmeleri, sonra ek sure ve ek alan; her grupta ucuzdan pahaliya.
+  const UPGRADE_KIND_ORDER = ['package', 'time', 'storage'];
+  const upgradeProducts = products.filter(isUpgrade).sort((a, b) =>
+    UPGRADE_KIND_ORDER.indexOf(a.options.upgrade_kind || '') - UPGRADE_KIND_ORDER.indexOf(b.options.upgrade_kind || '')
+    || a.price - b.price
+    || a.id.localeCompare(b.id));
 
   // Ne: Form alanindaki sayiyi okur; bos alan icin null doner.
   // Neden: Number('') === 0 oldugu icin bos birakilan bir limit alani sessizce "0 limit"
@@ -105,21 +114,38 @@ function AdminProducts() {
       errors.push(at('admin.products.errors.priceMin', 'Price must be greater than or equal to 0.', 'Ціна має бути більшою або дорівнювати 0.'));
     }
 
-    // Not: priority yalnizca siralama icindir. Backend 1'in altini reddediyor cunku public urun
-    // sorgusu `priority > 0` filtreliyor -- 0 yazmak urunu siteden sessizce kaldirirdi.
-    const priority = readNumber(formData.get('priority'));
-    if (priority === null || priority < 1) {
-      errors.push(at('admin.products.errors.priorityMin', 'Order must be 1 or greater.', 'Порядок має бути 1 або більше.'));
-    }
-
     const basePayload: UpdateAdminProductPayload = {
       ...(displayNameEn ? { display_name_en: displayNameEn } : {}),
       ...(displayNameUk ? { display_name_uk: displayNameUk } : {}),
       ...(displayDescriptionEn ? { display_description_en: displayDescriptionEn } : {}),
       ...(displayDescriptionUk ? { display_description_uk: displayDescriptionUk } : {}),
       price: price ?? undefined,
-      priority: priority ?? undefined,
     };
+
+    // Yukseltmede sira alani yok (magazada gorunmez); turune gore ek GB ya da ek ay duzenlenir.
+    if (isUpgrade(product)) {
+      const kind = product.options.upgrade_kind;
+      const field = kind === 'storage' ? 'extra_storage_gb' : kind === 'time' ? 'extra_storage_months' : null;
+      if (field) {
+        const amount = readNumber(formData.get(field));
+        if (amount === null || amount <= 0 || !Number.isInteger(amount)) {
+          errors.push(kind === 'storage'
+            ? at('admin.products.errors.extraGbPositive', 'Extra storage must be a whole number of GB greater than 0.', 'Додаткове місце має бути цілим числом ГБ, більшим за 0.')
+            : at('admin.products.errors.extraMonthsPositive', 'Extra time must be a whole number of months greater than 0.', 'Додатковий час має бути цілим числом місяців, більшим за 0.'));
+        } else {
+          basePayload[field] = amount;
+        }
+      }
+      return { payload: errors.length ? undefined : basePayload, errors };
+    }
+
+    // Not: priority yalnizca siralama icindir. Backend 1'in altini reddediyor cunku public urun
+    // sorgusu `priority > 0` filtreliyor -- 0 yazmak urunu siteden sessizce kaldirirdi.
+    const priority = readNumber(formData.get('priority'));
+    if (priority === null || priority < 1) {
+      errors.push(at('admin.products.errors.priorityMin', 'Order must be 1 or greater.', 'Порядок має бути 1 або більше.'));
+    }
+    basePayload.priority = priority ?? undefined;
 
     if (product.is_add_on) {
       return { payload: errors.length ? undefined : basePayload, errors };
@@ -285,7 +311,7 @@ function AdminProducts() {
   // Ne: Add-on kartinin ust kismina aktif/pasif toggle anahtari render eder.
   // Nasil: Native checkbox uzerine custom CSS slider sarar; tiklamada onToggleAddonEnabled cagirilir, durum etiketi yanindaki rozet ile senkron tutulur.
   // Neden: Admin tek tikla add-on'u acip kapatabilsin; toggle yalnizca add-on satirlarinda gorunsun cunku core paket icin backend 422 doner.
-  const renderAddonEnabledToggle = (product: AdminProduct) => {
+  const renderAddonEnabledToggle = (product: AdminProduct, hint?: string) => {
     const toggling = Boolean(enabledTogglingByUid[product.uid]);
     const result = enabledResultByUid[product.uid];
     return (
@@ -310,7 +336,7 @@ function AdminProducts() {
           </span>
         )}
         <p className="admin-product-field-hint">
-          {at('admin.products.disabledHint', 'When disabled, the add-on is hidden from public Services and Prices and Checkout.', 'Коли вимкнено, додаток приховано з публічних Послуг і цін та Checkout.')}
+          {hint || at('admin.products.disabledHint', 'When disabled, the add-on is hidden from public Services and Prices and Checkout.', 'Коли вимкнено, додаток приховано з публічних Послуг і цін та Checkout.')}
         </p>
       </div>
     );
@@ -567,6 +593,86 @@ function AdminProducts() {
     </form>
   );
 
+  const packageName = (id?: string) => {
+    const pkg = packageProducts.find((x) => x.id === id);
+    return pkg ? renderName(pkg) : id || '';
+  };
+
+  // Ne: Yukseltme urunu karti (Excel 2.18): ad, aciklama, fiyat, acik/kapali ve turune gore
+  //     ek GB ya da ek ay. Paket yukseltmesinde kaynak ve hedef paket yalnizca gosterilir.
+  // Neden: Musteri fiyati ve "GB / ay" miktarini urun listesinden degistirmek istedi.
+  const upgradeForm = (product: AdminProduct) => {
+    const { upgrade_kind: kind, upgrade_from: from, upgrade_to: to, upgrade_for: target } = product.options;
+    return (
+      <form className="admin-product-form" onSubmit={(e) => onSubmitProduct(e, product)}>
+        <div className="admin-product-card-top">
+          <div>
+            <span className="admin-product-kind-badge admin-product-kind-badge-addon">{at('admin.products.upgrade', 'Upgrade', 'Покращення')}</span>
+            <p className="admin-product-name">{renderName(product)}</p>
+            <p className="admin-product-desc">
+              {kind === 'package'
+                ? `${packageName(from)} → ${packageName(to)}`
+                : `${at('admin.products.upgradeFor', 'For', 'Для')} ${packageName(target)}`}
+            </p>
+            <p className="admin-product-tech-id">ID: {product.id}</p>
+          </div>
+          <p className="admin-product-price">₴{product.price.toFixed(2)}</p>
+        </div>
+
+        {renderAddonEnabledToggle(product, at('admin.products.upgradeDisabledHint', 'When disabled, hosts are not offered this upgrade on their event page.', 'Коли вимкнено, організатори не бачать це покращення на сторінці події.'))}
+
+        <div className="admin-product-fields">
+          <label className="admin-product-field">
+            <span className="admin-product-field-label">{at('admin.products.upgradeNameEn', 'Upgrade Name (EN)', 'Назва покращення (EN)')}</span>
+            <input name="display_name_en" className="admin-product-input" defaultValue={product.display_name_en || ''} />
+          </label>
+          <label className="admin-product-field">
+            <span className="admin-product-field-label">{at('admin.products.upgradeNameUk', 'Upgrade Name (UK)', 'Назва покращення (UK)')}</span>
+            <input name="display_name_uk" className="admin-product-input" defaultValue={product.display_name_uk || ''} />
+          </label>
+          <label className="admin-product-field">
+            <span className="admin-product-field-label">{at('admin.products.upgradeDescriptionEn', 'Upgrade Description (EN)', 'Опис покращення (EN)')}</span>
+            <textarea name="display_description_en" className="admin-product-input admin-product-textarea" defaultValue={product.display_description_en || ''} />
+          </label>
+          <label className="admin-product-field">
+            <span className="admin-product-field-label">{at('admin.products.upgradeDescriptionUk', 'Upgrade Description (UK)', 'Опис покращення (UK)')}</span>
+            <textarea name="display_description_uk" className="admin-product-input admin-product-textarea" defaultValue={product.display_description_uk || ''} />
+          </label>
+          <label className="admin-product-field">
+            <span className="admin-product-field-label">{at('admin.products.upgradePrice', 'Upgrade Price', 'Ціна покращення')}</span>
+            <input name="price" type="number" min={0} step="0.01" className="admin-product-input" defaultValue={product.price} />
+          </label>
+          {kind === 'storage' && (
+            <label className="admin-product-field">
+              <span className="admin-product-field-label">{at('admin.products.extraStorageGb', 'Extra storage (GB)', 'Додаткове місце (ГБ)')}</span>
+              <input name="extra_storage_gb" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.extra_storage_gb} />
+            </label>
+          )}
+          {kind === 'time' && (
+            <label className="admin-product-field">
+              <span className="admin-product-field-label">{at('admin.products.extraStorageMonths', 'Extra gallery storage (months)', 'Додаткове зберігання галереї (місяців)')}</span>
+              <input name="extra_storage_months" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.extra_storage_months} />
+            </label>
+          )}
+          <p className="admin-product-field-hint">
+            {at(
+              'admin.products.upgradeHint',
+              'A change applies to upgrades bought from now on; upgrades already bought keep what was paid for.',
+              'Зміна діє для покращень, придбаних відтепер; уже придбані покращення зберігають те, за що заплатили.',
+            )}
+          </p>
+        </div>
+
+        <div className="admin-product-form-footer">
+          <button type="submit" className="admin-product-save-btn" disabled={Boolean(savingByUid[product.uid])}>
+            {savingByUid[product.uid] ? at('admin.common.saving', 'Saving...', 'Збереження...') : at('admin.common.save', 'Save', 'Зберегти')}
+          </button>
+          {renderResult(product.uid)}
+        </div>
+      </form>
+    );
+  };
+
   return (
     <div className="admin-layout">
       <V2Header />
@@ -634,6 +740,26 @@ function AdminProducts() {
                 </article>
               ))}
             </section>
+
+            {upgradeProducts.length > 0 && (
+              <section className="admin-products-panel">
+                <div className="admin-products-panel-head">
+                  <div>
+                    <h2>{at('admin.products.upgrades', 'Upgrades', 'Покращення')}</h2>
+                    <p>{at('admin.products.upgradesDesc', 'Bought by hosts from their event page. Not shown on Services & Prices.', 'Організатори купують їх на сторінці події. Не показуються в «Послугах і цінах».')}</p>
+                  </div>
+                  <span className="admin-products-panel-count">{upgradeProducts.length}</span>
+                </div>
+                {upgradeProducts.map((product) => (
+                  <article
+                    key={product.uid}
+                    className={`admin-product-card admin-product-card-addon${product.is_enabled ? '' : ' admin-product-card-disabled'}`}
+                  >
+                    {upgradeForm(product)}
+                  </article>
+                ))}
+              </section>
+            )}
           </div>
         )}
       </div>
