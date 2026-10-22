@@ -196,9 +196,7 @@
             "publicTextGuestbook": "Guests can see each other's text entries",
             "publicTextGuestbookDesc": "When enabled, guests can read text messages left by other guests.",
             "publicAudioGuestbook": "Guests can see each other's audio entries",
-            "publicAudioGuestbookDesc": "When enabled, guests can listen to voice messages left by other guests.",
-            "guestGallery": "Guests can view the gallery",
-            "guestGalleryDesc": "When on, guests can see the photos and videos in albums that allow viewing. Each album can be limited separately on the Albums page."
+            "publicAudioGuestbookDesc": "When enabled, guests can listen to voice messages left by other guests."
         },
         "advertorial": {
             "title": "Advertising Area",
@@ -1019,8 +1017,6 @@
         "privacyPrivate": "Private",
         "privacyProtected": "Protected",
         "noDate": "No date",
-        "galleryOffNotice": "Guest viewing is off for the whole event. Guests can upload but not see the albums’ photos.",
-        "galleryOffAction": "Open Settings",
         "actions": {
             "edit": "Edit",
             "share": "Share & QR",
@@ -1062,7 +1058,7 @@
             "guestUpload": "Guest uploads",
             "guestUploadDesc": "Guests can add photos and videos. When off, guests can still open the album to view it (if viewing is on), but cannot upload.",
             "guestView": "Guests can view this album",
-            "guestViewDesc": "Guests see the photos and videos in this album. Also needs “Guests can view the gallery” in Settings. If both uploads and viewing are off, the album is hidden from guests.",
+            "guestViewDesc": "Guests see the photos and videos in this album. If both uploads and viewing are off, the album is hidden from guests.",
             "guestDownloadAll": "Guests can download the whole album",
             "guestDownloadAllDesc": "Shows a “Download all” button on the guest album page.",
             "save": "Save album",
@@ -1074,7 +1070,6 @@
             "passcodeRequired": "Protected albums need a passcode.",
             "passcodeTooShort": "Passcode must be 4–8 characters.",
             "defaultNote": "This is the default album. Uploads without an album go here, and it cannot be deleted.",
-            "needsGallery": "Unavailable while “Guests can view the gallery” is off in the event Settings.",
             "coverSaved": "Cover saved",
             "coverRemoved": "Cover removed",
             "unsaved": "Unsaved changes"

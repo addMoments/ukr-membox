@@ -49,7 +49,6 @@ function EventThemeInner({event}: {event: Event}) {
   // Ne: Onizlemedeki reklamlar ve albumler, misafir sayfasindakiyle ayni veriden.
   // Neden: Onizleme yalnizca ust kismi gosteriyordu; Solomiia ekranin birebir yansimasini
   //        istedi: paketteyse Promotions, altinda albumler (20 Ekim).
-  const galleryOn = !!event.settings?.guest_gallery;
   const [advertorial, setAdvertorial] = useState<AdvertorialResponse | null>(null);
   const [albums, setAlbums] = useState<GuestAlbum[]>([]);
   const [albumsLoaded, setAlbumsLoaded] = useState(false);
@@ -65,12 +64,12 @@ function EventThemeInner({event}: {event: Event}) {
     ]).then(([advertorialData, albumsData, counts]) => {
       if (!active) return;
       setAdvertorial(advertorialData);
-      setAlbums(albumsListedForNewGuest(albumsData.list, galleryOn));
+      setAlbums(albumsListedForNewGuest(albumsData.list));
       setAlbumsLoaded(albumsData.ok);
       setMediaCounts(counts);
     });
     return () => { active = false; };
-  }, [packedUid, galleryOn]);
+  }, [packedUid]);
 
   // Kirpilmis ya da orijinal dosya; "Maks. 10 MB" yaziyordu ama hic kontrol edilmiyordu.
   const handleImageReady = (file: File) => {
@@ -226,7 +225,6 @@ function EventThemeInner({event}: {event: Event}) {
               advertorial={advertorial}
               albums={albums}
               albumsLoaded={albumsLoaded}
-              galleryOn={galleryOn}
               albumMediaCounts={mediaCounts}
               preview
             />

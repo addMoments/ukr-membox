@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import EventDetailLayout from '../../v2-partials/EventDetailLayout';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import SettingsFieldNote from '../../v2-components/SettingsFieldNote';
@@ -161,9 +161,6 @@ function EventAlbumEditInner({ event }: { event: Event }) {
     }
   };
 
-  // Etkinlik anahtari: kapaliyken albumdeki "goruntuleme" ve "tumunu kaydet" ise yaramaz.
-  const guestGalleryOn = !!event.settings?.guest_gallery;
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const form = parse_submit_event(e);
     setError('');
@@ -196,9 +193,8 @@ function EventAlbumEditInner({ event }: { event: Event }) {
       privacy,
       passcode: privacy === 'protected' ? passcodeRaw : null,
       guest_upload: !!form.guest_upload,
-      // Pasif checkbox formla gonderilmez; galeri kapaliyken kayitli degeri koru (AM-08).
-      guest_view: guestGalleryOn ? !!form.guest_view : (album ? album.guest_view : false),
-      guest_download_all: guestGalleryOn ? !!form.guest_download_all : (album ? album.guest_download_all : false),
+      guest_view: !!form.guest_view,
+      guest_download_all: !!form.guest_download_all,
     };
 
     setSaving(true);
@@ -242,7 +238,6 @@ function EventAlbumEditInner({ event }: { event: Event }) {
   }
 
   const coverSrc = coverPreview || (cover ? albumCoverUrl({ cover }) : null);
-  const needsGalleryNote = textOr('albums.form.needsGallery', 'Unavailable while “Guests can view the gallery” is off in the event Settings.', 'Недоступно, поки в налаштуваннях події вимкнено «Гості можуть переглядати галерею».');
 
   return (
     <>
@@ -433,29 +428,18 @@ function EventAlbumEditInner({ event }: { event: Event }) {
             />
             <SettingsToggle
               name={textOr('albums.form.guestView', 'Guests can view this album', 'Гості можуть переглядати цей альбом')}
-              description={textOr('albums.form.guestViewDesc', 'Guests see the photos and videos in this album. Also needs “Guests can view the gallery” in Settings. If both uploads and viewing are off, the album is hidden from guests.', 'Гості бачать фото та відео в цьому альбомі. Також потрібно увімкнути «Гості можуть переглядати галерею» у налаштуваннях. Якщо вимкнено і завантаження, і перегляд, альбом приховано від гостей.')}
-              // Yeni albumde varsayilan etkinlik anahtarini izler; eskiden galeri kapaliyken de "acik" basliyordu.
-              checked={album ? album.guest_view : guestGalleryOn}
+              description={textOr('albums.form.guestViewDesc', 'Guests see the photos and videos in this album. If both uploads and viewing are off, the album is hidden from guests.', 'Гості бачать фото та відео в цьому альбомі. Якщо вимкнено і завантаження, і перегляд, альбом приховано від гостей.')}
+              // Galeriye yalnizca bu anahtar karar verir (Ayarlar'daki etkinlik anahtari 2026-10-22'de kalkti).
+              checked={album ? album.guest_view : true}
               formName="guest_view"
-              disabled={!guestGalleryOn}
-              disabledNote={needsGalleryNote}
             />
             <SettingsToggle
               name={textOr('albums.form.guestDownloadAll', 'Guests can download the whole album', 'Гості можуть зберегти весь альбом')}
               description={textOr('albums.form.guestDownloadAllDesc', 'Shows a “Download all” button on the guest album page.', 'Показує кнопку «Зберегти на пристрій» на сторінці альбому для гостей.')}
               checked={album ? album.guest_download_all : false}
               formName="guest_download_all"
-              disabled={!guestGalleryOn}
-              disabledNote={needsGalleryNote}
             />
           </div>
-          {!guestGalleryOn && (
-            <div className="albums-notice" style={{ marginTop: 20, marginBottom: 0 }}>
-              <i className="fa-solid fa-eye-slash" />
-              <span>{textOr('albums.galleryOffNotice', 'Guest viewing is off for the whole event. Guests can upload but not see the albums’ photos.', 'Перегляд для гостей вимкнено для всієї події. Гості можуть завантажувати, але не бачать фото в альбомах.')}</span>
-              <Link to={`/event/${packedUid}/settings#privacy`}>{textOr('albums.galleryOffAction', 'Open Settings', 'Відкрити налаштування')}</Link>
-            </div>
-          )}
         </section>
 
         <div className={`album-form-footer${dirty ? ' is-dirty' : ''}`}>

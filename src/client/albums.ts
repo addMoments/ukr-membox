@@ -104,9 +104,9 @@ export const ensureAlbumQRs = async (eventUid: string): Promise<string[]> => {
 // Misafir (webanon)
 // ---------------------------------------------------------------------------
 
-// Ana sayfa listesi. Suzme RLS'te (11-albums-v2.sql albums_guest_select): public + protected
-// (kilitli gosterilir) + linkten acilmis private; misafire acik hicbir yani olmayan album
-// (yukleme kapali ve galeri gorunmuyor) listeye girmez.
+// Ana sayfa listesi. Suzme RLS'te (15-album-decides-gallery.sql albums_guest_select): public +
+// protected (kilitli gosterilir) + linkten acilmis private; misafire acik hicbir yani olmayan
+// album (yukleme ve gorunum kapali) listeye girmez.
 // 2026-09-15: eskiden buradaki privacy=eq.public suzgeci protected albumu de gizliyordu;
 // host passcode koyunca album misafir sayfasindan kayboluyor, "passcode calismiyor" saniliyordu.
 export const guestListAlbums = async (eventUid: string): Promise<GuestAlbum[]> => {
@@ -119,9 +119,8 @@ export const guestListAlbums = async (eventUid: string): Promise<GuestAlbum[]> =
 // Ne: Host'un album listesinden, sayfayi ilk kez acan bir misafirin ana sayfada gordugu alt kume.
 // Nasil: albums_guest_select ile ayni kural; private album linkten acilmadikca listede yok.
 // Neden: Tema onizlemesi misafir ekranini birebir gostersin (Solomiia, 20 Ekim).
-export const albumsListedForNewGuest = (albums: Album[], galleryOn: boolean): GuestAlbum[] => {
-  return albums.filter((album) => (album.guest_upload || (album.guest_view && galleryOn))
-    && album.privacy !== 'private');
+export const albumsListedForNewGuest = (albums: Album[]): GuestAlbum[] => {
+  return albums.filter((album) => (album.guest_upload || album.guest_view) && album.privacy !== 'private');
 };
 
 // Ne: Misafirin acmis oldugu (passcode girdigi / linkten actigi) private-protected album
@@ -178,8 +177,6 @@ export interface GuestOpenResult {
   album_uid: string;
   guest_view: boolean;
   guest_upload: boolean;
-  // etkinlik duzeyi "Guests can view the gallery" anahtari (events.settings.guest_gallery)
-  gallery_on: boolean;
 }
 
 // Albumu linkten acar; private/protected ise token'a isler (X-Auth-Token core.ts'de saklanir).

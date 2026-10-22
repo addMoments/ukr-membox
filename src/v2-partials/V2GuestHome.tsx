@@ -40,11 +40,9 @@ export interface V2GuestHomeProps {
   font?: string;
   advertorial?: AdvertorialResponse | null;
   // Misafire gorunur albumler (RLS suzer: public + protected(kilitli) + linkten acilmis private;
-  // yuklemesi kapali VE galerisi gorunmeyen albumler listeye girmez).
+  // yuklemesi VE gorunumu kapali albumler listeye girmez).
   albums?: GuestAlbum[];
   albumsLoaded?: boolean;
-  // Etkinligin "Guests can view the gallery" anahtari (events_public.settings.guest_gallery).
-  galleryOn?: boolean;
   // Album basina misafirin okuyabildigi medya adedi (RLS suzer); "Moments N" sayaci bundan.
   albumMediaCounts?: Record<string, number> | null;
   // Host tema onizlemesi (telefon cercevesindeki iframe). Gercek sayfadaki header index.html'de,
@@ -191,7 +189,6 @@ function V2GuestHome({
   advertorial,
   albums = [],
   albumsLoaded = false,
-  galleryOn = false,
   albumMediaCounts = null,
   preview = false,
 }: V2GuestHomeProps) {
@@ -219,10 +216,11 @@ function V2GuestHome({
   const uploadableAlbums = albums.filter((album) => guestCanUploadTo(album, openedAlbums));
   const uploadsClosed = albumsLoaded && uploadableAlbums.length === 0;
   // Yalnizca General varken kart gizliydi; fotograflari gorulebiliyorsa misafirin galeriye tek yolu bu kart
-  // (AM-08: iki anahtar da acikken tek albumlu etkinlikte misafir fotograflara ulasamiyordu).
+  // (AM-08: tek albumlu etkinlikte misafir fotograflara ulasamiyordu).
+  const anyAlbumViewable = albums.some((album) => album.guest_view);
   const showAlbumCards = albums.length > 1
     || albums.some((album) => !album.is_default)
-    || (galleryOn && albums.some((album) => album.guest_view));
+    || anyAlbumViewable;
   // Ilk 3 album gorunur; fazlasi varsa "Show all albums N" butonu listeyi yerinde acar,
   // acildiktan sonra "Show less" ilk 3'e geri toplar (Solomiia, 19 Ekim).
   const [albumsExpanded, setAlbumsExpanded] = useState(false);
@@ -240,9 +238,9 @@ function V2GuestHome({
   const visibleAlbums = hasHiddenAlbums ? albums.slice(0, ALBUM_PREVIEW_COUNT) : albums;
   const isLocked = (album: GuestAlbum) => album.privacy === 'protected' && !openedAlbums.has(album.uid);
   // Ne: "Moments N" — misafirin acip bakabildigi albumlerdeki foto + video sayisi.
-  // Neden: Galeri kapaliyken misafir yalnizca kendi yuklediklerini okuyabilir; o sayi
+  // Neden: Hicbir album gorunur degilken misafir yalnizca kendi yuklediklerini okuyabilir; o sayi
   //        etkinligin anlari gibi okunmasin diye sayac hic gosterilmez.
-  const momentsCount = galleryOn && albumMediaCounts
+  const momentsCount = anyAlbumViewable && albumMediaCounts
     ? albums
       .filter((album) => album.guest_view && !isLocked(album))
       .reduce((sum, album) => sum + (albumMediaCounts[album.uid] || 0), 0)

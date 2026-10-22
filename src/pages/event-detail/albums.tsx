@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import EventDetailLayout from '../../v2-partials/EventDetailLayout';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import Button from '../../components/Button';
@@ -178,11 +178,9 @@ function EventAlbumsInner({ event }: { event: Event }) {
     return textOr('albums.privacyPublic', 'Public', 'Публічний');
   };
 
-  const guestGalleryOn = !!event.settings?.guest_gallery;
-  // v2 gorunurluk: album, misafire acik hicbir yani kalmayinca gizlenir
-  // (yukleme kapali VE (album gorunumu kapali YA DA etkinlik galerisi kapali)).
-  // 11-albums-v2.sql albums_guest_select ile ayni kural.
-  const isHiddenFromGuests = (album: Album) => !album.guest_upload && !(album.guest_view && guestGalleryOn);
+  // Album, misafire acik hicbir yani kalmayinca gizlenir (yukleme kapali VE gorunum kapali).
+  // 15-album-decides-gallery.sql albums_guest_select ile ayni kural.
+  const isHiddenFromGuests = (album: Album) => !album.guest_upload && !album.guest_view;
 
   const sorted = sortAlbums(albums, sort);
 
@@ -225,14 +223,6 @@ function EventAlbumsInner({ event }: { event: Event }) {
           />
         </div>
       </div>
-
-      {!guestGalleryOn && (
-        <div className="albums-notice" role="status">
-          <i className="fa-solid fa-eye-slash" />
-          <span>{textOr('albums.galleryOffNotice', 'Guest viewing is off for the whole event. Guests can upload but not see the albums’ photos.', 'Перегляд для гостей вимкнено для всієї події. Гості можуть завантажувати, але не бачать фото в альбомах.')}</span>
-          <Link to={`/event/${packedUid}/settings#privacy`}>{textOr('albums.galleryOffAction', 'Open Settings', 'Відкрити налаштування')}</Link>
-        </div>
-      )}
 
       {loaded && sorted.length === 0 ? (
         <div className="gallery-empty">

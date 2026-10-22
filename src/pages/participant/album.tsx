@@ -115,9 +115,8 @@ function ParticipantAlbum() {
       const user = await whoAmI();
       setParticipantUid(user.ui);
 
-      let openResult;
       try {
-        openResult = await guestOpenAlbum(albumUid, passcode);
+        await guestOpenAlbum(albumUid, passcode);
       } catch (err) {
         const code = getGuestAlbumErrorCode(err);
         if (code === 'PASSCODE_REQUIRED') {
@@ -156,9 +155,9 @@ function ParticipantAlbum() {
         setParticipantName(currentName);
       }
 
-      // Iki galeri anahtari: etkinlik (events_public.settings.guest_gallery) + album (guest_view).
-      // open ucu ikisini de doner; PostgREST'ten gelen kopya ile celisirse sunucuya guvenilir.
-      const visible = (openResult?.gallery_on ?? !!ev.settings?.guest_gallery) && !!albumData.guest_view;
+      // Galeriye yalnizca albumun guest_view'i karar verir; etkinlik duzeyi anahtar
+      // (settings.guest_gallery) 2026-10-22'de kalkti (15-album-decides-gallery.sql).
+      const visible = !!albumData.guest_view;
       setGalleryVisible(visible);
       if (visible) {
         const requestId = ++requestIdRef.current;

@@ -267,7 +267,6 @@ function Participant() {
       advertorial={advertorial}
       albums={albums}
       albumsLoaded={albumsLoaded}
-      galleryOn={!!event.settings?.guest_gallery}
       albumMediaCounts={albumMediaCounts}
     />
   );

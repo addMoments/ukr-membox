@@ -17,7 +17,6 @@ import { saveUrl } from '../../utils/download';
 import { S3_ROOT, SERV_ROOT } from '../../consts';
 import { dbWhoAmI } from '../../client/auth';
 import { t } from '../../packages/i18n';
-import { textOr } from '../../utils/admin_i18n';
 import { sendToMsg } from '../../types/mesage-screen';
 import { fetch } from '../../client/core';
 import { rm_key } from '../../utils/persistence';
@@ -415,14 +414,9 @@ function EventSettingsInner({event}: {event: Event}) {
           <p className="settings-section-description">{t('settings.privacy.description')}</p>
         </div>
         <div className="settings-toggle-list">
-          {/* Albumler: etkinlik duzeyi galeri anahtari. Anahtar yokken kapali sayilir
-              (RLS get_event_setting_bool FALSE doner); album duzeyinde ayrica guest_view var. */}
-          <SettingsToggle
-            name={textOr('settings.privacy.guestGallery', 'Guests can view the gallery', 'Гості можуть переглядати галерею')}
-            description={textOr('settings.privacy.guestGalleryDesc', 'When on, guests can see the photos and videos in albums that allow viewing. Each album can be limited separately on the Albums page.', 'Якщо увімкнено, гості бачать фото та відео в альбомах, де перегляд дозволено. Кожен альбом можна обмежити окремо на сторінці «Альбоми».')}
-            checked={!!settings.guest_gallery}
-            formName="guest_gallery"
-          />
+          {/* Etkinlik duzeyi "Guests can view the gallery" anahtari 2026-10-22'de kalkti (musteri:
+              album ayarlarindaki "Guests can view this album" ile ayni isi yapiyordu); galeriye
+              albumun guest_view'i karar verir (15-album-decides-gallery.sql). */}
           <SettingsToggle
             name={t('settings.privacy.multipleGuestbook')}
             description={t('settings.privacy.multipleGuestbookDesc')}
