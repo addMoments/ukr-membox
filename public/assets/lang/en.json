@@ -381,6 +381,54 @@
             "activeUntil": "Active until",
             "storageExpiration": "Storage Expiration"
         },
+        "upgrade": {
+            "label": "Upgrade",
+            "yourPlan": "Your plan:",
+            "titles": {
+                "standard": "Get more from your memories",
+                "plus": "Unlock the full experience",
+                "premium": "Need more space?",
+                "default": "Get more from your event"
+            },
+            "subtitles": {
+                "standard": "Upgrade your plan to get more storage, more uploads and extra features.",
+                "plus": "Upgrade to Premium and get even more storage, a longer gallery and extra features.",
+                "premium": "Keep your gallery longer or add more storage whenever you need it.",
+                "default": "Choose what you would like to add to your event."
+            },
+            "upgradeTo": "Upgrade to {{name}}",
+            "each": "{{price}} each",
+            "extraMonths": "+{{count}} months of gallery storage",
+            "extraMonthsDesc": "Your gallery is kept {{count}} months longer. You can add several periods.",
+            "extraGb": "+{{count}} GB of storage",
+            "extraGbDesc": "Get {{count}} GB more for your gallery. You can add several packs.",
+            "benefits": {
+                "storage": "{{count}} GB storage",
+                "unlimitedStorage": "Unlimited storage",
+                "media": "Up to {{count}} photos & videos",
+                "unlimitedMedia": "Unlimited photos & videos",
+                "months": "{{count}} months gallery storage",
+                "days": "{{count}} days gallery storage",
+                "ads": "Sponsored ad slot (Promotions)",
+                "guests": "Up to {{count}} guests",
+                "unlimitedGuests": "Unlimited guests",
+                "guestLimit": "No upload limit per guest",
+                "voice": "Voice messages"
+            },
+            "pay": "Upgrade · {{price}}",
+            "payEmpty": "Upgrade",
+            "redirecting": "Opening payment…",
+            "decrease": "Remove one",
+            "increase": "Add one",
+            "note": "One-time payment",
+            "noteDetail": "All your photos, albums and settings stay as they are.",
+            "done": "Your upgrade is active. Thank you!",
+            "errors": {
+                "windowClosed": "This event's gallery period has ended, so it can no longer be upgraded.",
+                "notOffered": "This option is no longer available for your plan. Please refresh the page.",
+                "generic": "The payment could not be opened. Please try again."
+            }
+        },
         "latestMemories": {
             "title": "Latest Memories",
             "subtitle": "The last 4 photos and videos your guests have shared. Click one to see it full size.",

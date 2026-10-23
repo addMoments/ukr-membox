@@ -11,6 +11,7 @@ import GuestAccessCard from '../v2-components/GuestAccessCard';
 import ColoredSettingsBox from '../v2-components/ColoredSettingsBox';
 import '../styles/EventHomeContent.css';
 import ActivityOverviewCard from '../v2-components/ActivityOverviewCard';
+import UpgradeCard from '../v2-components/UpgradeCard';
 import EmptyState from '../v2-components/EmptyState';
 import MediaCard from '../v2-components/MediaCard';
 import PhotoViewerModal, { photoViewerState } from './PhotoViewerModal';
@@ -429,6 +430,8 @@ function EventHomeContent({
             eventUid={`#${packedUid}`}
             isActive={isLive}
           />
+
+          <UpgradeCard packedUid={packedUid} />
 
           <ActivityOverviewCard
             stats={[
