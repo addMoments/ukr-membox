@@ -382,31 +382,26 @@
             "storageExpiration": "Storage Expiration"
         },
         "upgrade": {
-            "label": "Upgrade",
             "yourPlan": "Your plan:",
             "titles": {
-                "standard": "Get more from your memories",
-                "plus": "Unlock the full experience",
-                "premium": "Need more space?",
-                "default": "Get more from your event"
-            },
-            "subtitles": {
-                "standard": "Upgrade your plan to get more storage, more uploads and extra features.",
-                "plus": "Upgrade to Premium and get even more storage, a longer gallery and extra features.",
-                "premium": "Keep your gallery longer or add more storage whenever you need it.",
-                "default": "Choose what you would like to add to your event."
+                "standard": "Upgrade for more",
+                "plus": "Upgrade to Premium",
+                "premium": "More time or space?",
+                "default": "Upgrade your event"
             },
             "upgradeTo": "Upgrade to {{name}}",
-            "each": "{{price}} each",
-            "extraMonths": "+{{count}} months of gallery storage",
-            "extraMonthsDesc": "Your gallery is kept {{count}} months longer. You can add several periods.",
-            "extraGb": "+{{count}} GB of storage",
-            "extraGbDesc": "Get {{count}} GB more for your gallery. You can add several packs.",
+            "extraMonths": "+{{count}} months storage",
+            "extraUploadOne": "+{{count}} month of uploads",
+            "extraUpload": "+{{count}} months of uploads",
+            "extraGb": "+{{count}} GB storage",
+            "learnMore": "Learn more",
             "benefits": {
                 "storage": "{{count}} GB storage",
                 "unlimitedStorage": "Unlimited storage",
                 "media": "Up to {{count}} photos & videos",
                 "unlimitedMedia": "Unlimited photos & videos",
+                "uploadMonths": "Uploads open for {{count}} months",
+                "uploadDays": "Uploads open for {{count}} days",
                 "months": "{{count}} months gallery storage",
                 "days": "{{count}} days gallery storage",
                 "ads": "Sponsored ad slot (Promotions)",
@@ -420,8 +415,6 @@
             "redirecting": "Opening payment…",
             "decrease": "Remove one",
             "increase": "Add one",
-            "note": "One-time payment",
-            "noteDetail": "All your photos, albums and settings stay as they are.",
             "done": "Your upgrade is active. Thank you!",
             "errors": {
                 "windowClosed": "This event's gallery period has ended, so it can no longer be upgraded.",

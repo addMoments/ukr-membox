@@ -16,7 +16,7 @@ export interface PackageInfo {
 
 export interface UpgradeOption {
   id: string;
-  kind: 'package' | 'storage' | 'time';
+  kind: 'package' | 'storage' | 'time' | 'upload';
   // API price'i sayi olarak donuyor ama digerleri gibi once Number()'dan gecir (formatUah).
   price: number | string;
   display_name_en: string;
@@ -25,6 +25,7 @@ export interface UpgradeOption {
   to_package_info?: PackageInfo;
   extra_storage_gb?: number;
   extra_storage_months?: number;
+  extra_upload_months?: number;
 }
 
 export interface UpgradeOptionsResponse {

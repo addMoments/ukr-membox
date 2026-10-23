@@ -38,7 +38,7 @@ const parseJsonOrThrow = async (res: Response, endpointLabel: string): Promise<u
   }
 };
 
-const UPGRADE_KINDS = ['package', 'storage', 'time'] as const;
+const UPGRADE_KINDS = ['package', 'storage', 'time', 'upload'] as const;
 const optionalString = (value: unknown) => (typeof value === 'string' && value ? value : undefined);
 
 const normalizeOptions = (value: unknown): AdminProductOptions => {
@@ -63,6 +63,7 @@ const normalizeOptions = (value: unknown): AdminProductOptions => {
     upgrade_for: optionalString(raw.upgrade_for),
     extra_storage_gb: parseNumber(raw.extra_storage_gb),
     extra_storage_months: parseNumber(raw.extra_storage_months),
+    extra_upload_months: parseNumber(raw.extra_upload_months),
   };
 };
 

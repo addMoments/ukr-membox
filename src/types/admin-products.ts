@@ -13,12 +13,13 @@ export interface AdminProductOptions {
   image?: string;
   mobile_image?: string;
   // Yukseltme urunleri (Excel 2.18, 17-event-upgrades.sql). upgrade_kind yoksa normal urun.
-  upgrade_kind?: 'package' | 'storage' | 'time';
+  upgrade_kind?: 'package' | 'storage' | 'time' | 'upload';
   upgrade_from?: string;
   upgrade_to?: string;
   upgrade_for?: string;
   extra_storage_gb?: number;
   extra_storage_months?: number;
+  extra_upload_months?: number;
 }
 
 export interface AdminProduct {
@@ -63,6 +64,7 @@ export interface UpdateAdminProductPayload {
   is_enabled?: boolean;
   extra_storage_gb?: number;
   extra_storage_months?: number;
+  extra_upload_months?: number;
   options?: {
     image?: string;
     mobile_image?: string;

@@ -13,11 +13,13 @@ import {
 import '../v2-styles/UpgradeCard.css';
 
 // Etkinlik panosundaki yukseltme karti (Excel 2.18; yapi Solomiia'nin 23 Ekim taslagi).
-// Mini ve Classic'te paket secenekleri, Premium'da adetli +ay / +GB. Her varyantta tek odeme
-// dugmesi "Upgrade · tutar" (musteri: "everywhere the payment button should say upgrade").
+// Mini ve Classic'te paket secenekleri, Premium'da adetli +ay / +yukleme ayi / +GB. Her varyantta
+// tek odeme dugmesi "Upgrade · tutar" (musteri: "everywhere the payment button should say upgrade").
+// Kart QR ile Activity Overview arasinda; musteri 23 Ekim 11:41 kompakt istedi: aciklama metni ve
+// "One-time payment" kutusu yok, paketin kazandirdiklari "Learn more" ile acilir.
 // Odeme sonrasi bekleme sayfasi hostu ?upgrade=done ile buraya geri yollar.
 
-const MAX_BENEFITS = 4;
+const MAX_BENEFITS = 6;
 
 // Paket kartinin rengi ve basligi mevcut pakete gore; bilinmeyen paket varsayilana duser.
 const VARIANT_BY_PACKAGE: Record<string, string> = {
@@ -27,6 +29,15 @@ const VARIANT_BY_PACKAGE: Record<string, string> = {
 };
 
 const isUk = () => t('lang_code') === 'uk';
+
+// Premium eklerinin sirasi ve simgeleri. Taslakta once +ay, sonra +GB; +yukleme ayi (23 Ekim)
+// ikisinin arasinda. Backend fiyata gore siraliyor, ayni turde o sira korunur.
+const EXTRA_KIND_ORDER = ['time', 'upload', 'storage'];
+const EXTRA_ICON: Record<string, string> = {
+  time: 'fa-solid fa-database',
+  upload: 'fa-solid fa-calendar-plus',
+  storage: 'fa-solid fa-cloud',
+};
 
 // "CLASSIC" / "КЛАСИЧНИЙ" -> "Classic" / "Класичний" (urun adlari veride buyuk harfle duruyor).
 const titleCase = (name: string) => (name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : '');
@@ -50,9 +61,17 @@ const unlocks = (to: number | null, from: number | null) => to === -1 && from !=
 const raises = (to: number | null, from: number | null): to is number =>
   to !== null && to >= 0 && from !== null && from !== -1 && to > from;
 
+// Gun sayisi kartta 60 gun ve ustunde ay (30 gun = 1 ay), altinda gun olarak yazilir. Fark ancak
+// yuvarlanmis ay sayisi artiyorsa gosterilir: 30 -> 31 gun ("1 ay" -> "1 ay") kazanc degil.
+const longerPeriod = (to: number | null, from: number | null): to is number =>
+  raises(to, from) && Math.round(to / 30) > Math.round(from! / 30);
+const periodText = (days: number, monthsKey: string, daysKey: string) => (days >= 60
+  ? t(monthsKey, { count: Math.round(days / 30) })
+  : t(daysKey, { count: days }));
+
 // Ne: Paket yukseltmesinde hostun kazanacaklarini, mevcut ve hedef paketi karsilastirarak yazar.
 // Neden: Taslaktaki maddeler ornek metindi; limitler admin panelinden degisebildigi icin metin
-//        veriden uretilir, yoksa kart bir gun yanlis vaat eder. En onemli dort madde gosterilir.
+//        veriden uretilir, yoksa kart bir gun yanlis vaat eder.
 const packageBenefits = (current: PackageInfo, target: PackageInfo): string[] => {
   const from = current.options || {};
   const to = target.options || {};
@@ -68,12 +87,17 @@ const packageBenefits = (current: PackageInfo, target: PackageInfo): string[] =>
   if (unlocks(mediaTo, mediaFrom)) out.push(t('eventHome.upgrade.benefits.unlimitedMedia'));
   else if (raises(mediaTo, mediaFrom)) out.push(t('eventHome.upgrade.benefits.media', { count: mediaTo }));
 
+  // Musteri 23 Ekim: yukleme suresi paketlere gore 1 / 2 / 3 ay olacak.
+  const uploadTo = limit(to, 'activation_days');
+  const uploadFrom = limit(from, 'activation_days');
+  if (longerPeriod(uploadTo, uploadFrom)) {
+    out.push(periodText(uploadTo, 'eventHome.upgrade.benefits.uploadMonths', 'eventHome.upgrade.benefits.uploadDays'));
+  }
+
   const daysTo = limit(to, 'storage_days');
   const daysFrom = limit(from, 'storage_days');
-  if (raises(daysTo, daysFrom)) {
-    out.push(daysTo >= 60
-      ? t('eventHome.upgrade.benefits.months', { count: Math.round(daysTo / 30) })
-      : t('eventHome.upgrade.benefits.days', { count: daysTo }));
+  if (longerPeriod(daysTo, daysFrom)) {
+    out.push(periodText(daysTo, 'eventHome.upgrade.benefits.months', 'eventHome.upgrade.benefits.days'));
   }
 
   const featuresFrom = current.granted_features || [];
@@ -115,6 +139,7 @@ interface UpgradeCardProps {
 function UpgradeCard({ packedUid }: UpgradeCardProps) {
   const [data, setData] = useState<UpgradeOptionsResponse | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -165,10 +190,9 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
   }
 
   const packageOptions = options.filter((o) => o.kind === 'package');
-  // Taslaktaki sira: once +ay, sonra +GB.
   const extraOptions = options
-    .filter((o) => o.kind === 'time' || o.kind === 'storage')
-    .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'time' ? -1 : 1));
+    .filter((o) => EXTRA_KIND_ORDER.includes(o.kind))
+    .sort((a, b) => EXTRA_KIND_ORDER.indexOf(a.kind) - EXTRA_KIND_ORDER.indexOf(b.kind));
 
   const variant = VARIANT_BY_PACKAGE[current.id] || 'default';
   const textKey = VARIANT_BY_PACKAGE[current.id] ? current.id : 'default';
@@ -202,21 +226,24 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
 
   const renderPackageOption = (option: UpgradeOption) => {
     const selected = option.id === selectedPackage;
+    const open = Boolean(expanded[option.id]);
     const target = option.to_package_info;
     const benefits = target ? packageBenefits(current, target) : [];
     const targetVariant = VARIANT_BY_PACKAGE[target?.id || ''] || 'default';
     return (
-      <button
+      <div
         key={option.id}
-        type="button"
         className={`upgrade-option upgrade-option-package upgrade-option-to-${targetVariant}${selected ? ' is-selected' : ''}`}
-        aria-pressed={selected}
-        onClick={() => {
-          setError('');
-          setSelectedPackage(option.id);
-        }}
       >
-        <span className="upgrade-option-head">
+        <button
+          type="button"
+          className="upgrade-option-select"
+          aria-pressed={selected}
+          onClick={() => {
+            setError('');
+            setSelectedPackage(option.id);
+          }}
+        >
           <span className="upgrade-option-icon">
             <i className="fa-solid fa-crown" />
           </span>
@@ -224,66 +251,79 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
             <span className="upgrade-option-name">{t('eventHome.upgrade.upgradeTo', { name: packageName(target) })}</span>
             <span className="upgrade-option-price">+{formatUah(option.price)}</span>
           </span>
-        </span>
-        {benefits.length > 0 && (
-          <span className="upgrade-option-benefits">
-            {benefits.map((benefit) => (
-              <span key={benefit} className="upgrade-option-benefit">
-                <i className="fa-solid fa-check" />
-                {benefit}
-              </span>
-            ))}
+          <span className="upgrade-option-check" aria-hidden="true">
+            <i className={selected ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'} />
           </span>
+        </button>
+        {benefits.length > 0 && (
+          <>
+            <button
+              type="button"
+              className={`upgrade-option-more${open ? ' is-open' : ''}`}
+              aria-expanded={open}
+              aria-controls={`upgrade-benefits-${option.id}`}
+              onClick={() => setExpanded((prev) => ({ ...prev, [option.id]: !open }))}
+            >
+              {t('eventHome.upgrade.learnMore')}
+              <i className="fa-solid fa-chevron-down" />
+            </button>
+            {open && (
+              <ul className="upgrade-option-benefits" id={`upgrade-benefits-${option.id}`}>
+                {benefits.map((benefit) => (
+                  <li key={benefit} className="upgrade-option-benefit">
+                    <i className="fa-solid fa-check" />
+                    {benefit}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
-        <span className="upgrade-option-check" aria-hidden="true">
-          <i className={selected ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'} />
-        </span>
-      </button>
+      </div>
     );
+  };
+
+  const extraName = (option: UpgradeOption) => {
+    if (option.kind === 'time') return t('eventHome.upgrade.extraMonths', { count: option.extra_storage_months });
+    if (option.kind === 'upload') {
+      const months = option.extra_upload_months || 1;
+      return t(months === 1 ? 'eventHome.upgrade.extraUploadOne' : 'eventHome.upgrade.extraUpload', { count: months });
+    }
+    return t('eventHome.upgrade.extraGb', { count: option.extra_storage_gb });
   };
 
   const renderExtraOption = (option: UpgradeOption) => {
     const quantity = quantities[option.id] || 0;
-    const isTime = option.kind === 'time';
-    const name = isTime
-      ? t('eventHome.upgrade.extraMonths', { count: option.extra_storage_months })
-      : t('eventHome.upgrade.extraGb', { count: option.extra_storage_gb });
-    const desc = isTime
-      ? t('eventHome.upgrade.extraMonthsDesc', { count: option.extra_storage_months })
-      : t('eventHome.upgrade.extraGbDesc', { count: option.extra_storage_gb });
     return (
       <div key={option.id} className={`upgrade-option upgrade-option-extra upgrade-option-${option.kind}${quantity > 0 ? ' is-selected' : ''}`}>
-        <span className="upgrade-option-head">
-          <span className="upgrade-option-icon">
-            <i className={isTime ? 'fa-solid fa-database' : 'fa-solid fa-cloud'} />
-          </span>
-          <span className="upgrade-option-body">
-            <span className="upgrade-option-name">{name}</span>
-          </span>
+        <span className="upgrade-option-icon">
+          <i className={EXTRA_ICON[option.kind]} />
         </span>
-        <span className="upgrade-option-desc">{desc}</span>
-        <span className="upgrade-option-foot">
-          <span className="upgrade-option-price">{t('eventHome.upgrade.each', { price: `+${formatUah(option.price)}` })}</span>
-          <span className="upgrade-stepper">
-            <button
-              type="button"
-              className="upgrade-stepper-btn"
-              aria-label={t('eventHome.upgrade.decrease')}
-              disabled={quantity <= 0 || busy}
-              onClick={() => setQuantity(option.id, quantity - 1)}
-            >
-              <i className="fa-solid fa-minus" />
-            </button>
-            <span className="upgrade-stepper-value" aria-live="polite">{quantity}</span>
-            <button
-              type="button"
-              className="upgrade-stepper-btn"
-              aria-label={t('eventHome.upgrade.increase')}
-              disabled={quantity >= maxQuantity || busy}
-              onClick={() => setQuantity(option.id, quantity + 1)}
-            >
-              <i className="fa-solid fa-plus" />
-            </button>
+        <span className="upgrade-option-body">
+          <span className="upgrade-option-name">{extraName(option)}</span>
+          <span className="upgrade-option-foot">
+            <span className="upgrade-option-price">+{formatUah(option.price)}</span>
+            <span className="upgrade-stepper">
+              <button
+                type="button"
+                className="upgrade-stepper-btn"
+                aria-label={t('eventHome.upgrade.decrease')}
+                disabled={quantity <= 0 || busy}
+                onClick={() => setQuantity(option.id, quantity - 1)}
+              >
+                <i className="fa-solid fa-minus" />
+              </button>
+              <span className="upgrade-stepper-value" aria-live="polite">{quantity}</span>
+              <button
+                type="button"
+                className="upgrade-stepper-btn"
+                aria-label={t('eventHome.upgrade.increase')}
+                disabled={quantity >= maxQuantity || busy}
+                onClick={() => setQuantity(option.id, quantity + 1)}
+              >
+                <i className="fa-solid fa-plus" />
+              </button>
+            </span>
           </span>
         </span>
       </div>
@@ -293,10 +333,6 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
   return (
     <div className={`upgrade-card upgrade-card-${variant}`} id="upgrade">
       <div className="upgrade-card-head">
-        <span className="upgrade-card-label">
-          <i className="fa-solid fa-circle-arrow-up" />
-          {t('eventHome.upgrade.label')}
-        </span>
         <span className="upgrade-card-plan">
           {variant === 'premium' && <i className="fa-solid fa-crown" />}
           {t('eventHome.upgrade.yourPlan')} <b>{packageName(current)}</b>
@@ -311,7 +347,6 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
       )}
 
       <h3 className="upgrade-card-title">{t(`eventHome.upgrade.titles.${textKey}`)}</h3>
-      <p className="upgrade-card-subtitle">{t(`eventHome.upgrade.subtitles.${textKey}`)}</p>
 
       <div className="upgrade-card-options">
         {packageOptions.map(renderPackageOption)}
@@ -332,14 +367,6 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
         )}
       </button>
       {error && <p className="upgrade-card-error" role="alert">{error}</p>}
-
-      <div className="upgrade-card-note">
-        <i className="fa-solid fa-gift" />
-        <span>
-          <b>{t('eventHome.upgrade.note')}</b>
-          <span>{t('eventHome.upgrade.noteDetail')}</span>
-        </span>
-      </div>
     </div>
   );
 }

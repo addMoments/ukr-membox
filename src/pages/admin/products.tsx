@@ -61,8 +61,8 @@ function AdminProducts() {
 
   const packageProducts = products.filter((p) => !p.is_add_on);
   const addOnProducts = products.filter((p) => p.is_add_on && !isUpgrade(p));
-  // Once paket yukseltmeleri, sonra ek sure ve ek alan; her grupta ucuzdan pahaliya.
-  const UPGRADE_KIND_ORDER = ['package', 'time', 'storage'];
+  // Once paket yukseltmeleri, sonra ek galeri suresi, ek yukleme suresi ve ek alan; her grupta ucuzdan pahaliya.
+  const UPGRADE_KIND_ORDER = ['package', 'time', 'upload', 'storage'];
   const upgradeProducts = products.filter(isUpgrade).sort((a, b) =>
     UPGRADE_KIND_ORDER.indexOf(a.options.upgrade_kind || '') - UPGRADE_KIND_ORDER.indexOf(b.options.upgrade_kind || '')
     || a.price - b.price
@@ -122,10 +122,12 @@ function AdminProducts() {
       price: price ?? undefined,
     };
 
-    // Yukseltmede sira alani yok (magazada gorunmez); turune gore ek GB ya da ek ay duzenlenir.
+    // Yukseltmede sira alani yok (magazada gorunmez); turune gore ek GB, ek galeri ayi ya da ek yukleme ayi duzenlenir.
     if (isUpgrade(product)) {
       const kind = product.options.upgrade_kind;
-      const field = kind === 'storage' ? 'extra_storage_gb' : kind === 'time' ? 'extra_storage_months' : null;
+      const field = kind === 'storage' ? 'extra_storage_gb'
+        : kind === 'time' ? 'extra_storage_months'
+          : kind === 'upload' ? 'extra_upload_months' : null;
       if (field) {
         const amount = readNumber(formData.get(field));
         if (amount === null || amount <= 0 || !Number.isInteger(amount)) {
@@ -652,6 +654,12 @@ function AdminProducts() {
             <label className="admin-product-field">
               <span className="admin-product-field-label">{at('admin.products.extraStorageMonths', 'Extra gallery storage (months)', 'Додаткове зберігання галереї (місяців)')}</span>
               <input name="extra_storage_months" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.extra_storage_months} />
+            </label>
+          )}
+          {kind === 'upload' && (
+            <label className="admin-product-field">
+              <span className="admin-product-field-label">{at('admin.products.extraUploadMonths', 'Extra upload period (months)', 'Додатковий період завантаження (місяців)')}</span>
+              <input name="extra_upload_months" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.extra_upload_months} />
             </label>
           )}
           <p className="admin-product-field-hint">

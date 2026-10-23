@@ -1,5 +1,6 @@
 /* UpgradeCard Component (Excel 2.18) — renkler Solomiia'nin 23 Ekim taslagi:
-   Mini lavanta, Classic yesil, Premium seftali. */
+   Mini lavanta, Classic yesil, Premium seftali. 23 Ekim 11:41 kompakt ornegi: plan etiketi,
+   baslik, tek satirlik secenekler; paket ayrintilari "Learn more" ile acilir. */
 
 .upgrade-card {
   --upgrade-accent: #44403C;
@@ -7,7 +8,7 @@
   background: white;
   border-radius: 24px;
   box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.06);
-  padding: 28px;
+  padding: 20px;
   text-align: left;
 }
 
@@ -31,36 +32,18 @@
 
 .upgrade-card-head {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-
-.upgrade-card-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #1C1917;
-}
-
-.upgrade-card-label i {
-  color: var(--upgrade-accent);
-  font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .upgrade-card-plan {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
+  padding: 4px 11px;
   border-radius: 999px;
   background: var(--upgrade-accent-soft);
   color: #78716C;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .upgrade-card-plan b {
@@ -77,7 +60,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   padding: 10px 14px;
   border-radius: 12px;
   background: #E8F5E9;
@@ -91,54 +74,31 @@
 }
 
 .upgrade-card-title {
-  margin: 0 0 8px;
-  font-size: 26px;
+  margin: 0 0 14px;
+  font-size: 20px;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.2;
   color: #1C1917;
-}
-
-.upgrade-card-subtitle {
-  /* index.html'deki global p { text-align: center } kuralini ezer; taslakta sola dayali. */
-  text-align: left;
-  margin: 0 0 20px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #78716C;
 }
 
 .upgrade-card-options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-/* Sag sutun dar (1280px ekranda ~280px): simge + ad ust satirda, ozellikler/aciklama ve
-   adet secici altta tam genislikte. */
 .upgrade-option {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 10px;
-  width: 100%;
-  padding: 16px;
   border-radius: 16px;
   border: 1.5px solid rgba(28, 25, 23, 0.06);
   background: white;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-button.upgrade-option {
-  cursor: pointer;
+.upgrade-option.is-selected {
+  border-color: var(--upgrade-option-accent, var(--upgrade-accent));
 }
 
 .upgrade-option-package.is-selected {
-  border-color: var(--upgrade-option-accent, var(--upgrade-accent));
   box-shadow: 0 8px 20px -10px rgba(28, 25, 23, 0.25);
 }
 
@@ -157,23 +117,39 @@ button.upgrade-option {
   --upgrade-option-soft: #E3F2E1;
 }
 
+.upgrade-option-upload {
+  --upgrade-option-accent: #B4691F;
+  --upgrade-option-soft: #FFEFD6;
+}
+
 .upgrade-option-storage {
   --upgrade-option-accent: #3D4CB5;
   --upgrade-option-soft: #E8EAFA;
 }
 
-.upgrade-option-extra.is-selected {
-  border-color: var(--upgrade-option-accent);
-}
-
-.upgrade-option-head {
+/* Paket satiri: tum ust kisim secim dugmesi; "Learn more" ayri dugme (ic ice dugme olmaz). */
+.upgrade-option-select {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 }
 
-.upgrade-option-package .upgrade-option-head {
-  padding-right: 28px;
+/* Premium eki: simge, yaninda ad; adin altinda fiyat solda, adet secici sagda (sag sutun 1280px
+   ekranda ~280px, secici adin yanina sigmiyor). */
+.upgrade-option-extra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
 }
 
 .upgrade-option-icon {
@@ -181,43 +157,91 @@ button.upgrade-option {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--upgrade-option-soft, var(--upgrade-accent-soft));
   color: var(--upgrade-option-accent, var(--upgrade-accent));
-  font-size: 18px;
+  font-size: 15px;
 }
 
-.upgrade-option-to-premium .upgrade-option-icon {
+.upgrade-option-to-premium .upgrade-option-icon,
+.upgrade-option-upload .upgrade-option-icon {
   color: #D99A2B;
 }
 
 .upgrade-option-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   flex: 1 1 auto;
   min-width: 0;
 }
 
+.upgrade-option-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
 .upgrade-option-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
+  line-height: 1.3;
   color: #1C1917;
 }
 
 .upgrade-option-price {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--upgrade-option-accent, var(--upgrade-accent));
   white-space: nowrap;
+}
+
+.upgrade-option-check {
+  flex: 0 0 auto;
+  font-size: 18px;
+  color: #D6D3D1;
+}
+
+.upgrade-option-package.is-selected .upgrade-option-check {
+  color: var(--upgrade-option-accent, var(--upgrade-accent));
+}
+
+/* Simge (36px) + bosluk (12px) kadar iceriden: ad ve fiyatla ayni hizada. */
+.upgrade-option-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: -6px 0 0;
+  padding: 0 14px 12px 62px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #78716C;
+  cursor: pointer;
+}
+
+.upgrade-option-more i {
+  font-size: 10px;
+  transition: transform 0.15s ease;
+}
+
+.upgrade-option-more.is-open i {
+  transform: rotate(180deg);
 }
 
 .upgrade-option-benefits {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin: 0;
+  padding: 0 14px 14px;
+  list-style: none;
 }
 
 .upgrade-option-benefit {
@@ -235,32 +259,6 @@ button.upgrade-option {
   color: var(--upgrade-option-accent, var(--upgrade-accent));
 }
 
-.upgrade-option-desc {
-  font-size: 13px;
-  line-height: 1.4;
-  color: #78716C;
-}
-
-.upgrade-option-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.upgrade-option-check {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  font-size: 20px;
-  color: #D6D3D1;
-}
-
-.upgrade-option-package.is-selected .upgrade-option-check {
-  color: var(--upgrade-option-accent, var(--upgrade-accent));
-}
-
 .upgrade-stepper {
   flex: 0 0 auto;
   display: inline-flex;
@@ -272,12 +270,12 @@ button.upgrade-option {
 }
 
 .upgrade-stepper-btn {
-  width: 34px;
-  height: 36px;
+  width: 30px;
+  height: 32px;
   border: none;
   background: transparent;
   color: #1C1917;
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -287,9 +285,9 @@ button.upgrade-option {
 }
 
 .upgrade-stepper-value {
-  min-width: 26px;
+  min-width: 22px;
   text-align: center;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #1C1917;
 }
@@ -300,8 +298,8 @@ button.upgrade-option {
   justify-content: center;
   gap: 10px;
   width: 100%;
-  min-height: 52px;
-  margin-top: 18px;
+  min-height: 48px;
+  margin-top: 14px;
   border: none;
   border-radius: 14px;
   background: #1C1917;
@@ -318,62 +316,20 @@ button.upgrade-option {
 }
 
 .upgrade-card-error {
+  /* index.html'deki global p { text-align: center } kuralini ezer. */
   text-align: left;
   margin: 10px 0 0;
   font-size: 13px;
   color: #B91C1C;
 }
 
-.upgrade-card-note {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 12px 16px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.65);
-  font-size: 13px;
-  line-height: 1.4;
-  color: #78716C;
-}
-
-.upgrade-card-note i {
-  color: var(--upgrade-accent);
-  font-size: 18px;
-}
-
-.upgrade-card-note span {
-  display: flex;
-  flex-direction: column;
-}
-
-.upgrade-card-note b {
-  color: #1C1917;
-  font-weight: 600;
-}
-
 @media (max-width: 767px) {
   .upgrade-card {
-    padding: 22px;
+    padding: 18px;
     border-radius: 20px;
   }
 
   .upgrade-card-title {
-    font-size: 22px;
-  }
-
-  .upgrade-option {
-    padding: 14px;
-  }
-
-  .upgrade-option-check {
-    top: 14px;
-    right: 14px;
-  }
-
-  .upgrade-option-icon {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
+    font-size: 19px;
   }
 }
