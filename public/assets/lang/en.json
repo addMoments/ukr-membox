@@ -382,13 +382,7 @@
             "storageExpiration": "Storage Expiration"
         },
         "upgrade": {
-            "yourPlan": "Your plan:",
-            "titles": {
-                "standard": "Upgrade for more",
-                "plus": "Upgrade to Premium",
-                "premium": "More time or space?",
-                "default": "Upgrade your event"
-            },
+            "title": "Upgrade your plan:",
             "upgradeTo": "Upgrade to {{name}}",
             "extraMonths": "+{{count}} months storage",
             "extraUploadOne": "+{{count}} month of uploads",

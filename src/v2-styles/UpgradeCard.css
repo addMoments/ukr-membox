@@ -1,6 +1,7 @@
 /* UpgradeCard Component (Excel 2.18) — renkler Solomiia'nin 23 Ekim taslagi:
-   Mini lavanta, Classic yesil, Premium seftali. 23 Ekim 11:41 kompakt ornegi: plan etiketi,
-   baslik, tek satirlik secenekler; paket ayrintilari "Learn more" ile acilir. */
+   Mini lavanta, Classic yesil, Premium seftali. 23 Ekim 11:41 kompakt ornegi: tek satirlik
+   secenekler, paket ayrintilari "Learn more" ile acilir; 15:15: baslik ve paket balonu tek satir
+   ("Upgrade your plan:" duz yazi), "Learn more" fiyat satirinda, tik ustte. */
 
 .upgrade-card {
   --upgrade-accent: #44403C;
@@ -30,24 +31,15 @@
   background: linear-gradient(180deg, #FFF3E3 0%, #FFF9F1 100%);
 }
 
-.upgrade-card-head {
-  display: flex;
-  margin-bottom: 10px;
-}
-
 .upgrade-card-plan {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 11px;
+  padding: 3px 10px;
   border-radius: 999px;
   background: var(--upgrade-accent-soft);
-  color: #78716C;
-  font-size: 12px;
-}
-
-.upgrade-card-plan b {
   color: var(--upgrade-accent);
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -74,10 +66,14 @@
 }
 
 .upgrade-card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
   margin: 0 0 14px;
-  font-size: 20px;
-  font-weight: 800;
-  line-height: 1.2;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.3;
   color: #1C1917;
 }
 
@@ -127,7 +123,12 @@
   --upgrade-option-soft: #E8EAFA;
 }
 
-/* Paket satiri: tum ust kisim secim dugmesi; "Learn more" ayri dugme (ic ice dugme olmaz). */
+/* Paket satiri: tum ust kisim secim dugmesi; "Learn more" ayri dugme (ic ice dugme olmaz),
+   secim dugmesinin sag alt kosesinde, fiyatla ayni satirda. */
+.upgrade-option-head {
+  position: relative;
+}
+
 .upgrade-option-select {
   display: flex;
   align-items: center;
@@ -196,13 +197,16 @@
 .upgrade-option-price {
   font-size: 14px;
   font-weight: 700;
+  line-height: 20px;
   color: var(--upgrade-option-accent, var(--upgrade-accent));
   white-space: nowrap;
 }
 
 .upgrade-option-check {
   flex: 0 0 auto;
+  align-self: flex-start;
   font-size: 18px;
+  line-height: 1;
   color: #D6D3D1;
 }
 
@@ -210,13 +214,17 @@
   color: var(--upgrade-option-accent, var(--upgrade-accent));
 }
 
-/* Simge (36px) + bosluk (12px) kadar iceriden: ad ve fiyatla ayni hizada. */
+/* Secim dugmesinin alt dolgusu (12px) kadar yukarida, fiyat satiriyla (20px) ayni yukseklikte. */
 .upgrade-option-more {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: -6px 0 0;
-  padding: 0 14px 12px 62px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
   border: none;
   background: transparent;
   font: inherit;
@@ -327,9 +335,5 @@
   .upgrade-card {
     padding: 18px;
     border-radius: 20px;
-  }
-
-  .upgrade-card-title {
-    font-size: 19px;
   }
 }

@@ -16,12 +16,13 @@ import '../v2-styles/UpgradeCard.css';
 // Mini ve Classic'te paket secenekleri, Premium'da adetli +ay / +yukleme ayi / +GB. Her varyantta
 // tek odeme dugmesi "Upgrade · tutar" (musteri: "everywhere the payment button should say upgrade").
 // Kart QR ile Activity Overview arasinda; musteri 23 Ekim 11:41 kompakt istedi: aciklama metni ve
-// "One-time payment" kutusu yok, paketin kazandirdiklari "Learn more" ile acilir.
+// "One-time payment" kutusu yok, paketin kazandirdiklari "Learn more" ile acilir. 15:15 daha da
+// sikistirdi: ilk satir "Upgrade your plan: [paket]", "Learn more" fiyat satirinda, tik ustte.
 // Odeme sonrasi bekleme sayfasi hostu ?upgrade=done ile buraya geri yollar.
 
 const MAX_BENEFITS = 6;
 
-// Paket kartinin rengi ve basligi mevcut pakete gore; bilinmeyen paket varsayilana duser.
+// Paket kartinin rengi mevcut pakete gore; bilinmeyen paket varsayilana duser.
 const VARIANT_BY_PACKAGE: Record<string, string> = {
   standard: 'mini',
   plus: 'classic',
@@ -195,7 +196,6 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
     .sort((a, b) => EXTRA_KIND_ORDER.indexOf(a.kind) - EXTRA_KIND_ORDER.indexOf(b.kind));
 
   const variant = VARIANT_BY_PACKAGE[current.id] || 'default';
-  const textKey = VARIANT_BY_PACKAGE[current.id] ? current.id : 'default';
 
   const total = selectedPackage
     ? Number(packageOptions.find((o) => o.id === selectedPackage)?.price || 0)
@@ -235,28 +235,30 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
         key={option.id}
         className={`upgrade-option upgrade-option-package upgrade-option-to-${targetVariant}${selected ? ' is-selected' : ''}`}
       >
-        <button
-          type="button"
-          className="upgrade-option-select"
-          aria-pressed={selected}
-          onClick={() => {
-            setError('');
-            setSelectedPackage(option.id);
-          }}
-        >
-          <span className="upgrade-option-icon">
-            <i className="fa-solid fa-crown" />
-          </span>
-          <span className="upgrade-option-body">
-            <span className="upgrade-option-name">{t('eventHome.upgrade.upgradeTo', { name: packageName(target) })}</span>
-            <span className="upgrade-option-price">+{formatUah(option.price)}</span>
-          </span>
-          <span className="upgrade-option-check" aria-hidden="true">
-            <i className={selected ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'} />
-          </span>
-        </button>
-        {benefits.length > 0 && (
-          <>
+        {/* "Learn more" fiyat satirinda ama secim dugmesinin icinde olamaz (ic ice dugme); bu
+            sarmalayicinin icinde secim dugmesinin ustune konumlanir. */}
+        <div className="upgrade-option-head">
+          <button
+            type="button"
+            className="upgrade-option-select"
+            aria-pressed={selected}
+            onClick={() => {
+              setError('');
+              setSelectedPackage(option.id);
+            }}
+          >
+            <span className="upgrade-option-icon">
+              <i className="fa-solid fa-crown" />
+            </span>
+            <span className="upgrade-option-body">
+              <span className="upgrade-option-name">{t('eventHome.upgrade.upgradeTo', { name: packageName(target) })}</span>
+              <span className="upgrade-option-price">+{formatUah(option.price)}</span>
+            </span>
+            <span className="upgrade-option-check" aria-hidden="true">
+              <i className={selected ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'} />
+            </span>
+          </button>
+          {benefits.length > 0 && (
             <button
               type="button"
               className={`upgrade-option-more${open ? ' is-open' : ''}`}
@@ -267,17 +269,17 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
               {t('eventHome.upgrade.learnMore')}
               <i className="fa-solid fa-chevron-down" />
             </button>
-            {open && (
-              <ul className="upgrade-option-benefits" id={`upgrade-benefits-${option.id}`}>
-                {benefits.map((benefit) => (
-                  <li key={benefit} className="upgrade-option-benefit">
-                    <i className="fa-solid fa-check" />
-                    {benefit}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
+          )}
+        </div>
+        {benefits.length > 0 && open && (
+          <ul className="upgrade-option-benefits" id={`upgrade-benefits-${option.id}`}>
+            {benefits.map((benefit) => (
+              <li key={benefit} className="upgrade-option-benefit">
+                <i className="fa-solid fa-check" />
+                {benefit}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     );
@@ -332,12 +334,13 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
 
   return (
     <div className={`upgrade-card upgrade-card-${variant}`} id="upgrade">
-      <div className="upgrade-card-head">
+      <h3 className="upgrade-card-title">
+        {t('eventHome.upgrade.title')}
         <span className="upgrade-card-plan">
           {variant === 'premium' && <i className="fa-solid fa-crown" />}
-          {t('eventHome.upgrade.yourPlan')} <b>{packageName(current)}</b>
+          {packageName(current)}
         </span>
-      </div>
+      </h3>
 
       {done && (
         <div className="upgrade-card-done" role="status">
@@ -345,8 +348,6 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
           {t('eventHome.upgrade.done')}
         </div>
       )}
-
-      <h3 className="upgrade-card-title">{t(`eventHome.upgrade.titles.${textKey}`)}</h3>
 
       <div className="upgrade-card-options">
         {packageOptions.map(renderPackageOption)}

@@ -382,13 +382,7 @@
             "storageExpiration": "Закінчення терміну зберігання"
         },
         "upgrade": {
-            "yourPlan": "Ваш пакет:",
-            "titles": {
-                "standard": "Отримайте більше",
-                "plus": "Перейдіть на Преміум",
-                "premium": "Більше часу чи місця?",
-                "default": "Покращте свою подію"
-            },
+            "title": "Покращити пакет:",
             "upgradeTo": "Перейти на {{name}}",
             "extraMonths": "+{{count}} міс. зберігання",
             "extraUploadOne": "+{{count}} міс. завантажень",
