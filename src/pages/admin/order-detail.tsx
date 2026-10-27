@@ -13,6 +13,8 @@ import '../../v2-styles/AdminPageHeader.css';
 import '../../v2-styles/AdminOrders.css';
 
 interface ProductOptions {
+  // Paketlerde true (Mini/Classic/Premium ve Excel madde 6 ozel paketleri).
+  corePackage?: boolean;
   image?: string;
   icon?: string;
   designs?: { id: string; label: string; image: string }[];
@@ -725,7 +727,9 @@ function AdminOrderDetail() {
     if (!str) return '—';
     return new Date(str).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
-  const corePackageItemUid = order?.items?.find(item => CORE_PACKAGE_PRODUCT_IDS.includes(item.product.id))?.uid;
+  const corePackageItemUid = order?.items?.find(item => (
+    CORE_PACKAGE_PRODUCT_IDS.includes(item.product.id) || item.product.options?.corePackage === true
+  ))?.uid;
   const shouldShowFallbackOrderAccount = !!order?.order_account && !corePackageItemUid;
 
   return (

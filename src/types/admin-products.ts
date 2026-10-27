@@ -20,6 +20,10 @@ export interface AdminProductOptions {
   extra_storage_gb?: number;
   extra_storage_months?: number;
   extra_upload_months?: number;
+  // Ozel paketler (Excel madde 6, 18-special-packages.sql): ayri bolumde, acilip kapatilabilir;
+  // saklama suresi aktivasyondan itibaren toplam.
+  special_package?: boolean;
+  storage_from_activation?: boolean;
 }
 
 export interface AdminProduct {

@@ -13,6 +13,13 @@ import {
   validateAddonImageFile,
 } from '../../client/admin-products';
 import { AdminProduct, UpdateAdminProductPayload } from '../../types/admin-products';
+import {
+  getAdminAddmomentsAds,
+  getAdminAddmomentsAdsUploadUrl,
+  saveAdminAddmomentsAds,
+} from '../../client/advertorial';
+import AdvertorialSettings, { AdvertorialApi } from '../../v2-components/AdvertorialSettings';
+import '../../v2-styles/Settings.css';
 import { t } from '../../packages/i18n';
 import { FEATURE_VOICE } from '../../utils/features';
 import { adminText } from '../../utils/admin_i18n';
@@ -26,6 +33,16 @@ const at = adminText;
 
 // Yukseltme urunleri (Excel 2.18): host etkinlik sayfasindan alir, Services & Prices'ta gorunmez.
 const isUpgrade = (product: AdminProduct) => Boolean(product.options.upgrade_kind);
+
+// Ozel paketler (Excel madde 6): Mini/Classic/Premium'dan ayri bolum; admin acip kapatir, saklama toplam sure.
+const isSpecialPackage = (product: AdminProduct) => product.options.special_package === true;
+
+// Ozel paketli etkinliklerin misafir sayfasindaki AddMoments reklami; form etkinlik reklam formuyla ayni.
+const ADDMOMENTS_ADS_API: AdvertorialApi = {
+  load: getAdminAddmomentsAds,
+  save: saveAdminAddmomentsAds,
+  uploadUrl: getAdminAddmomentsAdsUploadUrl,
+};
 
 const isVoiceIncluded = (product: AdminProduct) => {
   return product.voice_included === true
@@ -59,7 +76,9 @@ function AdminProducts() {
       .finally(() => setLoading(false));
   }, []);
 
-  const packageProducts = products.filter((p) => !p.is_add_on);
+  const packageProducts = products.filter((p) => !p.is_add_on && !isSpecialPackage(p));
+  const specialProducts = products.filter((p) => !p.is_add_on && isSpecialPackage(p))
+    .sort((a, b) => b.priority - a.priority || a.price - b.price);
   const addOnProducts = products.filter((p) => p.is_add_on && !isUpgrade(p));
   // Once paket yukseltmeleri, sonra ek galeri suresi, ek yukleme suresi ve ek alan; her grupta ucuzdan pahaliya.
   const UPGRADE_KIND_ORDER = ['package', 'time', 'upload', 'storage'];
@@ -169,6 +188,10 @@ function AdminProducts() {
     if (mediaCount === null || mediaCount < -1) errors.push(at('admin.products.errors.mediaMin', 'Media count must be greater than or equal to -1.', 'Кількість фото/відео має бути більшою або дорівнювати -1.'));
     if (activationPeriod === null || activationPeriod <= 0) errors.push(at('admin.products.errors.activationPositive', 'Activation period must be greater than 0.', 'Період активації має бути більше 0.'));
     if (storagePeriod === null || storagePeriod <= 0) errors.push(at('admin.products.errors.storagePositive', 'Storage period must be greater than 0.', 'Період зберігання має бути більше 0.'));
+    // Ozel paketlerde saklama aktivasyondan itibaren toplam: yukleme suresinden kisa olamaz (backend de reddeder).
+    if (product.options.storage_from_activation && activationPeriod !== null && storagePeriod !== null && storagePeriod < activationPeriod) {
+      errors.push(at('admin.products.errors.storageTotalMin', 'For this package the storage period is the total from activation, so it must be at least the activation period.', 'Для цього пакета період зберігання рахується від активації, тому він має бути не меншим за період активації.'));
+    }
 
     return {
       payload: errors.length
@@ -409,13 +432,22 @@ function AdminProducts() {
     <form className="admin-product-form" onSubmit={(e) => onSubmitProduct(e, product)}>
       <div className="admin-product-card-top">
         <div>
-          <span className="admin-product-kind-badge">{at('admin.products.corePackage', 'Core package', 'Основний пакет')}</span>
+          <span className="admin-product-kind-badge">
+            {isSpecialPackage(product)
+              ? at('admin.products.specialPackage', 'Special package', 'Спеціальний пакет')
+              : at('admin.products.corePackage', 'Core package', 'Основний пакет')}
+          </span>
           <p className="admin-product-name">{renderName(product)}</p>
           {!!renderDescription(product) && <p className="admin-product-desc">{renderDescription(product)}</p>}
           <p className="admin-product-tech-id">ID: {product.id}</p>
         </div>
         <p className="admin-product-price">₴{product.price.toFixed(2)}</p>
       </div>
+
+      {isSpecialPackage(product) && renderAddonEnabledToggle(
+        product,
+        at('admin.products.specialDisabledHint', 'When disabled, the package is hidden from Services & Prices and cannot be bought.', 'Коли вимкнено, пакет приховано з «Послуг і цін», і його не можна купити.'),
+      )}
 
       <div className="admin-product-fields">
         <label className="admin-product-field">
@@ -492,9 +524,18 @@ function AdminProducts() {
           <input name="activation_period_days" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.activation_days} />
         </label>
         <label className="admin-product-field">
-          <span className="admin-product-field-label">{at('admin.products.storagePeriod', 'Storage Period', 'Період зберігання')}</span>
+          <span className="admin-product-field-label">
+            {product.options.storage_from_activation
+              ? at('admin.products.storagePeriodTotal', 'Storage Period (total, from activation)', 'Період зберігання (усього, від активації)')
+              : at('admin.products.storagePeriod', 'Storage Period', 'Період зберігання')}
+          </span>
           <input name="storage_period_days" type="number" min={1} step="1" className="admin-product-input" defaultValue={product.options.storage_days} />
         </label>
+        <p className="admin-product-field-hint">
+          {product.options.storage_from_activation
+            ? at('admin.products.periodsTotalHint', 'Both periods are in days and start on the activation date. The gallery closes when the storage period ends, e.g. 365 + 365 keeps it open for 12 months in total.', 'Обидва періоди в днях і починаються з дати активації. Галерея закривається, коли закінчується період зберігання: наприклад, 365 + 365 — це 12 місяців загалом.')
+            : at('admin.products.periodsHint', 'Both periods are in days. Storage starts when the activation (upload) period ends.', 'Обидва періоди в днях. Зберігання починається, коли закінчується період активації (завантаження).')}
+        </p>
       </div>
 
       {/* Ne: Voice feature durumunu backend boolean'indan, yoksa eski granted_features fallback'inden gosterir.
@@ -730,6 +771,33 @@ function AdminProducts() {
                 </article>
               ))}
             </section>
+
+            {specialProducts.length > 0 && (
+              <section className="admin-products-panel">
+                <div className="admin-products-panel-head">
+                  <div>
+                    <h2>{at('admin.products.specialPackages', 'Special Packages', 'Спеціальні пакети')}</h2>
+                    <p>{at('admin.products.specialPackagesDesc', 'Packages for special clients. Their guest page shows the AddMoments ads below; the host cannot change the advertising area.', 'Пакети для спеціальних клієнтів. На сторінці гостей показується реклама AddMoments нижче; організатор не може змінити рекламний блок.')}</p>
+                  </div>
+                  <span className="admin-products-panel-count">{specialProducts.length}</span>
+                </div>
+                {specialProducts.map((product) => (
+                  <article
+                    key={product.uid}
+                    className={`admin-product-card${product.is_enabled ? '' : ' admin-product-card-disabled'}`}
+                  >
+                    {packageForm(product)}
+                  </article>
+                ))}
+                <article className="admin-product-card admin-addmoments-ads-card">
+                  <AdvertorialSettings
+                    api={ADDMOMENTS_ADS_API}
+                    title={at('admin.products.addmomentsAds', 'Ads by AddMoments', 'Реклама від AddMoments')}
+                    description={at('admin.products.addmomentsAdsDesc', 'Shown on the guest page of every event with a special package. Choose a layout, upload images and optionally add links.', 'Показується на сторінці гостей кожної події зі спеціальним пакетом. Оберіть макет, завантажте зображення та за потреби додайте посилання.')}
+                  />
+                </article>
+              </section>
+            )}
 
             <section className="admin-products-panel">
               <div className="admin-products-panel-head">

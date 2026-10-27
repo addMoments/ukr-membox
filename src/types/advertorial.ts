@@ -13,6 +13,8 @@ export interface AdvertorialConfig {
 
 export interface AdvertorialResponse {
   enabled: boolean;
+  // Ozel paketlerde (Excel madde 6) alan AddMoments'in: host duzenleyemez, misafir AddMoments reklamini gorur.
+  managed_by?: 'addmoments';
   config: AdvertorialConfig;
 }
 

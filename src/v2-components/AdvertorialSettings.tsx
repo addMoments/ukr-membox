@@ -8,14 +8,38 @@ import {
   saveAdvertorialConfig,
   uploadAdvertorialImage,
 } from '../client/advertorial';
-import { AdvertorialCell, AdvertorialLayout } from '../types/advertorial';
+import {
+  AdvertorialCell,
+  AdvertorialConfig,
+  AdvertorialLayout,
+  AdvertorialResponse,
+  AdvertorialUploadUrlRequest,
+  AdvertorialUploadUrlResponse,
+} from '../types/advertorial';
 import { parse_submit_event } from '../utils/form_event_parse';
 import { t } from '../packages/i18n';
 import '../v2-styles/AdvertorialSettings.css';
 
-interface AdvertorialSettingsProps {
-  packedUid: string;
+// Formun konustugu uclar. Varsayilan etkinlik uclari; admin urun listesi AddMoments reklamini
+// (Excel madde 6) ayni formla duzenlemek icin kendi uclarini verir.
+export interface AdvertorialApi {
+  load: () => Promise<AdvertorialResponse>;
+  save: (payload: AdvertorialConfig) => Promise<AdvertorialResponse>;
+  uploadUrl: (payload: AdvertorialUploadUrlRequest) => Promise<AdvertorialUploadUrlResponse>;
 }
+
+interface AdvertorialSettingsProps {
+  packedUid?: string;
+  api?: AdvertorialApi;
+  title?: string;
+  description?: string;
+}
+
+const eventAdvertorialApi = (packedUid: string): AdvertorialApi => ({
+  load: () => getAdvertorialConfig(packedUid),
+  save: (payload) => saveAdvertorialConfig(packedUid, payload),
+  uploadUrl: (payload) => getAdvertorialUploadUrl(packedUid, payload),
+});
 
 interface StatusState {
   state: 'loading' | 'saving' | 'success' | 'error';
@@ -60,6 +84,10 @@ const ADVERTORIAL_TEXT: Record<string, { en: string; uk: string }> = {
   'settings.advertorial.description': {
     en: 'Choose a layout, upload ad images, and optionally add external links.',
     uk: 'Виберіть макет, завантажте рекламні зображення та за потреби додайте зовнішні посилання.',
+  },
+  'settings.advertorial.managedByAddmoments': {
+    en: 'In your package the advertising area is managed by AddMoments, so it can\'t be changed here.',
+    uk: 'У вашому пакеті рекламним блоком керує AddMoments, тому змінити його тут не можна.',
   },
   'settings.advertorial.loading': {
     en: 'Loading advertising settings...',
@@ -243,8 +271,9 @@ const validateAdvertorialImage = (file: File): string | null => {
   return null;
 };
 
-function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
+function AdvertorialSettings({ packedUid = '', api, title, description }: AdvertorialSettingsProps) {
   const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [managedByAddmoments, setManagedByAddmoments] = useState(false);
   const [layout, setLayout] = useState<AdvertorialLayout>('none');
   const [cells, setCells] = useState<AdvertorialCell[]>([]);
   const [status, setStatus] = useState<StatusState>({ state: 'loading' });
@@ -252,7 +281,8 @@ function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
   const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
-    if (!packedUid) return;
+    if (!api && !packedUid) return;
+    const source = api || eventAdvertorialApi(packedUid);
 
     // Ne: Settings acilisinda backend advertorial config'ini yukler.
     // Nasil: enabled/config response'u okunur, layout state'i ve cell preview listesi hydrate edilir.
@@ -260,10 +290,12 @@ function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
     const loadConfig = async () => {
       setStatus({ state: 'loading' });
       try {
-        const data = await getAdvertorialConfig(packedUid);
+        const data = await source.load();
         const nextLayout = data.config?.layout || 'none';
         const nextCells = normalizeCellsForLayout(nextLayout, data.config?.cells || []);
         setEnabled(data.enabled);
+        // Host ekraninda ozel paket: alan kilitli. Admin formu (api verili) ayni cevabi duzenler.
+        setManagedByAddmoments(!api && data.managed_by === 'addmoments');
         setLayout(nextLayout);
         setCells(nextCells);
         setFormKey((key) => key + 1);
@@ -275,7 +307,11 @@ function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
     };
 
     loadConfig();
-  }, [packedUid]);
+  }, [packedUid, api]);
+
+  const source = api || eventAdvertorialApi(packedUid);
+  const sectionTitle = title || advertorialText('settings.advertorial.title');
+  const sectionDescription = description || advertorialText('settings.advertorial.description');
 
   const handleLayoutChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const nextLayout = e.target.value as AdvertorialLayout;
@@ -298,7 +334,7 @@ function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
     setUploadingIndex(index);
     setStatus({ state: 'saving', message: advertorialText('settings.advertorial.uploadingImage', { index: index + 1 }) });
     try {
-      const uploadData = await getAdvertorialUploadUrl(packedUid, {
+      const uploadData = await source.uploadUrl({
         file_name: file.name,
         content_type: file.type,
         size_bytes: file.size,
@@ -344,7 +380,7 @@ function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
 
     setStatus({ state: 'saving' });
     try {
-      const saved = await saveAdvertorialConfig(packedUid, {
+      const saved = await source.save({
         layout: selectedLayout,
         cells: nextCells,
       });
@@ -364,8 +400,21 @@ function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
     return (
       <section className="settings-section advertorial-settings">
         <div className="settings-section-header">
-          <h2 className="settings-section-title">{advertorialText('settings.advertorial.title')}</h2>
+          <h2 className="settings-section-title">{sectionTitle}</h2>
           <p className="settings-section-description">{advertorialText('settings.advertorial.loading')}</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (managedByAddmoments) {
+    return (
+      <section className="settings-section advertorial-settings advertorial-settings-managed">
+        <div className="settings-section-header">
+          <h2 className="settings-section-title">{sectionTitle}</h2>
+          <p className="settings-section-description">
+            <i className="fa-solid fa-lock" aria-hidden="true" /> {advertorialText('settings.advertorial.managedByAddmoments')}
+          </p>
         </div>
       </section>
     );
@@ -378,9 +427,9 @@ function AdvertorialSettings({ packedUid }: AdvertorialSettingsProps) {
   return (
     <form key={formKey} className="settings-section advertorial-settings" onSubmit={handleSubmit}>
       <div className="settings-section-header">
-        <h2 className="settings-section-title">{advertorialText('settings.advertorial.title')}</h2>
+        <h2 className="settings-section-title">{sectionTitle}</h2>
         <p className="settings-section-description">
-          {advertorialText('settings.advertorial.description')}
+          {sectionDescription}
         </p>
       </div>
 

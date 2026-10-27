@@ -84,6 +84,10 @@ const isSponsoredIncludedInPremium = (product?: { sponsored_included?: boolean; 
   return product?.sponsored_included === true || product?.advertorial_included === true;
 };
 
+// Ozel paketler (Excel madde 6) Mini/Classic/Premium sirasinda degil: yukseltme teklifi almaz ve
+// reklam alani AddMoments'in oldugu icin reklam add-on'u onerilmez.
+const isSpecialPackage = (product: { options?: Record<string, any> }) => product.options?.special_package === true;
+
 // Ne: Cart item listesinden Meta AddToCart icin tekrar kullanilabilir signature uretir.
 // Nasil: Quantity'si pozitif urunleri product_uid:quantity formatinda siralayip pipe ile birlestirir.
 // Neden: Ayni cart checkout refresh'lerinde ikinci kez AddToCart sayilmasin.
@@ -273,7 +277,7 @@ function V2Checkout() {
   //        teklif ediliyor. Premium'a dahil olan sponsorlu add-on listeye alinmiyor.
   // Neden: Modalin ne gosterecegi ve hic acilip acilmayacagi tek kaynaktan gelsin.
   const corePackagesSorted = cart.products
-    .filter(p => !p.is_add_on && p.is_enabled)
+    .filter(p => !p.is_add_on && p.is_enabled && !isSpecialPackage(p))
     .sort((a, b) => {
       const aIdx = CORE_PACKAGE_ORDER.indexOf(a.id);
       const bIdx = CORE_PACKAGE_ORDER.indexOf(b.id);
@@ -292,6 +296,7 @@ function V2Checkout() {
   const premiumProduct = cart.products.find(p => p.id === PREMIUM_PACKAGE_ID);
   const isPremiumInCart = cart.cartItems.some(item => item.product_uid === PREMIUM_PACKAGE_ID && item.quantity > 0);
   const isInCart = (productId: string) => cart.cartItems.some(item => item.product_uid === productId && item.quantity > 0);
+  const isSpecialInCart = displayItems.some(({ product }) => isSpecialPackage(product));
 
   const upgradeOffer = nextCorePackage && currentCorePackage
     ? {
@@ -312,6 +317,7 @@ function V2Checkout() {
       && p.is_enabled
       && !isInCart(p.id)
       && !(p.id === SPONSORED_ADDON_ID && isPremiumInCart && isSponsoredIncludedInPremium(premiumProduct))
+      && !(p.id === SPONSORED_ADDON_ID && isSpecialInCart)
     )
     .map(p => ({
       id: p.id,

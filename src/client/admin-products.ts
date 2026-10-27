@@ -64,6 +64,8 @@ const normalizeOptions = (value: unknown): AdminProductOptions => {
     extra_storage_gb: parseNumber(raw.extra_storage_gb),
     extra_storage_months: parseNumber(raw.extra_storage_months),
     extra_upload_months: parseNumber(raw.extra_upload_months),
+    special_package: parseBoolean(raw.special_package),
+    storage_from_activation: parseBoolean(raw.storage_from_activation),
   };
 };
 

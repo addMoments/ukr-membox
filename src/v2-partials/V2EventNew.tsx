@@ -26,6 +26,9 @@ const isSponsoredIncludedInPremium = (product?: { sponsored_included?: boolean; 
   return product?.sponsored_included === true || product?.advertorial_included === true;
 };
 
+// Ozel paketler (Excel madde 6): admin acinca ayri bolumde. Reklam alanlari AddMoments'in, reklam add-on'u alinamaz.
+const isSpecialPackage = (product: { options?: Record<string, any> }) => product.options?.special_package === true;
+
 function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNewProps) {
   const cart = useSnapshot(cartState);
   const currentLang = String(t('lang_code') || 'en');
@@ -55,9 +58,9 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
   useEffect(() => {
     if (!cart.init) return;
     const premiumProduct = cart.products.find(p => p.id === PREMIUM_PACKAGE_ID);
+    const specialInCart = cart.products.some(p => isSpecialPackage(p) && getCartQty(p.id) > 0);
     if (
-      isSponsoredIncludedInPremium(premiumProduct)
-      && getCartQty(PREMIUM_PACKAGE_ID) > 0
+      ((isSponsoredIncludedInPremium(premiumProduct) && getCartQty(PREMIUM_PACKAGE_ID) > 0) || specialInCart)
       && getCartQty(SPONSORED_ADDON_ID) > 0
     ) {
       setCartQty(SPONSORED_ADDON_ID, 0);
@@ -66,7 +69,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
 
   const packageOrder = ['standard', 'plus', 'premium'];
   const corePackages = cart.products
-    .filter(p => !p.is_add_on && p.is_enabled)
+    .filter(p => !p.is_add_on && p.is_enabled && !isSpecialPackage(p))
     .sort((a, b) => {
       const aIdx = packageOrder.indexOf(a.id);
       const bIdx = packageOrder.indexOf(b.id);
@@ -91,26 +94,34 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
   const addOns = allAddOns.filter(p => p.id !== SPONSORED_ADDON_ID);
   const sponsoredAddOn = allAddOns.find(p => p.id === SPONSORED_ADDON_ID);
 
+  // Admin'in sirasi (buyuk priority once); paket secimi ana paketlerle ortak, sepette tek paket kalir.
+  const specialPackages = cart.products
+    .filter(p => !p.is_add_on && p.is_enabled && isSpecialPackage(p))
+    .sort((a, b) => b.priority - a.priority);
+  const allPackages = [...corePackages, ...specialPackages];
+
   const { total, itemCount } = cart;
 
-  const hasCoreSelected = corePackages.some(p => getCartQty(p.id) > 0);
+  const hasCoreSelected = allPackages.some(p => getCartQty(p.id) > 0);
   const premiumProduct = corePackages.find(p => p.id === PREMIUM_PACKAGE_ID);
   const isPremiumSelected = getCartQty(PREMIUM_PACKAGE_ID) > 0;
   const isPremiumSponsoredIncluded = isSponsoredIncludedInPremium(premiumProduct);
+  const isSpecialSelected = specialPackages.some(p => getCartQty(p.id) > 0);
 
   const coreClick = (id: string) => {
     const val = getCartQty(id) > 0 ? 0 : 1;
     if (val) {
-      corePackages.forEach(corePackage => {
+      allPackages.forEach(corePackage => {
         if (id !== corePackage.id) setCartQty(corePackage.id, 0);
       });
       if (id === PREMIUM_PACKAGE_ID && isPremiumSponsoredIncluded) setCartQty(SPONSORED_ADDON_ID, 0);
+      if (specialPackages.some(p => p.id === id)) setCartQty(SPONSORED_ADDON_ID, 0);
     }
     setCartQty(id, val);
   };
 
   const addonClick = (id: string) => {
-    if (id === SPONSORED_ADDON_ID && isPremiumSelected && isPremiumSponsoredIncluded) return;
+    if (id === SPONSORED_ADDON_ID && ((isPremiumSelected && isPremiumSponsoredIncluded) || isSpecialSelected)) return;
     // Not: Add-on sepete 1 adet degil, urunun min_qty degeriyle giriyor. QR Card'da
     // ilk secim 4 oluyor, Welcome Board dahil digerlerinde 1.
     setCartQty(id, getCartQty(id) > 0 ? 0 : getQtyRule(findProduct(id)).min);
@@ -235,6 +246,35 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
           </div>
         </section>
 
+        {specialPackages.length > 0 && (
+          <section className="event-new-section event-new-section-border">
+            <div className="event-new-section-header">
+              <div>
+                <h2 className="event-new-section-title">{textOr('paywall.specialPackages', 'Special Packages', 'Спеціальні пакети')}</h2>
+                <p className="event-new-section-subtitle">
+                  {textOr('paywall.specialPackagesSubtitle', 'Choose one of these instead of a package above.', 'Оберіть один із них замість пакета вище.')}
+                </p>
+              </div>
+            </div>
+
+            <div className="event-new-packages-grid">
+              {specialPackages.map((pkg) => (
+                <PackageCard
+                  key={pkg.id}
+                  id={pkg.id}
+                  displayName={resolveDisplayTexts(pkg).name}
+                  displayDescription={resolveDisplayTexts(pkg).description}
+                  displayBullets={resolveDisplayBullets(pkg)}
+                  price={pkg.price}
+                  tagText={localizedTagText(pkg.options)}
+                  isSelected={getCartQty(pkg.id) > 0}
+                  onSelect={() => coreClick(pkg.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Add-ons Section */}
         {addOns.length > 0 && (
           <section className="event-new-section event-new-section-border">
@@ -301,7 +341,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
               image={sponsoredAddOn.options?.image}
               mobileImage={sponsoredAddOn.options?.mobile_image}
               isSelected={getCartQty(SPONSORED_ADDON_ID) > 0}
-              isDisabled={isPremiumSelected && isPremiumSponsoredIncluded}
+              isDisabled={(isPremiumSelected && isPremiumSponsoredIncluded) || isSpecialSelected}
               onToggle={() => addonClick(SPONSORED_ADDON_ID)}
             />
           </section>

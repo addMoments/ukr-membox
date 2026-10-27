@@ -78,3 +78,33 @@ export async function uploadAdvertorialImage(
     throw new Error(`Advertorial image upload failed (status ${res.status}).`);
   }
 }
+
+// Ne: AddMoments reklamini (ozel paketli etkinliklerin misafir sayfasi, Excel madde 6) super admin icin okur/yazar.
+// Nasil: Etkinlik uclariyla ayni sozlesme; yalniz adres /api/admin/addmoments-ads.
+// Neden: Ayni AdvertorialSettings formu admin urun listesinde de calissin.
+export async function getAdminAddmomentsAds(): Promise<AdvertorialResponse> {
+  const res = await authFetch(`${SERV_ROOT}/api/admin/addmoments-ads`, {
+    headers: { Accept: 'application/json' },
+  });
+  return (await res.json()) as AdvertorialResponse;
+}
+
+export async function saveAdminAddmomentsAds(payload: AdvertorialConfig): Promise<AdvertorialResponse> {
+  const res = await authFetch(`${SERV_ROOT}/api/admin/addmoments-ads`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return (await res.json()) as AdvertorialResponse;
+}
+
+export async function getAdminAddmomentsAdsUploadUrl(
+  payload: AdvertorialUploadUrlRequest
+): Promise<AdvertorialUploadUrlResponse> {
+  const res = await authFetch(`${SERV_ROOT}/api/admin/addmoments-ads/upload-url`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return (await res.json()) as AdvertorialUploadUrlResponse;
+}
