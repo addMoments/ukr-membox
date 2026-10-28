@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import '../v2-styles/EventNew.css';
 import { t } from '../packages/i18n';
 import { textOr } from '../utils/admin_i18n';
-import { S3_ROOT } from '../consts';
 import { Link } from 'react-router-dom';
 import { cartState, findProduct, getCartQty, getQtyRule, getQtyRuleHint, initCartState, setCartQty } from '../client/cart';
 import { useSnapshot } from 'valtio';
@@ -13,6 +12,7 @@ import { signInEmail } from '../client/auth';
 import { resolvePostSignInRedirect } from '../client/admin';
 import { FormState } from '../utils/form_event_parse';
 import { formatUah } from '../utils/money';
+import BusinessTailoredSection from '../v2-components/BusinessTailoredSection';
 
 interface V2EventNewProps {
   showSignInSection?: boolean;
@@ -105,6 +105,8 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
     .sort((a, b) => b.priority - a.priority);
   const allPackages = [...corePackages, ...specialPackages];
   const shownPackages = isSpecialPage ? specialPackages : corePackages;
+  // Iletisim sayfasi WordPress'te; UK'de ayri adres (hfSetup.js UK_WORDPRESS_LINKS ile ayni).
+  const contactHref = currentLang === 'uk' ? '/uk/contact-addmoments/' : '/contact-us/';
   const PackagesTitle = isSpecialPage ? 'h1' : 'h2';
 
   const { total, itemCount } = cart;
@@ -226,8 +228,8 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
           </section>
         )}
 
-        {/* Core Packages Section (ozel sayfada ozel paketler) */}
-        <section className="event-new-section">
+        {/* Core Packages Section (ozel sayfada ozel paketler). id: alttaki "Compare standard packages" buraya kaydirir. */}
+        <section className="event-new-section event-new-packages-section" id="packages">
           <div className="event-new-section-header">
             <div>
               {/* Ozel sayfada hero yok: belgenin h1'i bu baslik. */}
@@ -344,26 +346,11 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
       </main>
 
       {!isSpecialPage && (
-        <header className="event-new-hero">
-          <div className="event-new-hero-container">
-            <div className="event-new-hero-content">
-              <span className="event-new-hero-badge">{t('paywall.heroBadge')}</span>
-              <h1 className="event-new-hero-title">
-                {t('paywall.heroTitle')}
-              </h1>
-              <p className="event-new-hero-subtitle">
-                {t('paywall.heroSubtitle')}
-              </p>
-            </div>
-            <div className="event-new-hero-image">
-              <img
-                src={S3_ROOT + "/ui/event-new-image.jpg"}
-                alt={t('paywall.heroImageAlt')}
-              />
-              <div className="event-new-hero-image-overlay"></div>
-            </div>
-          </div>
-        </header>
+        <BusinessTailoredSection
+          quoteHref={specialPackages.length > 0 ? '/special-packages/' : contactHref}
+          contactHref={contactHref}
+          onComparePackages={() => document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        />
       )}
 
       {/* Fixed Checkout Bar */}

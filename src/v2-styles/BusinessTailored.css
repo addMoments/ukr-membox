@@ -1,0 +1,437 @@
+/* Isletmeler icin ozel cozumler (Services & Prices alt bolumu; Solomiia'nin 28 Ekim tasarimi).
+   Olculer ve renkler tasarim dosyasindan: koyu #1f2328, acik lime #d9ec8b, soluk lime #f4f8dc / #eef5c4,
+   gri #6b7280, cizgi #eef0e8. Soldaki etiketler, adimlar ve butonlar sigdikca tek satir (musteri gorseli); zorla
+   tek satir yapilmaz: UK metinleri uzun, 1440'ta panele tasiyordu. */
+
+.business-tailored {
+  background: #ffffff;
+  overflow: hidden;
+  text-align: left;
+}
+
+.business-tailored-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 96px 48px;
+  box-sizing: border-box;
+  display: grid;
+  gap: 72px;
+  align-items: center;
+}
+
+@media (min-width: 1200px) {
+  .business-tailored-inner {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  }
+}
+
+/* Sol: mesaj */
+.business-tailored-message {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+.business-tailored-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #f4f8dc;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1f2328;
+}
+
+.business-tailored-title {
+  margin: 0;
+  font-size: 68px;
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: #1f2328;
+}
+
+/* text-align: footer/header CSS'indeki genel "p { text-align: center }" paragrafi ortaliyordu. */
+.business-tailored-text {
+  margin: 0;
+  text-align: left;
+  max-width: 540px;
+  font-size: 19px;
+  line-height: 1.6;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.business-tailored-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.business-tailored-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid #e3e6dc;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.business-tailored-steps {
+  list-style: none;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  border-top: 1px solid #eef0e8;
+  border-bottom: 1px solid #eef0e8;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.business-tailored-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.business-tailored-step-num {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #d9ec8b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1f2328;
+}
+
+.business-tailored-step-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.business-tailored-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.business-tailored-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 26px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.business-tailored-btn:hover {
+  transform: translateY(-1px);
+}
+
+.business-tailored-btn-primary {
+  background: #1f2328;
+  color: #ffffff;
+}
+
+.business-tailored-btn-primary:hover {
+  color: #ffffff;
+  box-shadow: 0 10px 24px -10px rgba(20, 24, 30, 0.45);
+}
+
+.business-tailored-btn-outline {
+  border: 2px solid #d9ec8b;
+  background: transparent;
+  color: #1f2328;
+}
+
+.business-tailored-btn-outline:hover {
+  color: #1f2328;
+  background: #f4f8dc;
+}
+
+/* Sag: panel */
+.business-tailored-panel-wrap {
+  min-width: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.business-tailored-panel-shape {
+  position: absolute;
+  top: -20px;
+  right: -4px;
+  width: 72%;
+  height: 78%;
+  border-radius: 40px;
+  background: #f4f8dc;
+}
+
+.business-tailored-panel {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  box-sizing: border-box;
+  padding: 32px;
+  border-radius: 32px;
+  background: #ffffff;
+  border: 1px solid #eef0e8;
+  box-shadow: 0 36px 70px -20px rgba(20, 24, 30, 0.18), 0 8px 20px rgba(20, 24, 30, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.business-tailored-panel-head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.business-tailored-panel-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.business-tailored-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #f1f3ec;
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+.business-tailored-tab {
+  white-space: nowrap;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  background: transparent;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.business-tailored-tab.is-active {
+  font-weight: 700;
+  background: #1f2328;
+  color: #ffffff;
+}
+
+.business-tailored-headline {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1f2328;
+}
+
+.business-tailored-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.business-tailored-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 18px 0;
+  border-top: 1px solid #eef0e8;
+}
+
+.business-tailored-row:last-child {
+  border-bottom: 1px solid #eef0e8;
+}
+
+.business-tailored-row-icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #eef5c4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.business-tailored-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.business-tailored-row-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2328;
+}
+
+.business-tailored-row-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #6b7280;
+}
+
+.business-tailored-brief {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: #1f2328;
+}
+
+.business-tailored-brief-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.business-tailored-brief-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.business-tailored-brief-sub {
+  font-size: 14px;
+  color: #c9ced6;
+}
+
+.business-tailored-brief-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #d9ec8b;
+  color: #1f2328;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.business-tailored-brief-btn:hover {
+  color: #1f2328;
+  background: #cfe470;
+}
+
+/* Tablet */
+@media (max-width: 1199px) {
+  .business-tailored-inner {
+    padding: 72px 32px;
+    gap: 56px;
+  }
+
+  .business-tailored-title {
+    font-size: 52px;
+  }
+}
+
+/* Telefon */
+@media (max-width: 640px) {
+  .business-tailored-inner {
+    padding: 56px 16px;
+    gap: 48px;
+  }
+
+  .business-tailored-message {
+    gap: 22px;
+  }
+
+  .business-tailored-title {
+    font-size: 38px;
+    line-height: 1.06;
+  }
+
+  .business-tailored-text {
+    font-size: 17px;
+  }
+
+  .business-tailored-steps {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .business-tailored-actions,
+  .business-tailored-btn {
+    width: 100%;
+  }
+
+  .business-tailored-btn {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .business-tailored-panel {
+    padding: 20px;
+    border-radius: 26px;
+  }
+
+  /* Iki sekme yan yana sigmiyor: esit iki sutun, uzun ad buton icinde iki satira iner. */
+  .business-tailored-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 22px;
+  }
+
+  .business-tailored-tab {
+    white-space: normal;
+    line-height: 1.2;
+    padding: 6px 10px;
+    border-radius: 18px;
+    font-size: 14px;
+  }
+
+  .business-tailored-headline {
+    font-size: 21px;
+  }
+
+  .business-tailored-panel-shape {
+    right: -8px;
+  }
+}
