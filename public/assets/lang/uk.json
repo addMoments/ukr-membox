@@ -387,6 +387,9 @@
             "extraMonths": "+{{count}} міс. зберігання",
             "extraUploadOne": "+{{count}} міс. завантажень",
             "extraUpload": "+{{count}} міс. завантажень",
+            "extraUploadStorageOne": "+{{count}} міс. завантажень і зберігання",
+            "extraUploadStorage": "+{{count}} міс. завантажень і зберігання",
+            "or": "або",
             "extraGb": "+{{count}} ГБ сховища",
             "learnMore": "Детальніше",
             "benefits": {

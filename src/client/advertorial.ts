@@ -79,18 +79,22 @@ export async function uploadAdvertorialImage(
   }
 }
 
-// Ne: AddMoments reklamini (ozel paketli etkinliklerin misafir sayfasi, Excel madde 6) super admin icin okur/yazar.
-// Nasil: Etkinlik uclariyla ayni sozlesme; yalniz adres /api/admin/addmoments-ads.
-// Neden: Ayni AdvertorialSettings formu admin urun listesinde de calissin.
-export async function getAdminAddmomentsAds(): Promise<AdvertorialResponse> {
-  const res = await authFetch(`${SERV_ROOT}/api/admin/addmoments-ads`, {
+// Ne: Bir paket grubunun AddMoments reklamini (Excel madde 6; musteri 28 Ekim: School / Hero / Mini ayri)
+//     super admin icin okur/yazar.
+// Nasil: Etkinlik uclariyla ayni sozlesme; adres /api/admin/addmoments-ads, grup ?set= ile.
+// Neden: Ayni AdvertorialSettings formu admin urun listesinde her grup icin calissin.
+const addmomentsAdsUrl = (set: string, suffix = '') =>
+  `${SERV_ROOT}/api/admin/addmoments-ads${suffix}?set=${encodeURIComponent(set)}`;
+
+export async function getAdminAddmomentsAds(set: string): Promise<AdvertorialResponse> {
+  const res = await authFetch(addmomentsAdsUrl(set), {
     headers: { Accept: 'application/json' },
   });
   return (await res.json()) as AdvertorialResponse;
 }
 
-export async function saveAdminAddmomentsAds(payload: AdvertorialConfig): Promise<AdvertorialResponse> {
-  const res = await authFetch(`${SERV_ROOT}/api/admin/addmoments-ads`, {
+export async function saveAdminAddmomentsAds(set: string, payload: AdvertorialConfig): Promise<AdvertorialResponse> {
+  const res = await authFetch(addmomentsAdsUrl(set), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(payload),
@@ -99,9 +103,10 @@ export async function saveAdminAddmomentsAds(payload: AdvertorialConfig): Promis
 }
 
 export async function getAdminAddmomentsAdsUploadUrl(
+  set: string,
   payload: AdvertorialUploadUrlRequest
 ): Promise<AdvertorialUploadUrlResponse> {
-  const res = await authFetch(`${SERV_ROOT}/api/admin/addmoments-ads/upload-url`, {
+  const res = await authFetch(addmomentsAdsUrl(set, '/upload-url'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(payload),

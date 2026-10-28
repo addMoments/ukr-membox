@@ -50,6 +50,7 @@ const EventAlbums = lazy(() => import('./pages/event-detail/albums'));
 const EventAlbumEdit = lazy(() => import('./pages/event-detail/album-edit'));
 const Message = lazy(() => import('./pages/message'));
 const EventNew = lazy(() => import('./pages/event-new'));
+const SpecialPackages = lazy(() => import('./pages/special-packages'));
 const EventCheckout = lazy(() => import('./pages/event-checkout'));
 const CheckoutPending = lazy(() => import('./pages/checkout-pending'));
 const ResetPassword = lazy(() => import('./pages/reset-password'));
@@ -120,6 +121,8 @@ function AppContent() {
 
           <Route path="/events/services-and-prices" element={<EventNew />} />
           <Route path="/events/services-and-prices/" element={<EventNew />} />
+          <Route path="/special-packages" element={<SpecialPackages />} />
+          <Route path="/special-packages/" element={<SpecialPackages />} />
           <Route path="/checkout" element={<EventCheckout />} />
           <Route path="/checkout/pending/:encPackedUID" element={<CheckoutPending />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />

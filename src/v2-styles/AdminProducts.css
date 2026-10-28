@@ -59,6 +59,31 @@
   color: #64748b;
 }
 
+/* AddMoments reklam gruplari (School / Hero / Mini): her sekme bir grubun reklam formunu acar. */
+.admin-ads-set-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0 0.55rem 0.8rem;
+}
+
+.admin-ads-set-tab {
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #dbe5f2;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-ads-set-tab.is-active {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+}
+
 .admin-products-panel-count {
   min-width: 32px;
   height: 32px;

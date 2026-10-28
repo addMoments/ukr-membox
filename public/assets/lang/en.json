@@ -387,6 +387,9 @@
             "extraMonths": "+{{count}} months storage",
             "extraUploadOne": "+{{count}} month of uploads",
             "extraUpload": "+{{count}} months of uploads",
+            "extraUploadStorageOne": "+{{count}} month of uploads and storage",
+            "extraUploadStorage": "+{{count}} months of uploads and storage",
+            "or": "or",
             "extraGb": "+{{count}} GB storage",
             "learnMore": "Learn more",
             "benefits": {

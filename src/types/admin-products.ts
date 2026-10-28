@@ -24,6 +24,9 @@ export interface AdminProductOptions {
   // saklama suresi aktivasyondan itibaren toplam.
   special_package?: boolean;
   storage_from_activation?: boolean;
+  // AddMoments reklam grubu (20-special-upgrades-and-ad-sets.sql): school, hero, mini. Ayni gruptaki
+  // paketler ayni reklami gosterir.
+  addmoments_ads_set?: string;
 }
 
 export interface AdminProduct {

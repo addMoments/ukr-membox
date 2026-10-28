@@ -21,7 +21,7 @@ import {
 import AdvertorialSettings, { AdvertorialApi } from '../../v2-components/AdvertorialSettings';
 import '../../v2-styles/Settings.css';
 import { t } from '../../packages/i18n';
-import { FEATURE_VOICE } from '../../utils/features';
+import { FEATURE_ADDMOMENTS_ADS, FEATURE_VOICE } from '../../utils/features';
 import { adminText } from '../../utils/admin_i18n';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import V2Header from '../../v2-components/V2Header';
@@ -37,11 +37,20 @@ const isUpgrade = (product: AdminProduct) => Boolean(product.options.upgrade_kin
 // Ozel paketler (Excel madde 6): Mini/Classic/Premium'dan ayri bolum; admin acip kapatir, saklama toplam sure.
 const isSpecialPackage = (product: AdminProduct) => product.options.special_package === true;
 
-// Ozel paketli etkinliklerin misafir sayfasindaki AddMoments reklami; form etkinlik reklam formuyla ayni.
-const ADDMOMENTS_ADS_API: AdvertorialApi = {
-  load: getAdminAddmomentsAds,
-  save: saveAdminAddmomentsAds,
-  uploadUrl: getAdminAddmomentsAdsUploadUrl,
+// AddMoments reklami paket grubuna gore (musteri 28 Ekim: "Ads for School / Hero / Mini"); grup urunun
+// options.addmoments_ads_set'inde. Form etkinlik reklam formuyla ayni. Grup basina tek nesne: form api
+// degisince yeniden yukler.
+const ADS_SET_ORDER = ['school', 'hero', 'mini'];
+const addmomentsAdsApis: Record<string, AdvertorialApi> = {};
+const addmomentsAdsApi = (set: string): AdvertorialApi => {
+  if (!addmomentsAdsApis[set]) {
+    addmomentsAdsApis[set] = {
+      load: () => getAdminAddmomentsAds(set),
+      save: (payload) => saveAdminAddmomentsAds(set, payload),
+      uploadUrl: (payload) => getAdminAddmomentsAdsUploadUrl(set, payload),
+    };
+  }
+  return addmomentsAdsApis[set];
 };
 
 const isVoiceIncluded = (product: AdminProduct) => {
@@ -60,6 +69,7 @@ function AdminProducts() {
   const [imageResultByUid, setImageResultByUid] = useState<Record<string, { ok: boolean; message: string }>>({});
   const [enabledTogglingByUid, setEnabledTogglingByUid] = useState<Record<string, boolean>>({});
   const [enabledResultByUid, setEnabledResultByUid] = useState<Record<string, { ok: boolean; message: string }>>({});
+  const [adsSet, setAdsSet] = useState('');
   const currentLang = String(t('lang_code') || 'en');
 
   useEffect(() => {
@@ -80,12 +90,31 @@ function AdminProducts() {
   const specialProducts = products.filter((p) => !p.is_add_on && isSpecialPackage(p))
     .sort((a, b) => b.priority - a.priority || a.price - b.price);
   const addOnProducts = products.filter((p) => p.is_add_on && !isUpgrade(p));
-  // Once paket yukseltmeleri, sonra ek galeri suresi, ek yukleme suresi ve ek alan; her grupta ucuzdan pahaliya.
+  // Once Mini/Classic/Premium'un, sonra ozel paketlerin yukseltmeleri. Her grupta once paket yukseltmeleri,
+  // sonra ek galeri suresi, ek yukleme suresi ve ek alan; her turde ucuzdan pahaliya.
   const UPGRADE_KIND_ORDER = ['package', 'time', 'upload', 'storage'];
+  const isSpecialUpgrade = (product: AdminProduct) => {
+    const sourceId = product.options.upgrade_from || product.options.upgrade_for;
+    return specialProducts.some((p) => p.id === sourceId);
+  };
   const upgradeProducts = products.filter(isUpgrade).sort((a, b) =>
-    UPGRADE_KIND_ORDER.indexOf(a.options.upgrade_kind || '') - UPGRADE_KIND_ORDER.indexOf(b.options.upgrade_kind || '')
+    Number(isSpecialUpgrade(a)) - Number(isSpecialUpgrade(b))
+    || UPGRADE_KIND_ORDER.indexOf(a.options.upgrade_kind || '') - UPGRADE_KIND_ORDER.indexOf(b.options.upgrade_kind || '')
     || a.price - b.price
     || a.id.localeCompare(b.id));
+
+  // Reklam gruplari ve onlari kullanan paketler (ozel paketler admin sirasiyla, Mini ana paketlerden).
+  const adsSetProducts: Record<string, AdminProduct[]> = {};
+  [...specialProducts, ...packageProducts].forEach((p) => {
+    const set = p.options.addmoments_ads_set;
+    if (set) adsSetProducts[set] = [...(adsSetProducts[set] || []), p];
+  });
+  const adsSets = Object.keys(adsSetProducts).sort((a, b) => {
+    const ai = ADS_SET_ORDER.indexOf(a);
+    const bi = ADS_SET_ORDER.indexOf(b);
+    return (ai === -1 ? ADS_SET_ORDER.length : ai) - (bi === -1 ? ADS_SET_ORDER.length : bi) || a.localeCompare(b);
+  });
+  const activeAdsSet = adsSets.includes(adsSet) ? adsSet : adsSets[0] || '';
 
   // Ne: Form alanindaki sayiyi okur; bos alan icin null doner.
   // Neden: Number('') === 0 oldugu icin bos birakilan bir limit alani sessizce "0 limit"
@@ -428,6 +457,27 @@ function AdminProducts() {
     );
   };
 
+  const adsSetLabel = (set: string) => {
+    const labels: Record<string, [string, string]> = {
+      school: ['School', 'Школа'],
+      hero: ['Hero', 'Герой'],
+      mini: ['Mini', 'Міні'],
+    };
+    const label = labels[set];
+    return label ? at(`admin.products.adsSet.${set}`, label[0], label[1]) : set;
+  };
+
+  // Ozellik 5'li paketlerde (ozel paketler) alan her zaman AddMoments'in; digerlerinde (Mini) reklam yalniz
+  // kuruluysa ve etkinlik kendi reklam alanini almadiysa gosterilir (backend eventAddmomentsAds).
+  const adsSetDescription = (set: string) => {
+    const setProducts = adsSetProducts[set] || [];
+    const names = setProducts.map(renderName).join(', ');
+    const owned = setProducts.every((p) => (p.granted_features || []).includes(FEATURE_ADDMOMENTS_ADS));
+    return owned
+      ? `${at('admin.products.adsSetOwned', 'Shown on the guest page of every event with these packages', 'Показується на сторінці гостей кожної події з цими пакетами')}: ${names}.`
+      : `${at('admin.products.adsSetOptional', 'Shown on the guest page of events with these packages that did not buy their own ad zone; with "No advertising" nothing is shown', 'Показується на сторінці гостей подій із цими пакетами, які не купили власний рекламний блок; з «Без реклами» нічого не показується')}: ${names}.`;
+  };
+
   const packageForm = (product: AdminProduct) => (
     <form className="admin-product-form" onSubmit={(e) => onSubmitProduct(e, product)}>
       <div className="admin-product-card-top">
@@ -446,7 +496,7 @@ function AdminProducts() {
 
       {isSpecialPackage(product) && renderAddonEnabledToggle(
         product,
-        at('admin.products.specialDisabledHint', 'When disabled, the package is hidden from Services & Prices and cannot be bought.', 'Коли вимкнено, пакет приховано з «Послуг і цін», і його не можна купити.'),
+        at('admin.products.specialDisabledHint', 'When disabled, the package is hidden from the Special Packages page and cannot be bought.', 'Коли вимкнено, пакет приховано зі сторінки «Спеціальні пакети», і його не можна купити.'),
       )}
 
       <div className="admin-product-fields">
@@ -637,7 +687,7 @@ function AdminProducts() {
   );
 
   const packageName = (id?: string) => {
-    const pkg = packageProducts.find((x) => x.id === id);
+    const pkg = [...packageProducts, ...specialProducts].find((x) => x.id === id);
     return pkg ? renderName(pkg) : id || '';
   };
 
@@ -777,7 +827,11 @@ function AdminProducts() {
                 <div className="admin-products-panel-head">
                   <div>
                     <h2>{at('admin.products.specialPackages', 'Special Packages', 'Спеціальні пакети')}</h2>
-                    <p>{at('admin.products.specialPackagesDesc', 'Packages for special clients. Their guest page shows the AddMoments ads below; the host cannot change the advertising area.', 'Пакети для спеціальних клієнтів. На сторінці гостей показується реклама AddMoments нижче; організатор не може змінити рекламний блок.')}</p>
+                    <p>
+                      {at('admin.products.specialPackagesDesc', 'Packages for special clients, sold on the Special Packages page', 'Пакети для спеціальних клієнтів, продаються на сторінці «Спеціальні пакети»')}
+                      {' '}(<a href="/special-packages/" target="_blank" rel="noreferrer">/special-packages/</a>).
+                      {' '}{at('admin.products.specialPackagesAdsDesc', 'Their guest page shows the AddMoments ads of their group below; the host cannot change the advertising area.', 'На сторінці гостей показується реклама AddMoments їхньої групи нижче; організатор не може змінити рекламний блок.')}
+                    </p>
                   </div>
                   <span className="admin-products-panel-count">{specialProducts.length}</span>
                 </div>
@@ -789,11 +843,38 @@ function AdminProducts() {
                     {packageForm(product)}
                   </article>
                 ))}
+              </section>
+            )}
+
+            {activeAdsSet && (
+              <section className="admin-products-panel">
+                <div className="admin-products-panel-head">
+                  <div>
+                    <h2>{at('admin.products.addmomentsAds', 'Ads by AddMoments', 'Реклама від AddMoments')}</h2>
+                    <p>{at('admin.products.addmomentsAdsGroupsDesc', 'Each group of packages has its own ads. Choose a group, then a layout, upload images and optionally add links.', 'Кожна група пакетів має власну рекламу. Оберіть групу, потім макет, завантажте зображення та за потреби додайте посилання.')}</p>
+                  </div>
+                  <span className="admin-products-panel-count">{adsSets.length}</span>
+                </div>
+                <div className="admin-ads-set-tabs" role="tablist">
+                  {adsSets.map((set) => (
+                    <button
+                      key={set}
+                      type="button"
+                      role="tab"
+                      aria-selected={set === activeAdsSet}
+                      className={`admin-ads-set-tab${set === activeAdsSet ? ' is-active' : ''}`}
+                      onClick={() => setAdsSet(set)}
+                    >
+                      {adsSetLabel(set)}
+                    </button>
+                  ))}
+                </div>
                 <article className="admin-product-card admin-addmoments-ads-card">
                   <AdvertorialSettings
-                    api={ADDMOMENTS_ADS_API}
-                    title={at('admin.products.addmomentsAds', 'Ads by AddMoments', 'Реклама від AddMoments')}
-                    description={at('admin.products.addmomentsAdsDesc', 'Shown on the guest page of every event with a special package. Choose a layout, upload images and optionally add links.', 'Показується на сторінці гостей кожної події зі спеціальним пакетом. Оберіть макет, завантажте зображення та за потреби додайте посилання.')}
+                    key={activeAdsSet}
+                    api={addmomentsAdsApi(activeAdsSet)}
+                    title={`${at('admin.products.addmomentsAds', 'Ads by AddMoments', 'Реклама від AddMoments')}: ${adsSetLabel(activeAdsSet)}`}
+                    description={adsSetDescription(activeAdsSet)}
                   />
                 </article>
               </section>

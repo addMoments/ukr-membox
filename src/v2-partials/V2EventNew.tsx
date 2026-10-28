@@ -17,6 +17,9 @@ import { formatUah } from '../utils/money';
 interface V2EventNewProps {
   showSignInSection?: boolean;
   onLoadingComplete?: () => void;
+  // 'special': /special-packages sayfasi (musteri 28 Ekim). Paket kartlari yalniz ozel paketler; giris blogu,
+  // reklam alani add-on'u ve alttaki hero yok (Services & Prices'in hero'su bu sayfaya baglanacak).
+  variant?: 'standard' | 'special';
 }
 
 const PREMIUM_PACKAGE_ID = 'premium';
@@ -26,11 +29,13 @@ const isSponsoredIncludedInPremium = (product?: { sponsored_included?: boolean; 
   return product?.sponsored_included === true || product?.advertorial_included === true;
 };
 
-// Ozel paketler (Excel madde 6): admin acinca ayri bolumde. Reklam alanlari AddMoments'in, reklam add-on'u alinamaz.
+// Ozel paketler (Excel madde 6): admin acinca /special-packages sayfasinda. Reklam alanlari AddMoments'in,
+// reklam add-on'u alinamaz.
 const isSpecialPackage = (product: { options?: Record<string, any> }) => product.options?.special_package === true;
 
-function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNewProps) {
+function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 'standard' }: V2EventNewProps) {
   const cart = useSnapshot(cartState);
+  const isSpecialPage = variant === 'special';
   const currentLang = String(t('lang_code') || 'en');
 
   const handleSignIn = async (formData: FormState) => {
@@ -99,6 +104,8 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
     .filter(p => !p.is_add_on && p.is_enabled && isSpecialPackage(p))
     .sort((a, b) => b.priority - a.priority);
   const allPackages = [...corePackages, ...specialPackages];
+  const shownPackages = isSpecialPage ? specialPackages : corePackages;
+  const PackagesTitle = isSpecialPage ? 'h1' : 'h2';
 
   const { total, itemCount } = cart;
 
@@ -187,47 +194,64 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
             Neden: Musteri sayfada aciklama olmadigini bildirdi. Hero bloğu DOM'da bu sayfanin
                    *altinda* durdugu icin kullanici sayfayi dogrudan fiyat kartlariyla aciyordu;
                    baslik h1 degil h2, cunku belgenin h1'i hero'daki basliktir. */}
-        <section className="event-new-intro">
-          <span className="event-new-intro-badge">
-            {textOr('paywall.intro.badge', 'One-time payment · No subscriptions', 'Одноразовий платіж · Без підписок')}
-          </span>
-          <h2 className="event-new-intro-title">
-            {textOr('paywall.intro.title', 'Your Day. Your Guests. Every Moment.', 'Ваш день. Ваші гості. Кожна мить.')}
-          </h2>
-          <p className="event-new-intro-text">
-            {textOr(
-              'paywall.intro.description',
-              'Choose the perfect package for your celebration and keep all those unforgettable moments together.',
-              'Оберіть ідеальний пакет для вашого свята та збережіть усі незабутні миті в одному місці.',
-            )}
-          </p>
-          <span className="event-new-intro-badge">
-            {textOr('paywall.intro.badgeAfter', 'Purchase now, use anytime', 'Купуйте зараз, користуйтесь будь-коли')}
-          </span>
-          <ol className="event-new-intro-steps">
-            {introSteps.map((step, index) => (
-              <li key={step.title} className="event-new-intro-step">
-                <span className="event-new-intro-step-num">{index + 1}</span>
-                <div>
-                  <p className="event-new-intro-step-title">{step.title}</p>
-                  <p className="event-new-intro-step-text">{step.text}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
+        {!isSpecialPage && (
+          <section className="event-new-intro">
+            <span className="event-new-intro-badge">
+              {textOr('paywall.intro.badge', 'One-time payment · No subscriptions', 'Одноразовий платіж · Без підписок')}
+            </span>
+            <h2 className="event-new-intro-title">
+              {textOr('paywall.intro.title', 'Your Day. Your Guests. Every Moment.', 'Ваш день. Ваші гості. Кожна мить.')}
+            </h2>
+            <p className="event-new-intro-text">
+              {textOr(
+                'paywall.intro.description',
+                'Choose the perfect package for your celebration and keep all those unforgettable moments together.',
+                'Оберіть ідеальний пакет для вашого свята та збережіть усі незабутні миті в одному місці.',
+              )}
+            </p>
+            <span className="event-new-intro-badge">
+              {textOr('paywall.intro.badgeAfter', 'Purchase now, use anytime', 'Купуйте зараз, користуйтесь будь-коли')}
+            </span>
+            <ol className="event-new-intro-steps">
+              {introSteps.map((step, index) => (
+                <li key={step.title} className="event-new-intro-step">
+                  <span className="event-new-intro-step-num">{index + 1}</span>
+                  <div>
+                    <p className="event-new-intro-step-title">{step.title}</p>
+                    <p className="event-new-intro-step-text">{step.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
-        {/* Core Packages Section */}
+        {/* Core Packages Section (ozel sayfada ozel paketler) */}
         <section className="event-new-section">
           <div className="event-new-section-header">
             <div>
-              <h2 className="event-new-section-title">{t('paywall.corePackages')}</h2>
-              <p className="event-new-section-subtitle">{t('paywall.corePackagesSubtitle')}</p>
+              {/* Ozel sayfada hero yok: belgenin h1'i bu baslik. */}
+              <PackagesTitle className="event-new-section-title">{t('paywall.corePackages')}</PackagesTitle>
+              <p className="event-new-section-subtitle">
+                {isSpecialPage
+                  ? textOr(
+                    'paywall.specialPage.subtitle',
+                    'One-time payment. Unlimited guests and co-hosts, QR templates and voice messages in every package.',
+                    'Одноразовий платіж. Необмежена кількість гостей і співорганізаторів, QR-шаблони та голосові повідомлення в кожному пакеті.',
+                  )
+                  : t('paywall.corePackagesSubtitle')}
+              </p>
             </div>
           </div>
 
+          {isSpecialPage && cart.init && shownPackages.length === 0 && (
+            <p className="event-new-section-subtitle">
+              {textOr('paywall.specialPage.empty', 'Special packages are not available right now.', 'Спеціальні пакети зараз недоступні.')}
+            </p>
+          )}
+
           <div className="event-new-packages-grid">
-            {corePackages.map((pkg) => {
+            {shownPackages.map((pkg) => {
               const cartQty = cart.cartItems.find(item => item.product_uid === pkg.id)?.quantity ?? 0;
               return (
                 <PackageCard
@@ -245,35 +269,6 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
             })}
           </div>
         </section>
-
-        {specialPackages.length > 0 && (
-          <section className="event-new-section event-new-section-border">
-            <div className="event-new-section-header">
-              <div>
-                <h2 className="event-new-section-title">{textOr('paywall.specialPackages', 'Special Packages', 'Спеціальні пакети')}</h2>
-                <p className="event-new-section-subtitle">
-                  {textOr('paywall.specialPackagesSubtitle', 'Choose one of these instead of a package above.', 'Оберіть один із них замість пакета вище.')}
-                </p>
-              </div>
-            </div>
-
-            <div className="event-new-packages-grid">
-              {specialPackages.map((pkg) => (
-                <PackageCard
-                  key={pkg.id}
-                  id={pkg.id}
-                  displayName={resolveDisplayTexts(pkg).name}
-                  displayDescription={resolveDisplayTexts(pkg).description}
-                  displayBullets={resolveDisplayBullets(pkg)}
-                  price={pkg.price}
-                  tagText={localizedTagText(pkg.options)}
-                  isSelected={getCartQty(pkg.id) > 0}
-                  onSelect={() => coreClick(pkg.id)}
-                />
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Add-ons Section */}
         {addOns.length > 0 && (
@@ -306,7 +301,7 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
           </section>
         )}
 
-        {sponsoredAddOn && (
+        {sponsoredAddOn && !isSpecialPage && (
           <section className="event-new-section event-new-section-border event-new-section-pro">
             {/* 2.4: musteri "daha iyi bir baslik tasarimi" istedi. Diger bolumler gibi baslik + alt
                 baslik, ustte giris blogundaki rozetle ayni dilde bir "isletmeler icin" etiketi. */}
@@ -348,26 +343,28 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete }: V2EventNew
         )}
       </main>
 
-      <header className="event-new-hero">
-        <div className="event-new-hero-container">
-          <div className="event-new-hero-content">
-            <span className="event-new-hero-badge">{t('paywall.heroBadge')}</span>
-            <h1 className="event-new-hero-title">
-              {t('paywall.heroTitle')}
-            </h1>
-            <p className="event-new-hero-subtitle">
-              {t('paywall.heroSubtitle')}
-            </p>
+      {!isSpecialPage && (
+        <header className="event-new-hero">
+          <div className="event-new-hero-container">
+            <div className="event-new-hero-content">
+              <span className="event-new-hero-badge">{t('paywall.heroBadge')}</span>
+              <h1 className="event-new-hero-title">
+                {t('paywall.heroTitle')}
+              </h1>
+              <p className="event-new-hero-subtitle">
+                {t('paywall.heroSubtitle')}
+              </p>
+            </div>
+            <div className="event-new-hero-image">
+              <img
+                src={S3_ROOT + "/ui/event-new-image.jpg"}
+                alt={t('paywall.heroImageAlt')}
+              />
+              <div className="event-new-hero-image-overlay"></div>
+            </div>
           </div>
-          <div className="event-new-hero-image">
-            <img
-              src={S3_ROOT + "/ui/event-new-image.jpg"}
-              alt={t('paywall.heroImageAlt')}
-            />
-            <div className="event-new-hero-image-overlay"></div>
-          </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Fixed Checkout Bar */}
       <div className="event-new-checkout-bar">

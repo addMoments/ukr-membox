@@ -19,6 +19,8 @@ import '../v2-styles/UpgradeCard.css';
 // "One-time payment" kutusu yok, paketin kazandirdiklari "Learn more" ile acilir. 15:15 daha da
 // sikistirdi: ilk satir "Upgrade your plan: [paket]", "Learn more" fiyat satirinda, tik ustte.
 // Odeme sonrasi bekleme sayfasi hostu ?upgrade=done ile buraya geri yollar.
+// Ozel paketlerde (musteri 28 Ekim) Class ve Grade'de hem paket hem "+12 ay" var: ikisi birlikte listelenir,
+// ama bir odeme ya paket ya ekler (backend tek sipariste ikisini almaz), biri secilince digeri bosalir.
 
 const MAX_BENEFITS = 6;
 
@@ -203,6 +205,7 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
 
   const setQuantity = (id: string, next: number) => {
     setError('');
+    if (next > 0) setSelectedPackage(null);
     setQuantities((prev) => ({ ...prev, [id]: Math.max(0, Math.min(maxQuantity, next)) }));
   };
 
@@ -244,6 +247,7 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
             aria-pressed={selected}
             onClick={() => {
               setError('');
+              setQuantities({});
               setSelectedPackage(option.id);
             }}
           >
@@ -289,6 +293,11 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
     if (option.kind === 'time') return t('eventHome.upgrade.extraMonths', { count: option.extra_storage_months });
     if (option.kind === 'upload') {
       const months = option.extra_upload_months || 1;
+      // Saklamasi aktivasyondan toplam olan pakette (ozel paketler) galeri yukleme bitince biter; ek ay
+      // ikisini birden uzatir (musteri: "+12 m (storage + link)").
+      if (current.options?.storage_from_activation === true) {
+        return t(months === 1 ? 'eventHome.upgrade.extraUploadStorageOne' : 'eventHome.upgrade.extraUploadStorage', { count: months });
+      }
       return t(months === 1 ? 'eventHome.upgrade.extraUploadOne' : 'eventHome.upgrade.extraUpload', { count: months });
     }
     return t('eventHome.upgrade.extraGb', { count: option.extra_storage_gb });
@@ -351,7 +360,10 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
 
       <div className="upgrade-card-options">
         {packageOptions.map(renderPackageOption)}
-        {packageOptions.length === 0 && extraOptions.map(renderExtraOption)}
+        {packageOptions.length > 0 && extraOptions.length > 0 && (
+          <p className="upgrade-card-or">{t('eventHome.upgrade.or')}</p>
+        )}
+        {extraOptions.map(renderExtraOption)}
       </div>
 
       <button type="button" className="upgrade-card-pay" disabled={busy || total <= 0} onClick={pay}>

@@ -83,6 +83,26 @@
   gap: 10px;
 }
 
+/* Paket ve ekler birlikte (ozel paketler): araya "veya" ayraci. */
+.upgrade-card-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #78716c;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.upgrade-card-or::before,
+.upgrade-card-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(28, 25, 23, 0.1);
+}
+
 .upgrade-option {
   border-radius: 16px;
   border: 1.5px solid rgba(28, 25, 23, 0.06);

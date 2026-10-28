@@ -66,6 +66,7 @@ const normalizeOptions = (value: unknown): AdminProductOptions => {
     extra_upload_months: parseNumber(raw.extra_upload_months),
     special_package: parseBoolean(raw.special_package),
     storage_from_activation: parseBoolean(raw.storage_from_activation),
+    addmoments_ads_set: optionalString(raw.addmoments_ads_set),
   };
 };
 
