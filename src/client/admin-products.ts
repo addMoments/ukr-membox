@@ -57,6 +57,8 @@ const normalizeOptions = (value: unknown): AdminProductOptions => {
     sponsored_included: parseBoolean(raw.sponsored_included),
     image: typeof raw.image === 'string' ? raw.image : undefined,
     mobile_image: typeof raw.mobile_image === 'string' ? raw.mobile_image : undefined,
+    special_image: optionalString(raw.special_image),
+    special_mobile_image: optionalString(raw.special_mobile_image),
     upgrade_kind: UPGRADE_KINDS.find((kind) => kind === raw.upgrade_kind),
     upgrade_from: optionalString(raw.upgrade_from),
     upgrade_to: optionalString(raw.upgrade_to),
@@ -171,32 +173,15 @@ export async function uploadFileToS3(uploadUrl: string, file: File, requiredHead
   }
 }
 
-// Ne: Add-on urununun options.image alanini yeni public_url ile gunceller.
-// Nasil: Backend kontratina uygun sekilde PATCH /api/admin/products/:uid icine sadece options.image koyar.
-// Neden: PUT zinciri basariyla tamamlandiktan sonra DB tarafinda image referansi tek bir alandan yonetilsin.
-export async function setAddonImage(productUID: string, publicUrl: string): Promise<AdminProduct> {
-  return updateAdminProduct(productUID, { options: { image: publicUrl } });
-}
+// Ek urun gorsel alanlari: Services & Prices (image, mobile_image) ve ozel paketler sayfasi
+// (special_image, special_mobile_image; musteri 29 Ekim). Mobil bossa masaustune duser.
+export type AddonImageField = 'image' | 'mobile_image' | 'special_image' | 'special_mobile_image';
 
-// Ne: Add-on urununun mobil options.mobile_image alanini yeni public_url ile gunceller.
-// Nasil: Mevcut admin products PATCH kontratina yalnizca options.mobile_image payload'u yollar.
-// Neden: Mobil fiyat/kart gorseli desktop gorselden bagimsiz yonetilebilsin.
-export async function setAddonMobileImage(productUID: string, publicUrl: string): Promise<AdminProduct> {
-  return updateAdminProduct(productUID, { options: { mobile_image: publicUrl } });
-}
-
-// Ne: Add-on urununun options.image alanini temizler.
-// Nasil: Backend kontratina uygun sekilde options.image alanina bos string gonderir; backend bu durumda alani kaldirir.
-// Neden: Admin "Remove" butonuna bastiginda kullanici icin tek tikta gorseli kaldirmak ve ekrandaki state'i hizla guncellemek.
-export async function removeAddonImage(productUID: string): Promise<AdminProduct> {
-  return updateAdminProduct(productUID, { options: { image: '' } });
-}
-
-// Ne: Add-on urununun options.mobile_image alanini temizler.
-// Nasil: Backend kontratina uygun sekilde mobile_image alanina bos string gonderir.
-// Neden: Mobil gorsel kaldirildiginda public tarafta options.image fallback'i devreye girebilsin.
-export async function removeAddonMobileImage(productUID: string): Promise<AdminProduct> {
-  return updateAdminProduct(productUID, { options: { mobile_image: '' } });
+// Ne: Add-on urununun bir gorsel alanini yeni public_url ile gunceller; bos string alani kaldirir.
+// Nasil: PATCH /api/admin/products/:uid icine yalnizca options.<alan> koyar; backend S3 nesnesini dogrular.
+// Neden: S3 upload zinciri tamamlaninca gorsel referansi tek alandan yonetilsin; dort alan ayni kontrati kullanir.
+export async function setAddonImageField(productUID: string, field: AddonImageField, publicUrl: string): Promise<AdminProduct> {
+  return updateAdminProduct(productUID, { options: { [field]: publicUrl } });
 }
 
 // Ne: Add-on urununun is_enabled bayragini gunceller.

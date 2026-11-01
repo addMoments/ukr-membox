@@ -19,6 +19,7 @@ import { displayConfigFieldLabel, localizedLabel, sortConfigFieldsLikeQrCard } f
 import { PromoValidationResponse } from '../types/promo';
 import { markMetaEventOnce, trackMetaAddToCart } from '../client/meta-pixel';
 import { formatUah } from '../utils/money';
+import { addonImages } from '../utils/addon_images';
 
 interface ShippingAddress {
   full_name: string;
@@ -324,7 +325,7 @@ function V2Checkout() {
       name: resolveDisplayTexts(p).name || p.id,
       priceLabel: formatUah(Number(p.price)),
       icon: p.options?.icon as string | undefined,
-      image: p.options?.image as string | undefined,
+      image: addonImages(p.options, isSpecialInCart).image,
       qtyHint: getQtyRuleHint(p),
     }));
 
@@ -523,6 +524,7 @@ function V2Checkout() {
                 onConfigChange={(key, val) => handleConfigChange(product.id, key, val)}
                 onQtyChange={(qty) => setCartQty(product.id, qty)}
                 onRemove={() => handleRemoveItem(product.id)}
+                useSpecialImages={isSpecialInCart}
               />
             ))}
           </div>
@@ -795,9 +797,11 @@ interface CartItemCardProps {
   onConfigChange: (key: string, value: string) => void;
   onQtyChange: (qty: number) => void;
   onRemove: () => void;
+  // Sepette ozel paket var: ek urun ozel paketler sayfasindaki gorselini gosterir (addonImages).
+  useSpecialImages?: boolean;
 }
 
-function CartItemCard({ product, displayName, displayDescription, quantity, config, onConfigChange, onQtyChange, onRemove }: CartItemCardProps) {
+function CartItemCard({ product, displayName, displayDescription, quantity, config, onConfigChange, onQtyChange, onRemove, useSpecialImages = false }: CartItemCardProps) {
   const isPhysical = product.fullfillment_type === 'physical';
   const isAddOn = !!product.is_add_on;
   const showQuantityStepper = isAddOn && !SINGLE_QUANTITY_ADDON_IDS.has(product.id);
@@ -809,7 +813,7 @@ function CartItemCard({ product, displayName, displayDescription, quantity, conf
 
   const selectedDesignId = config.design_id || designs[0]?.id || '';
   const selectedDesign = designs.find(d => d.id === selectedDesignId);
-  const previewImage = selectedDesign?.image || product.options?.image;
+  const previewImage = selectedDesign?.image || addonImages(product.options, useSpecialImages).image;
   // Ne: Secili tasarimin eski canvas overlay preview akisini kullanip kullanmadigini soyler.
   // Nasil: Backend design.overlays alanini dolu gonderdiyse true kabul eder.
   // Neden: Welcome Board ve QR Card gibi yeni statik tasarimlarda gorsel uzerine text/QR basilmamali.

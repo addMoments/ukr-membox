@@ -3,16 +3,14 @@ import { Link } from 'react-router-dom';
 import {
   getAddonUploadUrl,
   getAdminProducts,
-  removeAddonImage,
-  removeAddonMobileImage,
   setAddonEnabled,
-  setAddonImage,
-  setAddonMobileImage,
+  setAddonImageField,
   updateAdminProduct,
   uploadFileToS3,
   validateAddonImageFile,
 } from '../../client/admin-products';
 import { AdminProduct, UpdateAdminProductPayload } from '../../types/admin-products';
+import type { AddonImageField } from '../../client/admin-products';
 import {
   getAdminAddmomentsAds,
   getAdminAddmomentsAdsUploadUrl,
@@ -29,7 +27,11 @@ import '../../v2-styles/AdminPageHeader.css';
 import '../../v2-styles/AdminProducts.css';
 
 const PREMIUM_PACKAGE_ID = 'premium';
+// Reklam alani add-on'u ozel paketlerle alinamaz, o sayfada gorunmez: ozel sayfa gorseli yok.
+const SPONSORED_ADDON_ID = 'advertorial';
 const at = adminText;
+
+const isMobileField = (field: AddonImageField) => field === 'mobile_image' || field === 'special_mobile_image';
 
 // Yukseltme urunleri (Excel 2.18): host etkinlik sayfasindan alir, Services & Prices'ta gorunmez.
 const isUpgrade = (product: AdminProduct) => Boolean(product.options.upgrade_kind);
@@ -278,10 +280,11 @@ function AdminProducts() {
     return <span className={res.ok ? 'admin-product-save-ok' : 'admin-product-save-error'}>{res.message}</span>;
   };
 
-  // Ne: Add-on icin secilen desktop veya mobil gorseli S3'e yukleyip ilgili options alanini gunceller.
-  // Nasil: Once dosyayi validate eder; sonra upload-url alir, S3'e PUT eder ve target'a gore image/mobile_image PATCH atar.
-  // Neden: Desktop gorsel davranisi bozulmadan mobilde farkli gorsel yonetimi ayni upload zincirini kullanabilsin.
-  const onAddonImageSelect = async (product: AdminProduct, file: File | undefined | null, target: 'desktop' | 'mobile' = 'desktop') => {
+  // Ne: Add-on icin secilen gorseli S3'e yukleyip ilgili options alanini gunceller.
+  // Nasil: Once dosyayi validate eder; sonra upload-url alir, S3'e PUT eder ve alana (image, mobile_image,
+  //        special_image, special_mobile_image) PATCH atar.
+  // Neden: Desktop, mobil ve ozel paketler sayfasi gorselleri ayni upload zincirini kullanabilsin.
+  const onAddonImageSelect = async (product: AdminProduct, file: File | undefined | null, field: AddonImageField = 'image') => {
     if (!file) return;
     setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: '' } }));
 
@@ -301,11 +304,9 @@ function AdminProducts() {
         size_bytes: file.size,
       });
       await uploadFileToS3(presign.upload_url, file, presign.required_headers || { 'Content-Type': file.type });
-      const updated = target === 'mobile'
-        ? await setAddonMobileImage(product.uid, presign.public_url)
-        : await setAddonImage(product.uid, presign.public_url);
+      const updated = await setAddonImageField(product.uid, field, presign.public_url);
       setProducts((prev) => prev.map((x) => (x.uid === product.uid ? updated : x)));
-      setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? at('admin.products.mobileImageUpdated', 'Mobile image updated.', 'Мобільне зображення оновлено.') : at('admin.products.imageUpdated', 'Image updated.', 'Зображення оновлено.') } }));
+      setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: isMobileField(field) ? at('admin.products.mobileImageUpdated', 'Mobile image updated.', 'Мобільне зображення оновлено.') : at('admin.products.imageUpdated', 'Image updated.', 'Зображення оновлено.') } }));
     } catch (err) {
       const message = err instanceof Error ? err.message : at('admin.products.errors.imageUpload', 'Image upload failed.', 'Не вдалося завантажити зображення.');
       setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: false, message } }));
@@ -314,18 +315,16 @@ function AdminProducts() {
     }
   };
 
-  // Ne: Add-on urununun desktop veya mobil gorselini kaldirir.
-  // Nasil: Target'a gore options.image ya da options.mobile_image alanina bos string PATCH eder.
-  // Neden: Mobil gorsel temizlenince public tarafta desktop image fallback'i calissin, desktop remove davranisi ise aynen korunsun.
-  const onAddonImageRemove = async (product: AdminProduct, target: 'desktop' | 'mobile' = 'desktop') => {
+  // Ne: Add-on urununun bir gorsel alanini kaldirir.
+  // Nasil: Alana bos string PATCH eder; backend alani siler.
+  // Neden: Mobil gorsel temizlenince masaustune, ozel sayfa gorseli temizlenince Services & Prices gorseline dusulsun.
+  const onAddonImageRemove = async (product: AdminProduct, field: AddonImageField = 'image') => {
     setImageUploadingByUid((prev) => ({ ...prev, [product.uid]: true }));
-    setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? at('admin.products.removingMobileImage', 'Removing mobile image...', 'Видалення мобільного зображення...') : at('admin.common.remove', 'Remove', 'Прибрати') + '...' } }));
+    setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: isMobileField(field) ? at('admin.products.removingMobileImage', 'Removing mobile image...', 'Видалення мобільного зображення...') : at('admin.common.remove', 'Remove', 'Прибрати') + '...' } }));
     try {
-      const updated = target === 'mobile'
-        ? await removeAddonMobileImage(product.uid)
-        : await removeAddonImage(product.uid);
+      const updated = await setAddonImageField(product.uid, field, '');
       setProducts((prev) => prev.map((x) => (x.uid === product.uid ? updated : x)));
-      setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: target === 'mobile' ? at('admin.products.mobileImageRemoved', 'Mobile image removed.', 'Мобільне зображення видалено.') : at('admin.products.imageRemoved', 'Image removed.', 'Зображення видалено.') } }));
+      setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: true, message: isMobileField(field) ? at('admin.products.mobileImageRemoved', 'Mobile image removed.', 'Мобільне зображення видалено.') : at('admin.products.imageRemoved', 'Image removed.', 'Зображення видалено.') } }));
     } catch (err) {
       const message = err instanceof Error ? err.message : at('admin.products.errors.removeImage', 'Failed to remove image.', 'Не вдалося видалити зображення.');
       setImageResultByUid((prev) => ({ ...prev, [product.uid]: { ok: false, message } }));
@@ -402,49 +401,65 @@ function AdminProducts() {
   const renderAddonImageBlock = (product: AdminProduct) => {
     const uploading = Boolean(imageUploadingByUid[product.uid]);
     const result = imageResultByUid[product.uid];
-    const renderImageSlot = (target: 'desktop' | 'mobile', label: string, currentImage?: string) => (
-      <div className="admin-addon-image-slot">
-        <span className="admin-product-field-label">{label}</span>
-        <div className="admin-addon-image-row">
-          {currentImage ? (
-            <img src={currentImage} alt={`${product.id} ${target}`} className="admin-addon-image-preview" />
-          ) : (
-            <div className="admin-addon-image-empty">{target === 'mobile' ? at('admin.products.noMobileImage', 'No mobile image', 'Немає мобільного зображення') : at('admin.products.noImage', 'No image', 'Немає зображення')}</div>
-          )}
-          <div className="admin-addon-image-actions">
-            <label className={`admin-addon-image-btn${uploading ? ' admin-addon-image-btn-disabled' : ''}`}>
-              {uploading ? at('admin.products.uploading', 'Uploading...', 'Завантаження...') : currentImage ? at('admin.products.replaceImage', 'Replace image', 'Замінити зображення') : at('admin.products.chooseImage', 'Choose image', 'Обрати зображення')}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={uploading}
-                style={{ display: 'none' }}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  e.target.value = '';
-                  onAddonImageSelect(product, file, target);
-                }}
-              />
-            </label>
-            {currentImage && (
-              <button
-                type="button"
-                className="admin-addon-image-remove-btn"
-                disabled={uploading}
-                onClick={() => onAddonImageRemove(product, target)}
-              >
-                {at('admin.common.remove', 'Remove', 'Прибрати')}
-              </button>
+    const renderImageSlot = (field: AddonImageField, label: string) => {
+      const currentImage = product.options[field];
+      return (
+        <div className="admin-addon-image-slot">
+          <span className="admin-product-field-label">{label}</span>
+          <div className="admin-addon-image-row">
+            {currentImage ? (
+              <img src={currentImage} alt={`${product.id} ${field}`} className="admin-addon-image-preview" />
+            ) : (
+              <div className="admin-addon-image-empty">{isMobileField(field) ? at('admin.products.noMobileImage', 'No mobile image', 'Немає мобільного зображення') : at('admin.products.noImage', 'No image', 'Немає зображення')}</div>
             )}
+            <div className="admin-addon-image-actions">
+              <label className={`admin-addon-image-btn${uploading ? ' admin-addon-image-btn-disabled' : ''}`}>
+                {uploading ? at('admin.products.uploading', 'Uploading...', 'Завантаження...') : currentImage ? at('admin.products.replaceImage', 'Replace image', 'Замінити зображення') : at('admin.products.chooseImage', 'Choose image', 'Обрати зображення')}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  disabled={uploading}
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    onAddonImageSelect(product, file, field);
+                  }}
+                />
+              </label>
+              {currentImage && (
+                <button
+                  type="button"
+                  className="admin-addon-image-remove-btn"
+                  disabled={uploading}
+                  onClick={() => onAddonImageRemove(product, field)}
+                >
+                  {at('admin.common.remove', 'Remove', 'Прибрати')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    );
+      );
+    };
 
     return (
       <div className="admin-addon-image-block">
-        {renderImageSlot('desktop', at('admin.products.addonImage', 'Add-On Image', 'Зображення додатка'), product.options.image)}
-        {renderImageSlot('mobile', at('admin.products.mobileImage', 'Mobile Image', 'Мобільне зображення'), product.options.mobile_image)}
+        {renderImageSlot('image', at('admin.products.addonImage', 'Add-On Image', 'Зображення додатка'))}
+        {renderImageSlot('mobile_image', at('admin.products.mobileImage', 'Mobile Image', 'Мобільне зображення'))}
+        {/* Ozel paketler sayfasinin gorselleri (musteri 29 Ekim). Reklam alani add-on'u o sayfada yok. */}
+        {product.id !== SPONSORED_ADDON_ID && (
+          <>
+            <p className="admin-addon-image-subhead">
+              {at('admin.products.specialPageImages', 'Special Packages page', 'Сторінка «Спеціальні пакети»')}
+            </p>
+            {renderImageSlot('special_image', at('admin.products.specialAddonImage', 'Add-On Image (Special Packages)', 'Зображення додатка (Спеціальні пакети)'))}
+            {renderImageSlot('special_mobile_image', at('admin.products.specialMobileImage', 'Mobile Image (Special Packages)', 'Мобільне зображення (Спеціальні пакети)'))}
+            <p className="admin-product-field-hint">
+              {at('admin.products.specialImagesHint', 'Shown on the Special Packages page and at checkout when a special package is in the cart. When empty, the images above are used.', 'Показується на сторінці «Спеціальні пакети» та під час оформлення, якщо в кошику спеціальний пакет. Якщо порожньо, використовуються зображення вище.')}
+            </p>
+          </>
+        )}
         {result?.message && (
           <span className={result.ok ? 'admin-product-save-ok' : 'admin-product-save-error'}>
             {result.message}

@@ -12,6 +12,9 @@ export interface AdminProductOptions {
   sponsored_included?: boolean;
   image?: string;
   mobile_image?: string;
+  // Ozel paketler sayfasindaki ek urun gorselleri (musteri 29 Ekim); bossa image / mobile_image kullanilir.
+  special_image?: string;
+  special_mobile_image?: string;
   // Yukseltme urunleri (Excel 2.18, 17-event-upgrades.sql). upgrade_kind yoksa normal urun.
   upgrade_kind?: 'package' | 'storage' | 'time' | 'upload';
   upgrade_from?: string;
@@ -75,6 +78,8 @@ export interface UpdateAdminProductPayload {
   options?: {
     image?: string;
     mobile_image?: string;
+    special_image?: string;
+    special_mobile_image?: string;
   };
 }
 

@@ -13,6 +13,7 @@ import { resolvePostSignInRedirect } from '../client/admin';
 import { FormState } from '../utils/form_event_parse';
 import { formatUah } from '../utils/money';
 import BusinessTailoredSection from '../v2-components/BusinessTailoredSection';
+import { addonImages } from '../utils/addon_images';
 
 interface V2EventNewProps {
   showSignInSection?: boolean;
@@ -107,7 +108,28 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
   const shownPackages = isSpecialPage ? specialPackages : corePackages;
   // Iletisim sayfasi WordPress'te; UK'de ayri adres (hfSetup.js UK_WORDPRESS_LINKS ile ayni).
   const contactHref = currentLang === 'uk' ? '/uk/contact-addmoments/' : '/contact-us/';
-  const PackagesTitle = isSpecialPage ? 'h1' : 'h2';
+  const IntroTitle = isSpecialPage ? 'h1' : 'h2';
+
+  // Ozel sayfada paketler options.special_section'a gore bolumlere ayrilir (musteri 29 Ekim: School ile Hero
+  // arasinda ince cizgi, ardindan kalin baslik + normal alt baslik). Ilk bolum "Choose Your Package" altinda.
+  type PackageItem = (typeof specialPackages)[number];
+  const packageSections: { key: string; packages: PackageItem[] }[] = [];
+  shownPackages.forEach((pkg) => {
+    const key = isSpecialPage ? String(pkg.options?.special_section || '') : '';
+    const section = packageSections.find((x) => x.key === key);
+    if (section) section.packages.push(pkg);
+    else packageSections.push({ key, packages: [pkg] });
+  });
+  const sectionHeader = (key: string) => (key === 'hero'
+    ? {
+      title: textOr('paywall.specialPage.heroTitle', 'Honour Your Hero', 'Вшануйте свого Героя'),
+      subtitle: textOr(
+        'paywall.specialPage.heroSubtitle',
+        'One page where everyone can share photos, videos and voice messages.',
+        'Одна сторінка, де кожен може поділитися фото, відео та голосовими повідомленнями.',
+      ),
+    }
+    : null);
 
   const { total, itemCount } = cart;
 
@@ -185,6 +207,27 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
     },
   ];
 
+  const renderPackageGrid = (packages: PackageItem[]) => (
+    <div className="event-new-packages-grid">
+      {packages.map((pkg) => {
+        const cartQty = cart.cartItems.find(item => item.product_uid === pkg.id)?.quantity ?? 0;
+        return (
+          <PackageCard
+            key={pkg.id}
+            id={pkg.id}
+            displayName={resolveDisplayTexts(pkg).name}
+            displayDescription={resolveDisplayTexts(pkg).description}
+            displayBullets={resolveDisplayBullets(pkg)}
+            price={pkg.price}
+            tagText={localizedTagText(pkg.options)}
+            isSelected={cartQty > 0}
+            onSelect={() => coreClick(pkg.id)}
+          />
+        );
+      })}
+    </div>
+  );
+
   return (
     <>
       {showSignInSection && <V2SignInForm onSubmit={handleSignIn} compact />}
@@ -195,45 +238,43 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
             Nasil: Tek seferlik odeme rozeti + baslik + aciklama + uc adimlik sira.
             Neden: Musteri sayfada aciklama olmadigini bildirdi. Hero bloğu DOM'da bu sayfanin
                    *altinda* durdugu icin kullanici sayfayi dogrudan fiyat kartlariyla aciyordu;
-                   baslik h1 degil h2, cunku belgenin h1'i hero'daki basliktir. */}
-        {!isSpecialPage && (
-          <section className="event-new-intro">
-            <span className="event-new-intro-badge">
-              {textOr('paywall.intro.badge', 'One-time payment · No subscriptions', 'Одноразовий платіж · Без підписок')}
-            </span>
-            <h2 className="event-new-intro-title">
-              {textOr('paywall.intro.title', 'Your Day. Your Guests. Every Moment.', 'Ваш день. Ваші гості. Кожна мить.')}
-            </h2>
-            <p className="event-new-intro-text">
-              {textOr(
-                'paywall.intro.description',
-                'Choose the perfect package for your celebration and keep all those unforgettable moments together.',
-                'Оберіть ідеальний пакет для вашого свята та збережіть усі незабутні миті в одному місці.',
-              )}
-            </p>
-            <span className="event-new-intro-badge">
-              {textOr('paywall.intro.badgeAfter', 'Purchase now, use anytime', 'Купуйте зараз, користуйтесь будь-коли')}
-            </span>
-            <ol className="event-new-intro-steps">
-              {introSteps.map((step, index) => (
-                <li key={step.title} className="event-new-intro-step">
-                  <span className="event-new-intro-step-num">{index + 1}</span>
-                  <div>
-                    <p className="event-new-intro-step-title">{step.title}</p>
-                    <p className="event-new-intro-step-text">{step.text}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
+                   baslik h1 degil h2, cunku belgenin h1'i alttaki isletmeler bolumunun basligi. Ozel paketler
+                   sayfasinda da var (musteri 29 Ekim: "Can we add this section"); orada alt bolum yok, h1 bu. */}
+        <section className="event-new-intro">
+          <span className="event-new-intro-badge">
+            {textOr('paywall.intro.badge', 'One-time payment · No subscriptions', 'Одноразовий платіж · Без підписок')}
+          </span>
+          <IntroTitle className="event-new-intro-title">
+            {textOr('paywall.intro.title', 'Your Day. Your Guests. Every Moment.', 'Ваш день. Ваші гості. Кожна мить.')}
+          </IntroTitle>
+          <p className="event-new-intro-text">
+            {textOr(
+              'paywall.intro.description',
+              'Choose the perfect package for your celebration and keep all those unforgettable moments together.',
+              'Оберіть ідеальний пакет для вашого свята та збережіть усі незабутні миті в одному місці.',
+            )}
+          </p>
+          <span className="event-new-intro-badge">
+            {textOr('paywall.intro.badgeAfter', 'Purchase now, use anytime', 'Купуйте зараз, користуйтесь будь-коли')}
+          </span>
+          <ol className="event-new-intro-steps">
+            {introSteps.map((step, index) => (
+              <li key={step.title} className="event-new-intro-step">
+                <span className="event-new-intro-step-num">{index + 1}</span>
+                <div>
+                  <p className="event-new-intro-step-title">{step.title}</p>
+                  <p className="event-new-intro-step-text">{step.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
 
         {/* Core Packages Section (ozel sayfada ozel paketler). id: alttaki "Compare standard packages" buraya kaydirir. */}
         <section className="event-new-section event-new-packages-section" id="packages">
           <div className="event-new-section-header">
             <div>
-              {/* Ozel sayfada hero yok: belgenin h1'i bu baslik. */}
-              <PackagesTitle className="event-new-section-title">{t('paywall.corePackages')}</PackagesTitle>
+              <h2 className="event-new-section-title">{t('paywall.corePackages')}</h2>
               <p className="event-new-section-subtitle">
                 {isSpecialPage
                   ? textOr(
@@ -252,25 +293,25 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
             </p>
           )}
 
-          <div className="event-new-packages-grid">
-            {shownPackages.map((pkg) => {
-              const cartQty = cart.cartItems.find(item => item.product_uid === pkg.id)?.quantity ?? 0;
-              return (
-                <PackageCard
-                  key={pkg.id}
-                  id={pkg.id}
-                  displayName={resolveDisplayTexts(pkg).name}
-                  displayDescription={resolveDisplayTexts(pkg).description}
-                  displayBullets={resolveDisplayBullets(pkg)}
-                  price={pkg.price}
-                  tagText={localizedTagText(pkg.options)}
-                  isSelected={cartQty > 0}
-                  onSelect={() => coreClick(pkg.id)}
-                />
-              );
-            })}
-          </div>
+          {packageSections.length > 0 && renderPackageGrid(packageSections[0].packages)}
         </section>
+
+        {packageSections.slice(1).map((section) => {
+          const header = sectionHeader(section.key);
+          return (
+            <section key={section.key} className="event-new-section event-new-section-border">
+              {header && (
+                <div className="event-new-section-header">
+                  <div>
+                    <h2 className="event-new-section-title">{header.title}</h2>
+                    <p className="event-new-section-subtitle">{header.subtitle}</p>
+                  </div>
+                </div>
+              )}
+              {renderPackageGrid(section.packages)}
+            </section>
+          );
+        })}
 
         {/* Add-ons Section */}
         {addOns.length > 0 && (
@@ -292,8 +333,8 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
                   price={addOn.price}
                   quantity={getCartQty(addOn.id)}
                   icon={addOn.options?.icon}
-                  image={addOn.options?.image}
-                  mobileImage={addOn.options?.mobile_image}
+                  image={addonImages(addOn.options, isSpecialPage).image}
+                  mobileImage={addonImages(addOn.options, isSpecialPage).mobileImage}
                   qtyRuleHint={getQtyRuleHint(addOn)}
                   isSelected={getCartQty(addOn.id) > 0}
                   onToggle={() => addonClick(addOn.id)}
