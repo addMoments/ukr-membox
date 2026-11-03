@@ -11,7 +11,7 @@ import V2SignInForm from './V2SignInForm';
 import { signInEmail } from '../client/auth';
 import { resolvePostSignInRedirect } from '../client/admin';
 import { FormState } from '../utils/form_event_parse';
-import { formatUah } from '../utils/money';
+import { formatUah, formatUahAmount } from '../utils/money';
 import BusinessTailoredSection from '../v2-components/BusinessTailoredSection';
 import { addonImages } from '../utils/addon_images';
 
@@ -122,11 +122,12 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
   });
   const sectionHeader = (key: string) => (key === 'hero'
     ? {
-      title: textOr('paywall.specialPage.heroTitle', 'Honour Your Hero', 'Вшануйте свого Героя'),
+      // Metinler Solomiia'nin (2 Kasim), birebir.
+      title: textOr('paywall.specialPage.heroTitle', 'Honoring Those We Remember', "На честь тих, кого пам'ятаємо"),
       subtitle: textOr(
         'paywall.specialPage.heroSubtitle',
-        'One page where everyone can share photos, videos and voice messages.',
-        'Одна сторінка, де кожен може поділитися фото, відео та голосовими повідомленнями.',
+        'A special space to share photos, stories, and memories of our Heroes.',
+        'Особливий простір для спільних фотографій, історій та спогадів про наших Героїв.',
       ),
     }
     : null);
@@ -415,8 +416,6 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
         </div>
       </div>
 
-      {/* Spacing for checkout bar */}
-      <div className="event-new-footer-spacing"></div>
       </div>
     </>
   );
@@ -462,7 +461,8 @@ function PackageCard({ id, displayName, displayDescription, displayBullets, pric
         <h3 className="event-new-package-name">{resolvedName}</h3>
         <div className="event-new-package-price-block">
           <div className="event-new-package-price">
-            <span className="event-new-package-price-amount">{formatUah(price)}</span>
+            {/* Yaninda "UAH" yaziyor; ₴ ikinci kez para birimi oluyordu (musteri 2 Kasim, 2.4). */}
+            <span className="event-new-package-price-amount">{formatUahAmount(price)}</span>
             <span className="event-new-package-price-unit">{"UAH"}</span>
           </div>
         </div>

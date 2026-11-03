@@ -2,11 +2,10 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import SettingsFieldNote from './SettingsFieldNote';
 import { textOr } from '../utils/admin_i18n';
 import {
+  WELCOME_MAX_CHARS,
   WELCOME_MAX_LINES,
   countWelcomeLines,
-  fitWelcomeMessage,
   loadWelcomeFont,
-  welcomeFits,
 } from '../utils/welcomeMessage';
 
 interface WelcomeMessageFieldProps {
@@ -18,15 +17,14 @@ interface WelcomeMessageFieldProps {
   fontId?: string;
 }
 
-// Ne: Ayarlardaki karsilama metni alani; misafir sayfasinda 3 satiri asacak girisi kabul etmez.
-// Nasil: Her degisiklik misafir sayfasindaki olcuyle sayilir (utils/welcomeMessage). Sona yazilan ya
-//        da yapistirilan metin sinira kadar kesilir; ortaya yapilan, siniri asan ekleme reddedilir.
-//        Silme her zaman serbest: sinirdan once yazilmis uzun metin adim adim kisaltilabilir.
-// Neden: Musteri (16 Ekim) hostun en fazla 3 tam satir kullanabilmesini istedi.
+// Ne: Ayarlardaki karsilama metni alani ve misafir sayfasinda kac satir tutacaginin sayaci.
+// Nasil: Her degisiklik misafir sayfasindaki olcuyle sayilir (utils/welcomeMessage). 3 satiri asan
+//        metin kabul edilir; misafir ilk 3 satiri ve "Більше" baglantisini gorur (V2GuestHome).
+// Neden: 16 Ekim'de metin 3 satirla sinirlanmisti; musteri 2 Kasim'da asil istegin 3 satirin
+//        gorunmesi, fazlasinin "Show more" ile acilmasi oldugunu yazdi.
 function WelcomeMessageField({ name, label, placeholder, initialValue, fontId }: WelcomeMessageFieldProps) {
   const [value, setValue] = useState(initialValue);
   const [lines, setLines] = useState(() => countWelcomeLines(initialValue, fontId));
-  const [rejected, setRejected] = useState(false);
   const valueRef = useRef(value);
   valueRef.current = value;
 
@@ -39,26 +37,13 @@ function WelcomeMessageField({ name, label, placeholder, initialValue, fontId }:
     return () => { alive = false; };
   }, [fontId]);
 
-  const accept = (next: string) => {
+  const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const next = e.target.value;
     setValue(next);
     setLines(countWelcomeLines(next, fontId));
   };
 
-  const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const next = e.target.value;
-    if (welcomeFits(next, fontId) || next.length < value.length) {
-      accept(next);
-      setRejected(false);
-      return;
-    }
-    if (next.startsWith(value)) {
-      const fitted = fitWelcomeMessage(next, fontId);
-      if (fitted.length > value.length) accept(fitted);
-    }
-    setRejected(true);
-  };
-
-  const overLimit = lines > WELCOME_MAX_LINES;
+  const collapsed = lines > WELCOME_MAX_LINES;
 
   return (
     <div className="settings-field full-width">
@@ -69,36 +54,27 @@ function WelcomeMessageField({ name, label, placeholder, initialValue, fontId }:
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        rows={3}
+        maxLength={WELCOME_MAX_CHARS}
+        rows={4}
       />
-      <div className={`settings-welcome-counter${overLimit || rejected ? ' over' : ''}`} aria-live="polite">
-        {textOr('settings.generalDetails.welcomeLines', 'Lines: {{lines}} / {{max}}', 'Рядків: {{lines}} / {{max}}', { lines, max: WELCOME_MAX_LINES })}
+      <div className="settings-welcome-counter" aria-live="polite">
+        {textOr('settings.generalDetails.welcomeLineCount', 'Lines on the guest page: {{lines}}', 'Рядків на сторінці для гостей: {{lines}}', { lines })}
       </div>
       <SettingsFieldNote>
         <p>
           {textOr(
-            'settings.generalDetails.welcomeLimitHelp',
-            'Guests see this message on the event page in up to {{max}} lines (about 120 characters), so the title, buttons, promotions and albums fit on one screen.',
-            'Гості бачать це повідомлення на сторінці події — не більше {{max}} рядків (близько 120 символів), щоб назва, кнопки, промоції та альбоми вмістилися на одному екрані.',
+            'settings.generalDetails.welcomeShowMoreHelp',
+            'Guests see the first {{max}} lines. If the message is longer, a “Show more” link opens the rest.',
+            'Гості бачать перші {{max}} рядки. Якщо повідомлення довше, решту відкриває посилання «Більше».',
             { max: WELCOME_MAX_LINES },
           )}
         </p>
-        {overLimit && (
+        {collapsed && (
           <p>
             {textOr(
-              'settings.generalDetails.welcomeTooLong',
-              'This message is longer than {{max}} lines: guests see the first {{max}} lines and a “Show more” link. Shorten it to fit.',
-              'Повідомлення довше за {{max}} рядки: гості бачать перші {{max}} рядки та посилання «Більше». Скоротіть його, щоб воно вмістилося.',
-              { max: WELCOME_MAX_LINES },
-            )}
-          </p>
-        )}
-        {rejected && !overLimit && (
-          <p>
-            {textOr(
-              'settings.generalDetails.welcomeRejected',
-              'The welcome message can take at most {{max}} lines on the guest page.',
-              'Вітальне повідомлення може займати не більше {{max}} рядків на сторінці для гостей.',
+              'settings.generalDetails.welcomeCollapsed',
+              'This message is longer than {{max}} lines, so guests will see “Show more” under the first {{max}} lines.',
+              'Повідомлення довше за {{max}} рядки, тож гості побачать «Більше» після перших {{max}} рядків.',
               { max: WELCOME_MAX_LINES },
             )}
           </p>

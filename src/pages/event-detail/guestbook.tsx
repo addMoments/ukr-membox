@@ -3,8 +3,11 @@ import { useParams } from 'react-router-dom';
 import EventDetailLayout from '../../v2-partials/EventDetailLayout';
 import AdminPageHeader from '../../v2-components/AdminPageHeader';
 import { pgREST } from '../../client/postgrest';
+import { deleteUploadPermanently } from '../../client/uploads';
 import { unpackUUID } from '../../packages/uuid';
 import { t } from '../../packages/i18n';
+import { textOr } from '../../utils/admin_i18n';
+import { showToast } from '../../v2-components/V2Toast';
 import '../../v2-styles/Guestbook.css';
 import { S3_ROOT } from '../../consts';
 
@@ -111,6 +114,24 @@ function EventGuestbook() {
       body: JSON.stringify({ trashed_at: null }),
     });
     fetchUploads();
+  };
+
+  // Ne: Ses kaydini ya da yazili mesaji kalici siler (gizlemenin aksine geri alinamaz).
+  // Neden: Musteri 2 Kasim (2.24): host misafir defterindeki mesajlari silemiyordu, yalnizca gizleyebiliyordu.
+  const handleDelete = async (upload: GuestbookUpload) => {
+    const confirmed = window.confirm(upload.upload_type === 'voice'
+      ? textOr('guestbook.deleteVoiceConfirm', 'Delete this voice message permanently? This cannot be undone.', 'Видалити це голосове повідомлення назавжди? Цю дію не можна скасувати.')
+      : textOr('guestbook.deleteTextConfirm', 'Delete this message permanently? This cannot be undone.', 'Видалити це повідомлення назавжди? Цю дію не можна скасувати.'));
+    if (!confirmed) return;
+    if (elemref.current.currentAudioUrl === S3_ROOT + upload.value) elemref.current.stopPlay();
+    try {
+      await deleteUploadPermanently(upload.uid);
+      setUploads(prev => prev.filter(u => u.uid !== upload.uid));
+      showToast(textOr('guestbook.deleted', 'Message deleted', 'Повідомлення видалено'));
+    } catch (e) {
+      console.error('[guestbook] delete failed', e);
+      showToast(textOr('guestbook.deleteFailed', 'Could not delete the message. Please try again.', 'Не вдалося видалити повідомлення. Спробуйте ще раз.'), 'error');
+    }
   };
 
   const elemref = useRef({
@@ -292,6 +313,12 @@ function EventGuestbook() {
                                     {t('guestbook.hide')}
                                   </button>
                                 )}
+                                <button
+                                  className="guestbook-action-btn delete"
+                                  onClick={() => handleDelete(upload)}
+                                >
+                                  {textOr('guestbook.delete', 'Delete', 'Видалити')}
+                                </button>
                               </div>
                             </td>
                           </tr>

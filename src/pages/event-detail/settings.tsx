@@ -6,6 +6,7 @@ import ColoredSettingsBox from '../../v2-components/ColoredSettingsBox';
 import AdvertorialSettings from '../../v2-components/AdvertorialSettings';
 import SettingsFieldNote from '../../v2-components/SettingsFieldNote';
 import WelcomeMessageField from '../../v2-components/WelcomeMessageField';
+import ChangePasswordSection from '../../v2-components/ChangePasswordSection';
 import Button from '../../components/Button';
 import '../../v2-styles/Settings.css';
 import { parse_submit_event } from '../../utils/form_event_parse';
@@ -104,7 +105,7 @@ function EventSettingsInner({event}: {event: Event}) {
     const eventUid = unpackUUID(packedUid || "");
 
     const { activation_date, event_date, ...rest } = form;
-    // Sondaki bos satir/bosluk misafir sayfasinda gorunmuyor ama 3 satir sinirini zorluyor; kaydedilmez.
+    // Sondaki bos satir/bosluk misafir sayfasinda gorunmuyor ama satir sayisini sisirir; kaydedilmez.
     if (typeof rest.welcome_message === 'string') rest.welcome_message = rest.welcome_message.replace(/\s+$/, '');
 
     setGeneralStatus({ state: 'saving' });
@@ -488,6 +489,8 @@ function EventSettingsInner({event}: {event: Event}) {
           </label>
         </div>
       </section> */}
+
+      <ChangePasswordSection />
 
       <ColoredSettingsBox
         title={t('settings.export.title')}

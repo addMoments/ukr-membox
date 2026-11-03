@@ -94,6 +94,15 @@
   gap: 48px;
 }
 
+/* React footer'inda bulten bolumu yok; ustteki 128px + cizgi + 80px yalnizca bultenden ayirmak
+   icindi ve uygulama sayfalarinin sonunda bos bir serit birakiyordu (musteri 2 Kasim).
+   WordPress footer'inda bulten ilk cocuk oldugu icin orasi etkilenmez. */
+.v2-footer > .v2-footer-content:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
 @media (min-width: 992px) {
   .v2-footer-content {
     grid-template-columns: minmax(360px, 2.1fr) repeat(3, minmax(120px, 1fr));

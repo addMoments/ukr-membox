@@ -19,6 +19,8 @@ import { GuestTheme } from '../../types/guestTheme';
 import { fonts } from '../../types/fonts';
 import Mockup2 from '../../components/Mockup2';
 import ImageCropModal from '../../v2-components/ImageCropModal';
+import SettingsFieldNote from '../../v2-components/SettingsFieldNote';
+import { showToast } from '../../v2-components/V2Toast';
 import { t } from '../../packages/i18n';
 import { textOr } from '../../utils/admin_i18n';
 import { getAdvertorialConfig } from '../../client/advertorial';
@@ -36,15 +38,27 @@ const EVENT_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 
 function EventThemeInner({event}: {event: Event}) {
   const { uid: packedUid } = useParams<{ uid: string }>();
-  const initialColors: GuestTheme = { ...defaultGuestTheme, ...event.settings?.colors };
-  const [theme, setTheme] = useState<GuestTheme>(initialColors);
-
-  const [activeFont, setActiveFont] = useState(event.settings?.font || fonts[0].id);
-  const [bannerImage, setBannerImage] = useState<File | null>(null);
-  const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
+  // Son kaydedilen renk ve yazi tipi; Discard bunlara doner, Save bunlari gunceller.
+  const [saved, setSaved] = useState<{ colors: GuestTheme; font: string }>(() => ({
+    colors: { ...defaultGuestTheme, ...event.settings?.colors },
+    font: event.settings?.font || fonts[0].id,
+  }));
+  const [theme, setTheme] = useState<GuestTheme>(saved.colors);
+  const [activeFont, setActiveFont] = useState(saved.font);
+  // ThemeCustomizer form alanlarini kendi tutuyor; Discard'da anahtar degisip yeniden kurulur.
+  const [customizerKey, setCustomizerKey] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  // Etkinlik gorseli album kapagi gibi: secilip kirpilinca hemen yuklenir ve kaydedilir, yaninda
+  // "kaydedildi" yazar; Save Changes'i beklemez (musteri 2 Kasim: onizleme aninda degistigi icin
+  // kaydedilmis saniliyordu).
+  const [savedImage, setSavedImage] = useState<string | null>(event.image || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageStatus, setImageStatus] = useState('');
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState('');
+  useEffect(() => () => { if (imagePreview) URL.revokeObjectURL(imagePreview); }, [imagePreview]);
 
   // Ne: Onizlemedeki reklamlar ve albumler, misafir sayfasindakiyle ayni veriden.
   // Neden: Onizleme yalnizca ust kismi gosteriyordu; Solomiia ekranin birebir yansimasini
@@ -71,45 +85,91 @@ function EventThemeInner({event}: {event: Event}) {
     return () => { active = false; };
   }, [packedUid]);
 
+  const eventUid = unpackUUID(packedUid || "");
+
+  const flashImageStatus = (text: string) => {
+    setImageStatus(text);
+    window.setTimeout(() => setImageStatus(''), 3000);
+  };
+
+  const imageSaveFailed = () => setImageError(textOr('theme.imageSaveFailed', 'Could not save the image. Please try again.', 'Не вдалося зберегти зображення. Спробуйте ще раз.'));
+
   // Kirpilmis ya da orijinal dosya; "Maks. 10 MB" yaziyordu ama hic kontrol edilmiyordu.
-  const handleImageReady = (file: File) => {
+  const handleImageReady = async (file: File) => {
     setCropFile(null);
+    setImageStatus('');
     if (file.size > EVENT_IMAGE_MAX_BYTES) {
       setImageError(textOr('theme.fileTooLarge', 'This image is larger than 10 MB. Crop it or choose a smaller file.', 'Зображення більше за 10 МБ. Обріжте його або виберіть менший файл.'));
       return;
     }
     setImageError('');
-    setBannerImage(file);
-    setBannerImageUrl(URL.createObjectURL(file));
+    setImagePreview(URL.createObjectURL(file));
+    setImageUploading(true);
+    try {
+      const [path] = await uploadEventImage(file);
+      await pgREST(`/events?uid=eq.${eventUid}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ image: path }),
+      });
+      setSavedImage(path);
+      flashImageStatus(textOr('theme.imageSaved', 'Image saved', 'Зображення збережено'));
+    } catch (e) {
+      console.error('[theme] event image save failed', e);
+      imageSaveFailed();
+    } finally {
+      setImagePreview(null);
+      setImageUploading(false);
+    }
+  };
+
+  const handleImageRemove = async () => {
+    setImageError('');
+    setImageStatus('');
+    setImageUploading(true);
+    try {
+      await pgREST(`/events?uid=eq.${eventUid}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ image: null }),
+      });
+      setSavedImage(null);
+      flashImageStatus(textOr('theme.imageRemoved', 'Image removed', 'Зображення прибрано'));
+    } catch (e) {
+      console.error('[theme] event image remove failed', e);
+      imageSaveFailed();
+    } finally {
+      setImageUploading(false);
+    }
   };
 
   const handleSave = async () => {
     setLoading(true);
-    const eventUid = unpackUUID(packedUid || "");
-    const payload: any = {};
-    const colors = get_form_state(document.getElementById('theme-palette-form') as HTMLFormElement);
+    const colors = get_form_state(document.getElementById('theme-palette-form') as HTMLFormElement) as GuestTheme;
     const font = activeFont;
-    
-    payload.settings = {
-      ...event.settings,
-      colors,
-      font
+    try {
+      await pgREST(`/events?uid=eq.${eventUid}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ settings: { ...event.settings, colors, font } }),
+      });
+      setSaved({ colors, font });
+      setTheme(colors);
+      showToast(textOr('theme.changesSaved', 'Changes saved', 'Зміни збережено'));
+    } catch (e) {
+      console.error('[theme] save failed', e);
+      showToast(textOr('theme.saveFailed', 'Could not save the changes. Please try again.', 'Не вдалося зберегти зміни. Спробуйте ще раз.'), 'error');
+    } finally {
+      setLoading(false);
     }
-    
-    if (bannerImage) {
-      const urls = await uploadEventImage(bannerImage);
-      payload.image = urls[0];
-      setBannerImageUrl(S3_ROOT + urls[0]);
-    };
-
-    pgREST(`/events?uid=eq.${eventUid}`, {
-      method: 'PATCH',
-      body: JSON.stringify(payload)
-    }).finally(() => setLoading(false));
   };
 
+  // Kaydedilmemis renk ve yazi tipi degisikliklerini son kaydedilen hale dondurur (bos bir fonksiyondu).
   const handleDiscard = () => {
+    setTheme(saved.colors);
+    setActiveFont(saved.font);
+    setCustomizerKey((k) => k + 1);
+    showToast(textOr('theme.changesDiscarded', 'Unsaved changes discarded', 'Незбережені зміни скасовано'), 'info');
   };
+
+  const imageSrc = imagePreview || (savedImage ? S3_ROOT + savedImage : null);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
@@ -158,26 +218,44 @@ function EventThemeInner({event}: {event: Event}) {
             onCancel={() => setCropFile(null)}
             onDone={handleImageReady}
           />
-          <FileInput
-          onFile={setCropFile}
-          mimeTypes={['image/png', 'image/jpeg', 'image/webp']}
-          >
-          <div className="theme-upload-area">
-            <div className="theme-upload-icon">
-              <i className="fa-solid fa-cloud-upload-alt" />
+          <div className="theme-image-field">
+            <div className="theme-image-preview">
+              {imageSrc ? <img src={imageSrc} alt="" /> : <i className="fa-regular fa-image" />}
             </div>
-            <h3 className="theme-upload-title">{t('theme.uploadTitle')}</h3>
-            <p className="theme-upload-subtitle">{t('theme.uploadSubtitle')}</p>
-            <p className="theme-upload-specs">{textOr('theme.uploadSpecs', 'Recommended 1800×810 px (20:9). JPG, PNG or WEBP, up to 10 MB. Guests see exactly the area you crop, on phones and computers alike.', 'Рекомендовано 1800×810 px (20:9). JPG, PNG або WEBP, до 10 МБ. Гості бачать саме ту частину, яку ви обрізали, — і на телефоні, і на комп’ютері.')}</p>
-            <button className="theme-upload-btn">{t('theme.browseGallery')}</button>
+            <div className="theme-image-actions">
+              <FileInput onFile={setCropFile} mimeTypes={['image/png', 'image/jpeg', 'image/webp']} multiple={false}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  icon="fa-solid fa-upload"
+                  loading={imageUploading}
+                  text={savedImage ? textOr('theme.imageChange', 'Change image', 'Змінити зображення') : textOr('theme.imageUpload', 'Upload image', 'Завантажити зображення')}
+                />
+              </FileInput>
+              {savedImage && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  icon="fa-solid fa-xmark"
+                  text={textOr('theme.imageRemove', 'Remove image', 'Прибрати зображення')}
+                  onClick={handleImageRemove}
+                  disabled={imageUploading}
+                />
+              )}
+              {imageStatus && <span className="theme-image-status" role="status">✓ {imageStatus}</span>}
+              {imageError && <p className="theme-upload-error" role="alert">{imageError}</p>}
+              <SettingsFieldNote>
+                <p>{textOr('theme.uploadSpecs', 'Recommended 1800×810 px (20:9). JPG, PNG or WEBP, up to 10 MB. Guests see exactly the area you crop, on phones and computers alike.', 'Рекомендовано 1800×810 px (20:9). JPG, PNG або WEBP, до 10 МБ. Гості бачать саме ту частину, яку ви обрізали, — і на телефоні, і на комп’ютері.')}</p>
+                <p>{textOr('theme.imageSavedOnUpload', 'The image is saved as soon as you upload it; Save Changes is only for colours and fonts.', 'Зображення зберігається одразу після завантаження; «Зберегти зміни» — лише для кольорів і шрифтів.')}</p>
+              </SettingsFieldNote>
+            </div>
           </div>
-          </FileInput>
-          {imageError && <p className="theme-upload-error" role="alert">{imageError}</p>}
         </section>
 
         <ThemeCustomizer
-          initialColors={initialColors}
-          initialFont={activeFont}
+          key={customizerKey}
+          initialColors={saved.colors}
+          initialFont={saved.font}
           onThemeChange={setTheme}
           onFontChange={setActiveFont}
           formId="theme-palette-form"
@@ -210,7 +288,7 @@ function EventThemeInner({event}: {event: Event}) {
           mockupImage='https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/mobileMockup.png'
           >
           <HeadlessParticipant
-              bannerImageUrl={bannerImageUrl || (event.image ? S3_ROOT + event.image : null)}
+              bannerImageUrl={imageSrc}
               eventTitle={event.name || ''}
               eventType={event.event_type || 'Event'}
               eventDate={formatDate(event.settings?.event_date || event.activation_date) || t('eventHome.heroCard.dateNotSet')}

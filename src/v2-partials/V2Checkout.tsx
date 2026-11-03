@@ -100,6 +100,20 @@ function buildMetaCartSignature(cartItems: ReadonlyArray<{ product_uid: string; 
     .join('|');
 }
 
+// Ne: Iletisim telefonunu "+380991234567" bicimine getirir: bosluk, tire, parantez atilir; Ukrayna'nin yerel
+//     "099..." ve kodsuz "99..." yazimlari +380'e cevrilir, ulke kodlu numaralar oldugu gibi kalir.
+const normalizeContactPhone = (raw: string) => {
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
+  if (raw.trim().startsWith('+')) return `+${digits}`;
+  if (/^0\d{9}$/.test(digits)) return `+38${digits}`;
+  if (/^\d{9}$/.test(digits)) return `+380${digits}`;
+  return `+${digits}`;
+};
+
+// Uluslararasi numaralar 9-15 hane (E.164); backend ayni kurali uygular (product.go Purchase).
+const isContactPhoneValid = (raw: string) => /^\+\d{9,15}$/.test(normalizeContactPhone(raw));
+
 function V2Checkout() {
   const cart = useSnapshot(cartState);
   const currentLang = String(t('lang_code') || 'en');
@@ -109,6 +123,8 @@ function V2Checkout() {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [buyerConfigs, setBuyerConfigs] = useState<BuyerConfigsState>({});
   const [userEmail, setUserEmail] = useState('');
+  // Iletisim telefonu (musteri 2 Kasim, 2.11); purchase_info.phone olarak saklanir, admin siparis detayinda gorunur.
+  const [contactPhone, setContactPhone] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<PromoValidationResponse | null>(null);
   // Ne: "Baska bir sey eklemek ister misiniz?" modali (2.11).
   // Nasil: Odeme butonuna ilk basista, tum dogrulamalar gectikten sonra bir kez aciliyor;
@@ -356,6 +372,7 @@ function V2Checkout() {
   // Neden: Upsell modali (2.11) araya girdigi icin gonderim, dogrulamadan ayri cagrilabilmeli;
   //        modaldaki "odemeye devam et" ayni fonksiyonu tetikliyor.
   const placeOrder = (email: string) => {
+    const phone = normalizeContactPhone(contactPhone);
     (async () => {
       const cartStateData = await get_key("cart_state");
       if (!cartStateData) {
@@ -386,6 +403,7 @@ function V2Checkout() {
           provider_id: "liqpay",
           purchase_info: cartStateData,
           email: email,
+          phone,
           buyer_configs: serializedConfigs,
           ...(appliedPromo ? { promo_code: appliedPromo.promo_code_text_snapshot } : {}),
           ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
@@ -421,6 +439,13 @@ function V2Checkout() {
     const email = (qs('input[name="email"]') as HTMLInputElement)?.value;
     if (!email) {
       alert(t('checkout.enterEmail'));
+      return;
+    }
+
+    if (!isContactPhoneValid(contactPhone)) {
+      alert(contactPhone.trim()
+        ? textOr('checkout.phoneInvalid', 'Please enter a valid phone number, e.g. +380 99 123 45 67.', 'Введіть коректний номер телефону, наприклад +380 99 123 45 67.')
+        : textOr('checkout.enterPhone', 'Please enter your phone number.', 'Будь ласка, введіть номер телефону.'));
       return;
     }
 
@@ -600,6 +625,23 @@ function V2Checkout() {
                 {t('checkout.emailInfo')}
               </p>
 
+              <div className="checkout-email-group checkout-phone-group">
+                <label className="checkout-email-label" htmlFor="checkout-phone">{textOr('checkout.phoneLabel', 'Phone number', 'Номер телефону')}</label>
+                <div className="checkout-email-input-wrap">
+                  <input
+                    id="checkout-phone"
+                    type="tel"
+                    className="checkout-email-input"
+                    placeholder="+380 99 123 45 67"
+                    name="phone"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                  />
+                </div>
+              </div>
+
               {/* Ne: Kargo aciklamasi ve adres bloğu, siparişi tamamlama butonunun hemen ustunde.
                   Nasil: Aciklama her sepette gorunur ("fiziksel urun siparis ederseniz..." diye
                   kosullu yazilmis); adres alani yalnizca sepette fiziksel urun varsa render edilir.
@@ -673,6 +715,8 @@ function V2Checkout() {
           initial={shippingAddress}
           onConfirm={(addr) => {
             setShippingAddress(addr);
+            // Iletisim telefonu bossa kargo adresindeki numara onerilir (ikisi cogu zaman ayni).
+            if (!contactPhone.trim() && addr.phone) setContactPhone(normalizeContactPhone(addr.phone));
             setShowAddressModal(false);
             scrollToCheckoutSummaryOnMobile();
           }}

@@ -632,3 +632,60 @@
 .theme-preview-column .mockup-screen-container {
   border-radius: 34px;
 }
+
+/* Etkinlik gorseli: album kapagi duzeni (onizleme + Degistir/Kaldir + "kaydedildi"), 20:9 onizleme. */
+.theme-image-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.theme-image-preview {
+  width: 240px;
+  aspect-ratio: 20 / 9;
+  border-radius: 16px;
+  background: #F5F5F4;
+  border: 1px solid #E7E5E4;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #D6D3D1;
+  font-size: 32px;
+}
+
+.theme-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.theme-image-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.theme-image-actions .file-input-wrapper {
+  display: inline-block;
+}
+
+.theme-image-actions .theme-upload-error {
+  margin: 0;
+}
+
+.theme-image-status {
+  color: #16A34A;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .theme-image-preview {
+    width: 100%;
+  }
+}

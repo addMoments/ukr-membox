@@ -251,3 +251,35 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Cop kutusu: kalici silme suresi notu, "Delete all" ve "Delete selected" (musteri 2 Kasim, 2.26). */
+.trash-retention-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #57534E;
+}
+
+.trash-retention-note i {
+  color: #A8A29E;
+}
+
+.gallery-sort-btn.trash-empty-btn {
+  color: #DC2626;
+  background: #FEF2F2;
+}
+
+.gallery-sort-btn.trash-empty-btn:hover:not(:disabled) {
+  background: #FEE2E2;
+}
+
+.gallery-sort-btn.trash-empty-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.gallery-select-move-btn.trash-delete-selected-btn {
+  background: #DC2626;
+}

@@ -979,7 +979,10 @@
   filter: none;
 }
 
-/* Footer spacing for checkout bar */
-.event-new-footer-spacing {
-  height: 140px;
+/* Sabit odeme cubugu (alttan 40px, ~70-85px boy) sayfanin sonunda footer'in alt satirini
+   ortmesin diye bosluk footer'in altina verilir. Onceden footer'dan once 140px beyaz bir blok
+   vardi; footer'in bos ust seridiyle birlikte sayfa sonunda bos alan olarak goruluyordu
+   (musteri 2 Kasim). */
+.event-new-page ~ .v2-footer {
+  padding-bottom: 150px;
 }

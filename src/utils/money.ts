@@ -4,8 +4,11 @@
 //        iki hane kalir.
 // Not: API price'i string donduruyor ("790.00"); .toFixed()'i dogrudan cagirmak sayfayi
 //      bembeyaz birakir, bu yuzden deger once Number()'dan gecer.
-export const formatUah = (value: number | string | null | undefined): string => {
+export const formatUahAmount = (value: number | string | null | undefined): string => {
   const amount = Number(value || 0);
   const cents = Math.round((Number.isFinite(amount) ? amount : 0) * 100);
-  return `₴${cents % 100 === 0 ? cents / 100 : (cents / 100).toFixed(2)}`;
+  return `${cents % 100 === 0 ? cents / 100 : (cents / 100).toFixed(2)}`;
 };
+
+// Para birimi isaretli hali; yaninda "UAH" yazan yerlerde (paket karti) formatUahAmount kullanilir.
+export const formatUah = (value: number | string | null | undefined): string => `₴${formatUahAmount(value)}`;

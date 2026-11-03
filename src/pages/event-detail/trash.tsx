@@ -13,10 +13,23 @@ import { S3_ROOT, SERV_ROOT } from '../../consts';
 import { t } from '../../packages/i18n';
 import { textOr } from '../../utils/admin_i18n';
 import { getAuthToken } from '../../client/core';
+import { deleteTrashedUploads } from '../../client/uploads';
 import '../../v2-styles/Gallery.css';
 
 // Cop kartlarinda album adi (silinmis albumdekiler "Deleted album" etiketiyle).
 type TrashUpload = UploadType & { albums?: { name?: string; deleted_at?: string | null } | null };
+
+// Copteki foto ve videolar bu sureden sonra kalici silinir (backend event_cleanup.TrashTTL, saatlik tarama).
+const TRASH_DAYS = 14;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Kalici silinmeye kac gun kaldigi (en az 1; tarama saatlik oldugu icin son gun "1 day left" okunur).
+const daysLeft = (trashedAt: string | null | undefined) => {
+  if (!trashedAt) return TRASH_DAYS;
+  const normalized = trashedAt.endsWith('Z') || trashedAt.includes('+') ? trashedAt : trashedAt + 'Z';
+  const left = new Date(normalized).getTime() + TRASH_DAYS * DAY_MS - Date.now();
+  return Math.max(1, Math.ceil(left / DAY_MS));
+};
 
 function EventTrash() {
   const { uid: packedUid } = useParams<{ uid: string }>();
@@ -24,6 +37,10 @@ function EventTrash() {
   const [participants, setParticipants] = useState<ParticipantInfo[]>([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [toast, setToast] = useState<string | null>(null);
+  // Coklu secim ve "copu bosalt" (musteri 2 Kasim, 2.26).
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -120,6 +137,47 @@ function EventTrash() {
     }
   };
 
+  const toggleSelected = (uploadUid: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(uploadUid)) next.delete(uploadUid);
+      else next.add(uploadUid);
+      return next;
+    });
+  };
+
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelected(new Set());
+  };
+
+  // Ne: Secilenleri ya da tum copu (yalnizca foto/video) tek istekle kalici siler.
+  // Not: "Tumu" sunucuda bu etkinligin tum copunu siler; ekrandaki tur filtresinden bagimsiz.
+  const handleBulkDelete = async (target: 'all' | 'selected') => {
+    const uids = target === 'all' ? [] : Array.from(selected);
+    const count = target === 'all' ? uploads.length : uids.length;
+    if (count === 0 || bulkDeleting) return;
+    const confirmed = window.confirm(target === 'all'
+      ? textOr('trash.emptyConfirm', 'Permanently delete all {{count}} photos and videos in the trash? This cannot be undone.', 'Назавжди видалити всі фото та відео в кошику ({{count}})? Цю дію не можна скасувати.', { count })
+      : textOr('trash.deleteSelectedConfirm', 'Permanently delete {{count}} selected items? This cannot be undone.', 'Назавжди видалити вибрані елементи ({{count}})? Цю дію не можна скасувати.', { count }));
+    if (!confirmed) return;
+
+    setBulkDeleting(true);
+    try {
+      const deleted = await deleteTrashedUploads(unpackUUID(packedUid || ''), target === 'all' ? 'all' : uids);
+      setUploads(prev => (target === 'all' ? [] : prev.filter(u => !selected.has(u.uid))));
+      exitSelectMode();
+      showToast(textOr('trash.bulkDeleted', '{{count}} items permanently deleted', 'Назавжди видалено елементів: {{count}}', { count: deleted }));
+    } catch (error) {
+      console.error('Bulk delete failed:', error);
+      showToast(t('trash.deleteError'));
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const allShownSelected = filteredUploads.length > 0 && filteredUploads.every(u => selected.has(u.uid));
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString(t('lang_code'), { day: 'numeric', month: 'short', year: 'numeric' });
@@ -161,11 +219,63 @@ function EventTrash() {
             title={t('trash.title')}
           />
 
+          <p className="trash-retention-note">
+            <i className="fa-regular fa-clock" />
+            {textOr('trash.retentionNote', 'Photos and videos stay in the trash for {{days}} days, then they are deleted permanently.', 'Фото та відео зберігаються в кошику {{days}} днів, а потім видаляються назавжди.', { days: TRASH_DAYS })}
+          </p>
+
           <GalleryFilterBar
             activeTab={activeFilter}
             onTabChange={setActiveFilter}
             renderSearch={false}
+            extraControls={uploads.length > 0 ? (
+              <div className="gallery-extra-controls">
+                <button
+                  type="button"
+                  className={`gallery-sort-btn${selectMode ? ' active' : ''}`}
+                  onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
+                >
+                  <i className={`fa-solid ${selectMode ? 'fa-xmark' : 'fa-check-double'}`} />
+                  <span>{selectMode ? textOr('gallery.cancelSelect', 'Cancel', 'Скасувати') : textOr('gallery.select', 'Select', 'Вибрати')}</span>
+                </button>
+                <button
+                  type="button"
+                  className="gallery-sort-btn trash-empty-btn"
+                  onClick={() => handleBulkDelete('all')}
+                  disabled={bulkDeleting}
+                >
+                  <i className={`fa-solid ${bulkDeleting && !selectMode ? 'fa-spinner fa-spin' : 'fa-trash'}`} />
+                  <span>{textOr('trash.emptyTrash', 'Delete all', 'Видалити все')}</span>
+                </button>
+              </div>
+            ) : undefined}
           />
+
+          {selectMode && (
+            <div className="gallery-select-bar">
+              <span className="gallery-select-count">
+                {textOr('gallery.selectedCount', '{{count}} selected', 'Вибрано: {{count}}', { count: selected.size })}
+              </span>
+              <button
+                type="button"
+                className="gallery-select-link"
+                onClick={() => setSelected(allShownSelected ? new Set() : new Set(filteredUploads.map(u => u.uid)))}
+              >
+                {allShownSelected ? textOr('common.deselectAll', 'Deselect all', 'Зняти вибір') : textOr('trash.selectAll', 'Select all', 'Вибрати всі')}
+              </button>
+              <div className="gallery-select-move">
+                <button
+                  type="button"
+                  className="gallery-select-move-btn trash-delete-selected-btn"
+                  disabled={selected.size === 0 || bulkDeleting}
+                  onClick={() => handleBulkDelete('selected')}
+                >
+                  <i className={`fa-solid ${bulkDeleting ? 'fa-spinner fa-spin' : 'fa-trash'}`} />
+                  {textOr('trash.deleteSelected', 'Delete selected', 'Видалити вибрані')}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Trash Grid */}
           {filteredUploads.length > 0 ? (
@@ -174,6 +284,15 @@ function EventTrash() {
                 {filteredUploads.map((upload) => {
                   const participant = participantMap.get(upload.client_uid);
                   const name = participant?.name || t('common.unknown');
+                  const albumLabel = upload.albums
+                    ? (upload.albums.deleted_at
+                      ? textOr('trash.deletedAlbum', 'Deleted album', 'Видалений альбом')
+                      : upload.albums.name)
+                    : '';
+                  const left = daysLeft(upload.trashed_at);
+                  const leftLabel = left === 1
+                    ? textOr('trash.oneDayLeft', '1 day left', 'Залишився 1 день')
+                    : textOr('trash.daysLeft', '{{count}} days left', 'Залишилось днів: {{count}}', { count: left });
 
                   return (
                     <MediaCard
@@ -181,11 +300,10 @@ function EventTrash() {
                       key={upload.uid}
                       uploaderName={name}
                       uploadEntry={upload}
-                      badge={upload.albums
-                        ? (upload.albums.deleted_at
-                          ? textOr('trash.deletedAlbum', 'Deleted album', 'Видалений альбом')
-                          : upload.albums.name)
-                        : undefined}
+                      badge={[albumLabel, leftLabel].filter(Boolean).join(' · ')}
+                      selectable={selectMode}
+                      selected={selected.has(upload.uid)}
+                      onSelectToggle={() => toggleSelected(upload.uid)}
                       actions={[
                         { variant: 'icontext', text: '', icon: 'fa-solid fa-magnifying-glass', onClick: () => openPhotoViewer(upload.uid) },
                         { variant: 'icontext', text: '', icon: 'fa-solid fa-rotate-left', onClick: () => handleRestore(upload.uid) },
@@ -194,14 +312,6 @@ function EventTrash() {
                     />
                   );
                 })}
-              </div>
-
-              {/* Load More */}
-              <div className="gallery-load-more">
-                <button className="gallery-load-more-btn">
-                  <i className="fa-solid fa-refresh" />
-                  {t('trash.loadMore')}
-                </button>
               </div>
             </>
           ) : (

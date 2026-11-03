@@ -7,6 +7,24 @@ type PresignResponse = Record<string, {
     filePath: string;
 }>;
 
+// Ne: Yuklemeyi (foto, video, ses kaydi ya da yazili mesaj) veritabanindan ve S3'ten kalici siler.
+// Not: Backend yalnizca etkinligin yoneticisine izin verir (DELETE /api/auth/upload/{uid}).
+export const deleteUploadPermanently = async (uploadUid: string) => {
+    await fetch(`${SERV_ROOT}/api/auth/upload/${packUUID(uploadUid)}`, { method: 'DELETE' });
+};
+
+// Ne: Cop kutusundaki foto ve videolari kalici siler: 'all' tum copu bosaltir, liste yalnizca secilenleri.
+// Nasil: Tek istek; backend yalnizca bu etkinligin copteki foto/videolarini siler ve kac tane sildigini doner.
+export const deleteTrashedUploads = async (eventUid: string, uploadUids: string[] | 'all'): Promise<number> => {
+    const res = await fetch(`${SERV_ROOT}/api/auth/event/${packUUID(eventUid)}/trash/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(uploadUids === 'all' ? { all: true } : { upload_uids: uploadUids }),
+    });
+    const data = await res.json().catch(() => null);
+    return Number(data?.deleted || 0);
+};
+
 export const uploadEventImage = async (
     file: File,
 ) => {

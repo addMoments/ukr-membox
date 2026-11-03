@@ -1,15 +1,15 @@
 import { fonts } from '../types/fonts';
 
-// Ne: Karsilama metninin (events.welcome_message) misafir ana sayfasindaki satir siniri.
-// Neden: Musteri 16 Ekim'de hostun en fazla 3 tam satir kullanabilmesini istedi; ana sayfada
-//        baslik, metin, butonlar, 4 reklam ve albumlerin basi tek ekrana sigmali.
+// Ne: Karsilama metninin (events.welcome_message) misafir ana sayfasinda kac satir tuttugu.
+// Neden: Misafir ana sayfasi metnin ilk 3 satirini gosterir, fazlasi "Більше" ile acilir
+//        (V2GuestHome GuestWelcomeText). Ayarlardaki sayac hostun bunu onceden gormesi icin.
+//        16 Ekim'de metin 3 satirla sinirlanmisti; musteri 2 Kasim'da siniri kaldirtti.
 // Nasil: Metin, misafir sayfasindaki ayni yazi tipi, boyut ve genislikte gizli bir kutuda
 //        olculur. Genislik en dar yaygin telefona (360 px) gore: sayfa 14 px, metin 17 px
-//        iceriden basliyor (GuestHome.css .guest-home-main / .guest-home-welcome-wrap). Boylece
-//        sinira uyan metin 360 px ve uzeri her telefonda 3 satiri gecmez.
+//        iceriden basliyor (GuestHome.css .guest-home-main / .guest-home-welcome-wrap).
 export const WELCOME_MAX_LINES = 3;
-// Olcum her nasilsa calismazsa da metin sinirsiz buyumesin diye sert ust sinir.
-export const WELCOME_MAX_CHARS = 160;
+// Metin sinirsiz buyumesin diye sert ust sinir (textarea maxLength).
+export const WELCOME_MAX_CHARS = 1000;
 
 const MEASURE_WIDTH = 360 - 2 * 14 - 2 * 17;
 const LINE_HEIGHT = 22;
@@ -63,22 +63,4 @@ export function countWelcomeLines(text: string, fontId?: string): number {
   el.style.fontFamily = fontFor(fontId).fontFamily;
   el.textContent = text;
   return Math.max(1, Math.round(el.scrollHeight / LINE_HEIGHT));
-}
-
-export function welcomeFits(text: string, fontId?: string): boolean {
-  return text.length <= WELCOME_MAX_CHARS && countWelcomeLines(text, fontId) <= WELCOME_MAX_LINES;
-}
-
-// Sona yapistirilan uzun metni sinira sigan en uzun basa keser.
-export function fitWelcomeMessage(text: string, fontId?: string): string {
-  const capped = text.slice(0, WELCOME_MAX_CHARS);
-  if (welcomeFits(capped, fontId)) return capped;
-  let lo = 0;
-  let hi = capped.length;
-  while (lo < hi) {
-    const mid = Math.ceil((lo + hi) / 2);
-    if (welcomeFits(capped.slice(0, mid), fontId)) lo = mid;
-    else hi = mid - 1;
-  }
-  return capped.slice(0, lo);
 }

@@ -443,10 +443,12 @@ function EventAlbumEditInner({ event }: { event: Event }) {
         </section>
 
         <div className={`album-form-footer${dirty ? ' is-dirty' : ''}`}>
+          {/* Yeni albumde de "Save album": formun sonunda "+ Create album" yeni bir album daha
+              acacakmis gibi okunuyordu (musteri 2 Kasim, madde 3). */}
           <Button
             type="submit"
-            icon={isNew ? 'fa-solid fa-plus' : 'fa-solid fa-check'}
-            text={isNew ? textOr('albums.form.create', 'Create album', 'Створити альбом') : textOr('albums.form.save', 'Save album', 'Зберегти альбом')}
+            icon="fa-solid fa-check"
+            text={textOr('albums.form.save', 'Save album', 'Зберегти альбом')}
             loading={saving || coverUploading}
           />
           <Button

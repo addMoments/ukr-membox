@@ -77,6 +77,8 @@ interface OrderDetail {
   created_at: string;
   buyer_email: string;
   buyer_name: string;
+  // Checkout'taki iletisim telefonu (2 Kasim 2026'dan beri); eski siparislerde bos.
+  buyer_phone?: string;
   provider: string;
   shipping_address?: ShippingAddress;
   payment_summary?: PaymentSummary;
@@ -752,6 +754,12 @@ function AdminOrderDetail() {
                 <span className="admin-order-meta-label">{at('admin.orderDetail.buyerEmail', 'Buyer Email', 'Email покупця')}</span>
                 <span className="admin-order-meta-value">{order.buyer_email || '—'}</span>
               </div>
+              {order.buyer_phone && (
+                <div className="admin-order-meta-item">
+                  <span className="admin-order-meta-label">{at('admin.orderDetail.buyerPhone', 'Buyer Phone', 'Телефон покупця')}</span>
+                  <a className="admin-order-meta-value" href={`tel:${order.buyer_phone}`}>{order.buyer_phone}</a>
+                </div>
+              )}
               {order.buyer_name && (
                 <div className="admin-order-meta-item">
                   <span className="admin-order-meta-label">{at('admin.common.name', 'Name', 'Ім\'я')}</span>

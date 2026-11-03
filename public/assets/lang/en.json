@@ -178,11 +178,7 @@
             "dateRejected": "Date could not be saved. It may conflict with event constraints.",
             "dateLockedAfterStart": "Your package has been activated, so the activation date can no longer be changed.",
             "welcomeMessageLabel": "Welcome Message",
-            "welcomeMessagePlaceholder": "Welcome to our digital album! We're so excited to celebrate with you.",
-            "welcomeLines": "Lines: {{lines}} / {{max}}",
-            "welcomeLimitHelp": "Guests see this message on the event page in up to {{max}} lines (about 120 characters), so the title, buttons, promotions and albums fit on one screen.",
-            "welcomeTooLong": "This message is longer than {{max}} lines: guests see the first {{max}} lines and a “Show more” link. Shorten it to fit.",
-            "welcomeRejected": "The welcome message can take at most {{max}} lines on the guest page."
+            "welcomeMessagePlaceholder": "Welcome to our digital album! We're so excited to celebrate with you."
         },
         "privacy": {
             "title": "Privacy & Access",
@@ -292,7 +288,7 @@
         "breadcrumb": "Trash",
         "loadMore": "Load More",
         "emptyTitle": "Trash is empty",
-        "emptyText": "Items you delete will appear here for 30 days before being permanently removed.",
+        "emptyText": "Photos and videos you delete appear here for 14 days, then they are deleted permanently.",
         "deleteConfirm": "Are you sure you want to permanently delete this item?",
         "deleteSuccess": "Item permanently deleted",
         "deleteError": "Failed to delete item",
