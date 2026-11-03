@@ -74,9 +74,11 @@
   aspect-ratio: 2 / 1;
 }
 
-/* Gorsel varken kesikli cerceve yok; misafirdeki hafif golge. */
+/* Gorsel varken kesikli cerceve ve zemin yok; misafirdeki hafif golge. Zemin Safari'de gorselin
+   kenarindan sizip ince acik cizgi birakiyordu (GuestHome.css .guest-advertorial-cell). */
 .advertorial-cell-preview.has-image {
   border: 0;
+  background: transparent;
   box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
