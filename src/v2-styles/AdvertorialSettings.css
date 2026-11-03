@@ -74,12 +74,26 @@
   aspect-ratio: 2 / 1;
 }
 
-/* Gorsel varken kesikli cerceve ve zemin yok; misafirdeki hafif golge. Zemin Safari'de gorselin
-   kenarindan sizip ince acik cizgi birakiyordu (GuestHome.css .guest-advertorial-cell). */
+/* Gorsel varken kesikli cerceve ve zemin yok; misafirdeki hafif golge ve kirpma. Safari'de
+   overflow kirpmasi kenarda ince acik cizgi birakiyordu; neden ve golge katmani icin
+   GuestHome.css .guest-advertorial-cell. */
 .advertorial-cell-preview.has-image {
   border: 0;
   background: transparent;
-  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.06);
+  overflow: visible;
+}
+
+.advertorial-cell-preview.has-image::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 11px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18), 0 1px 2px 1px rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+}
+
+.advertorial-cell-preview.has-image .advertorial-image {
+  clip-path: inset(0 round 12px);
 }
 
 .advertorial-cell-placeholder {
