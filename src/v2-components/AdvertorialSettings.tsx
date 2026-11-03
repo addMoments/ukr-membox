@@ -106,24 +106,24 @@ const ADVERTORIAL_TEXT: Record<string, { en: string; uk: string }> = {
     uk: 'Коли рекламний блок приховано, зображення не потрібне.',
   },
   'settings.advertorial.imageGuidance.single': {
-    en: 'Upload 1 landscape image in 2:1 ratio, for example 1600x800 px. Other shapes are shown whole, with soft edges.',
-    uk: 'Завантажте 1 горизонтальне зображення у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми показується повністю, з м’якими краями.',
+    en: 'Upload 1 landscape image in 2:1 ratio, for example 1600x800 px. Other shapes are cropped to fill the space, as in the preview below.',
+    uk: 'Завантажте 1 горизонтальне зображення у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми обрізається, щоб заповнити місце, як у попередньому перегляді нижче.',
   },
   'settings.advertorial.imageGuidance.1x1': {
-    en: 'Upload 1 landscape image in 2:1 ratio, for example 1600x800 px. Other shapes are shown whole, with soft edges.',
-    uk: 'Завантажте 1 горизонтальне зображення у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми показується повністю, з м’якими краями.',
+    en: 'Upload 1 landscape image in 2:1 ratio, for example 1600x800 px. Other shapes are cropped to fill the space, as in the preview below.',
+    uk: 'Завантажте 1 горизонтальне зображення у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми обрізається, щоб заповнити місце, як у попередньому перегляді нижче.',
   },
   'settings.advertorial.imageGuidance.2x1': {
-    en: 'Upload 2 landscape images side by side. Each image should be 2:1, for example 1600x800 px. Other shapes are shown whole, with soft edges.',
-    uk: 'Завантажте 2 горизонтальні зображення поруч. Кожне має бути у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми показується повністю, з м’якими краями.',
+    en: 'Upload 2 landscape images side by side. Each image should be 2:1, for example 1600x800 px. Other shapes are cropped to fill the space, as in the preview below.',
+    uk: 'Завантажте 2 горизонтальні зображення поруч. Кожне має бути у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми обрізається, щоб заповнити місце, як у попередньому перегляді нижче.',
   },
   'settings.advertorial.imageGuidance.1x2': {
-    en: 'Upload 2 landscape images stacked vertically. Each image should be 2:1, for example 1600x800 px. Other shapes are shown whole, with soft edges.',
-    uk: 'Завантажте 2 горизонтальні зображення одне під одним. Кожне має бути у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми показується повністю, з м’якими краями.',
+    en: 'Upload 2 landscape images stacked vertically. Each image should be 2:1, for example 1600x800 px. Other shapes are cropped to fill the space, as in the preview below.',
+    uk: 'Завантажте 2 горизонтальні зображення одне під одним. Кожне має бути у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми обрізається, щоб заповнити місце, як у попередньому перегляді нижче.',
   },
   'settings.advertorial.imageGuidance.2x2': {
-    en: 'Upload 4 landscape images in a 2x2 grid. Each image should be 2:1, for example 1600x800 px. Other shapes are shown whole, with soft edges.',
-    uk: 'Завантажте 4 горизонтальні зображення у сітці 2x2. Кожне має бути у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми показується повністю, з м’якими краями.',
+    en: 'Upload 4 landscape images in a 2x2 grid. Each image should be 2:1, for example 1600x800 px. Other shapes are cropped to fill the space, as in the preview below.',
+    uk: 'Завантажте 4 горизонтальні зображення у сітці 2x2. Кожне має бути у співвідношенні 2:1, наприклад 1600x800 px. Зображення іншої форми обрізається, щоб заповнити місце, як у попередньому перегляді нижче.',
   },
   'settings.advertorial.uploadingImage': {
     en: 'Uploading image {{index}}...',
