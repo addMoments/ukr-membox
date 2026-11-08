@@ -442,9 +442,11 @@ function V2Checkout() {
       return;
     }
 
-    // Telefon istege bagli (kullanici 3 Kasim); yazildiysa gecerli olmali.
-    if (contactPhone.trim() && !isContactPhoneValid(contactPhone)) {
-      alert(textOr('checkout.phoneInvalid', 'Please enter a valid phone number, e.g. +380 99 123 45 67.', 'Введіть коректний номер телефону, наприклад +380 99 123 45 67.'));
+    // Telefon zorunlu (Fatih 7 Kasim, 2.11 "can be mandatory"; 3 Kasim'da istege bagli yapilmisti).
+    if (!isContactPhoneValid(contactPhone)) {
+      alert(contactPhone.trim()
+        ? textOr('checkout.phoneInvalid', 'Please enter a valid phone number, e.g. +380 99 123 45 67.', 'Введіть коректний номер телефону, наприклад +380 99 123 45 67.')
+        : textOr('checkout.enterPhone', 'Please enter your phone number.', 'Будь ласка, введіть номер телефону.'));
       return;
     }
 
@@ -625,7 +627,7 @@ function V2Checkout() {
               </p>
 
               <div className="checkout-email-group checkout-phone-group">
-                <label className="checkout-email-label" htmlFor="checkout-phone">{textOr('checkout.phoneLabelOptional', 'Phone number (optional)', 'Номер телефону (необов’язково)')}</label>
+                <label className="checkout-email-label" htmlFor="checkout-phone">{textOr('checkout.phoneLabel', 'Phone number', 'Номер телефону')}</label>
                 <div className="checkout-email-input-wrap">
                   <input
                     id="checkout-phone"
