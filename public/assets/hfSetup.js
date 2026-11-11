@@ -1,4 +1,14 @@
 (()=>{
+  // Header ikonlarinin kok adresi: React sayfasinda bu dosya %PUBLIC_URL%/assets/hfSetup.js'ten
+  // yuklendigi icin kendi adresinden cikarilir (medya depolamasi tasininca kendiliginden izler);
+  // WordPress footer'inda satir ici oldugu icin src yok, varsayilan kullanilir
+  // (make-wordpress-components.js onu PUBLIC_URL ile degistirir).
+  const HF_DEFAULT_ASSET_ROOT = "https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/";
+  const HF_ASSET_ROOT = (()=>{
+    const src = document.currentScript && document.currentScript.src;
+    const m = src && src.match(/^(.*\/assets\/)hfSetup\.js(?:[?#].*)?$/);
+    return m ? m[1] : HF_DEFAULT_ASSET_ROOT;
+  })();
   const LANG_DROPDOWN_KEY = '__amLangDropdown';
   const LANG_SWAP_KEY = '__amLangSwap';
 
@@ -285,7 +295,7 @@
       setMobileGuestMenuMode();
     }
     
-    const headerAssetRoot = "https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/header/";
+    const headerAssetRoot = HF_ASSET_ROOT + 'header/';
     const root = document.querySelector("nav.v2-header");
     const qs = (query)=>(root.querySelector(query));
     const addEvent = (query, event, listener)=>(qs(query).addEventListener(event, listener));

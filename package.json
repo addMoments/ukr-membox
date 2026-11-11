@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "PUBLIC_URL=https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui react-scripts build && node postbuild.js",
+    "build": "PUBLIC_URL=${PUBLIC_URL:-https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui} react-scripts build && node postbuild.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "deploy": "./deploy/deploy.sh"

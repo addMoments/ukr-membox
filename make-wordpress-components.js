@@ -27,7 +27,11 @@ const headerStyle = fs.readFileSync(path.join(publicDir, 'assets/header/style.cs
 const footerStyle = fs.readFileSync(path.join(publicDir, 'assets/footer/style.css'), 'utf8');
 
 // Read merged script
-const hfScript = fs.readFileSync(path.join(publicDir, 'assets/hfSetup.js'), 'utf8');
+// Medya/arayuz kok adresi; R2'ye tasininca PUBLIC_URL ile verilir (package.json build ile ayni).
+const publicUrl = process.env.PUBLIC_URL || "https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui";
+// hfSetup.js WordPress footer'inda satir ici calisir, kendi adresini bilemez; varsayilan kokunu degistir.
+const hfScript = fs.readFileSync(path.join(publicDir, 'assets/hfSetup.js'), 'utf8')
+  .replace('"https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/"', JSON.stringify(publicUrl + '/assets/'));
 
 // Create header.html
 const headerOutput = `${headerHtml}
@@ -48,7 +52,6 @@ ${footerStyle}
 </style>`;
 
 // Write files
-const publicUrl = "https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui";
 fs.writeFileSync(path.join(outputDir, 'header.html'), headerOutput.replaceAll("%PUBLIC_URL%", publicUrl));
 fs.writeFileSync(path.join(outputDir, 'footer.html'), footerOutput.replaceAll("%PUBLIC_URL%", publicUrl));
 

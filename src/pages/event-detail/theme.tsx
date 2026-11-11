@@ -285,7 +285,7 @@ function EventThemeInner({event}: {event: Event}) {
             leftPercent: 5,
             topPercent: 2,
           }}
-          mockupImage='https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/mobileMockup.png'
+          mockupImage={`${process.env.PUBLIC_URL}/assets/mobileMockup.png`}
           >
           <HeadlessParticipant
               bannerImageUrl={imageSrc}
