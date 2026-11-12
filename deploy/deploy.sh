@@ -28,10 +28,11 @@ if [ -n "${S3_ENDPOINT_URL:-}" ]; then
   export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
   export RCLONE_CONFIG_R2_ENDPOINT="$S3_ENDPOINT_URL"
   export RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
-  # Ayni cache politikasi; silme yok (eski asset'ler geri donus yolu).
-  rclone copy "$BUILD_DIR/static" "r2:$AWS_BUCKET/ui/static" \
+  # Ayni cache politikasi; silme yok (eski asset'ler geri donus yolu). --checksum: icerigi ayni dosyaya
+  # dokunmaz (yalniz mtime farki icin nesneyi yeniden yazip basliklarini degistirmesin).
+  rclone copy --checksum "$BUILD_DIR/static" "r2:$AWS_BUCKET/ui/static" \
     --header-upload "Cache-Control: public, max-age=31536000, immutable"
-  rclone copy "$BUILD_DIR" "r2:$AWS_BUCKET/ui" --exclude "static/**" \
+  rclone copy --checksum "$BUILD_DIR" "r2:$AWS_BUCKET/ui" --exclude "static/**" \
     --header-upload "Cache-Control: no-cache"
 else
   # Hash'li dosyalar (static/**): icerigi degisince adi da degisir, sonsuza kadar cache'lenebilir.
