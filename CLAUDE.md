@@ -13,7 +13,7 @@ Unlike standard React applications, this project manages its header and footer *
 
 ## Development & Deployment
 - **Build**: Run `npm run build`. Note that a postbuild script (`postbuild.js`) executes automatically.
-- **Deploy**: Run `npm run deploy`. This triggers `deploy/deploy.sh` which uploads assets to AWS S3 and the `index.html` file to the FTP server.
+- **Deploy**: Run `npm run deploy`. This triggers `deploy/deploy.sh` which uploads assets to Cloudflare R2 (bucket `addmoments-media`, served at `https://media.addmoments.com.ua/ui`, via rclone because `deploy/.env` sets `S3_ENDPOINT_URL`) and the `index.html` file to the FTP server. Media and UI moved from AWS S3 to R2 on 12 November 2026; the build defaults (`package.json` `PUBLIC_URL`, `S3_ROOT` in `src/consts.ts`) point at the R2 address.
 
 ## API & Backend Rules
 - Whenever creating a new API, you **MUST** also add its documentation in `openapi.yaml` and update the `postman_collection.json` in the root of the project.

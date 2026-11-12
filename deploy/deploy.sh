@@ -10,12 +10,11 @@ BUILD_DIR="$SCRIPT_DIR/../build"
 
 find $BUILD_DIR -name ".DS_Store" -delete
 
-# Cloudflare R2 gibi S3 uyumlu bir depoya yuklemek icin .env'de S3_ENDPOINT_URL verilir (ornek
-# https://<account_id>.eu.r2.cloudflarestorage.com; AWS_* anahtarlari o zaman R2 anahtarlaridir) ve
-# build PUBLIC_URL ile alinir (package.json build betigi PUBLIC_URL'i ortamdan okur, yoksa bugunku
-# S3 adresi). R2'ye yazmak rclone ile yapilir: AWS CLI 2.23'un "aws s3 cp/sync"i R2'de ara ara
+# 12 Kasim 2026'dan beri canli depo Cloudflare R2 (addmoments-media): .env'de S3_ENDPOINT_URL verilir (ornek
+# https://<account_id>.eu.r2.cloudflarestorage.com; AWS_* anahtarlari o zaman R2 anahtarlaridir). Build'in
+# varsayilan PUBLIC_URL'i https://media.addmoments.com.ua/ui (package.json); ortamdan ezilebilir. R2'ye yazmak rclone ile yapilir: AWS CLI 2.23'un "aws s3 cp/sync"i R2'de ara ara
 # SignatureDoesNotMatch veriyor (aws-chunked + CRC64NVME trailer gonderiyor, when_required ayari da
-# yetmiyor; 11 Kasim test bucket'inda goruldu). S3_ENDPOINT_URL yoksa asagidaki S3 yolu bugunkuyle ayni.
+# yetmiyor; 11 Kasim test bucket'inda goruldu). S3_ENDPOINT_URL yoksa asagidaki eski S3 yolu calisir (yalniz geri donus icin).
 if [ -n "${S3_ENDPOINT_URL:-}" ]; then
   if ! command -v rclone >/dev/null 2>&1; then
     echo "S3_ENDPOINT_URL verilmis ama rclone yok: brew install rclone" >&2

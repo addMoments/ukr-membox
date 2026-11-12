@@ -3,7 +3,7 @@
   // yuklendigi icin kendi adresinden cikarilir (medya depolamasi tasininca kendiliginden izler);
   // WordPress footer'inda satir ici oldugu icin src yok, varsayilan kullanilir
   // (make-wordpress-components.js onu PUBLIC_URL ile degistirir).
-  const HF_DEFAULT_ASSET_ROOT = "https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/";
+  const HF_DEFAULT_ASSET_ROOT = "https://media.addmoments.com.ua/ui/assets/";
   const HF_ASSET_ROOT = (()=>{
     const src = document.currentScript && document.currentScript.src;
     const m = src && src.match(/^(.*\/assets\/)hfSetup\.js(?:[?#].*)?$/);

@@ -27,11 +27,11 @@ const headerStyle = fs.readFileSync(path.join(publicDir, 'assets/header/style.cs
 const footerStyle = fs.readFileSync(path.join(publicDir, 'assets/footer/style.css'), 'utf8');
 
 // Read merged script
-// Medya/arayuz kok adresi; R2'ye tasininca PUBLIC_URL ile verilir (package.json build ile ayni).
-const publicUrl = process.env.PUBLIC_URL || "https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui";
+// Medya/arayuz kok adresi (12 Kasim 2026'dan beri Cloudflare R2); package.json build ile ayni varsayilan.
+const publicUrl = process.env.PUBLIC_URL || "https://media.addmoments.com.ua/ui";
 // hfSetup.js WordPress footer'inda satir ici calisir, kendi adresini bilemez; varsayilan kokunu degistir.
 const hfScript = fs.readFileSync(path.join(publicDir, 'assets/hfSetup.js'), 'utf8')
-  .replace('"https://memboxpub-qo1gff2e.s3.eu-north-1.amazonaws.com/ui/assets/"', JSON.stringify(publicUrl + '/assets/'));
+  .replace('"https://media.addmoments.com.ua/ui/assets/"', JSON.stringify(publicUrl + '/assets/'));
 
 // Create header.html
 const headerOutput = `${headerHtml}
