@@ -424,7 +424,15 @@ function V2Checkout() {
           document.body.appendChild(form);
           form.submit();
         } else if (data.url) {
+          // 0 ₴ siparis (free paket / %100 promo): odeme yok, dogrudan "Payment Successful" ekrani.
           window.location.href = data.url;
+        } else if (data.code === 'FREE_PACKAGE_ALREADY_USED') {
+          alert(textOr('checkout.freePackageUsed',
+            'The free package can be used once per email. Please choose another package.',
+            'Безкоштовний пакет можна отримати лише один раз на email. Будь ласка, оберіть інший пакет.'));
+        } else if (data.message) {
+          // Ne: Backend'in {code, message} hatalari (orn. INVALID_EMAIL) eskiden sessizce kayboluyordu.
+          alert(data.message);
         }
       }).catch(err => {
         alert(err.message);
