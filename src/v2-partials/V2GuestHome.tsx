@@ -21,6 +21,8 @@ import { packUUID as packedAlbumUid } from '../packages/uuid';
 import GuestUploadModal, { GuestUploadModalHandle } from './GuestUploadModal';
 import AdvertorialImage from '../v2-components/AdvertorialImage';
 import { ArrowRightIcon, CalendarIcon, CameraIcon, CheckIcon, LockFilledIcon, MessageCircleIcon, MicIcon } from '../v2-components/GuestLineIcons';
+import { getEventPublicFeatures } from '../client/features';
+import { DEMO_GUEST_MEDIA_LIMIT, FEATURE_DEMO } from '../utils/features';
 
 export interface V2GuestHomeProps {
   bannerImageUrl: string | null;
@@ -255,6 +257,17 @@ function V2GuestHome({
   // Yukleme modali ayri bilesende (GuestUploadModal); dosyalar ref uzerinden verilir.
   const uploadModalRef = useRef<GuestUploadModalHandle>(null);
 
+  // Ne: Demo etkinliginde (Fatih 14 Kasim) "100% private" satiri yerine demo notu.
+  // Neden: Demo linki herkese acik; ziyaretcinin yukledigi baska ziyaretcilere gorunur ve bir saatte silinir.
+  //        "Ozel ve guvenli" demek orada yanlis olurdu. Onizlemede (host ayarlari) istek atilmaz.
+  const [isDemo, setIsDemo] = useState(false);
+  useEffect(() => {
+    if (preview || !packedUid) return;
+    let active = true;
+    getEventPublicFeatures(packedUid).then((ids) => { if (active) setIsDemo(ids.includes(FEATURE_DEMO)); });
+    return () => { active = false; };
+  }, [packedUid, preview]);
+
   // Ne: Token'daki "al" claim'i — misafirin passcode ile / linkten actigi albumler.
   // Neden: Protected album listede kilitli gorunur; acilmamissa yukleme hedefi olamaz ve
   //        karti kilit ikonuyla cikar. Album listesi degisince (passcode girildi, sayfaya
@@ -405,11 +418,25 @@ function V2GuestHome({
             </Link>
           </div>
 
-          <p className="guest-home-secure">
-            <span className="guest-home-secure-check"><CheckIcon size={9} strokeWidth={3.5} /></span>
-            <span className="guest-home-secure-lock"><LockFilledIcon size={11} strokeWidth={2.5} /></span>
-            <span>{textOr('guest.home.privateSecure', '100% private and secure. No account required.', '100% приватно і безпечно. Без реєстрації.')}</span>
-          </p>
+          {isDemo ? (
+            <p className="guest-home-demo-note" role="note">
+              <i className="fa-solid fa-circle-info" aria-hidden="true" />
+              <span>
+                {textOr(
+                  'guest.home.demoNote',
+                  'This is a demo event. Other visitors can see what you upload, and it is deleted after 1 hour. Up to {{max}} files.',
+                  'Це демо-подія. Інші відвідувачі бачать те, що ви завантажуєте, а через 1 годину воно видаляється. До {{max}} файлів.',
+                  { max: DEMO_GUEST_MEDIA_LIMIT },
+                )}
+              </span>
+            </p>
+          ) : (
+            <p className="guest-home-secure">
+              <span className="guest-home-secure-check"><CheckIcon size={9} strokeWidth={3.5} /></span>
+              <span className="guest-home-secure-lock"><LockFilledIcon size={11} strokeWidth={2.5} /></span>
+              <span>{textOr('guest.home.privateSecure', '100% private and secure. No account required.', '100% приватно і безпечно. Без реєстрації.')}</span>
+            </p>
+          )}
         </section>
 
         <GuestAdvertorialGrid advertorial={advertorial} />

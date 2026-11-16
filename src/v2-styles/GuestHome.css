@@ -393,6 +393,28 @@
   flex-shrink: 0;
 }
 
+/* Demo etkinligi notu: "100% private" satirinin yerine (Fatih 14 Kasim). Tema rengine uyar. */
+.guest-home-demo-note {
+  margin: 10px 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary) 22%, var(--base-card));
+  color: var(--text);
+  font-size: 12px;
+  line-height: 17px;
+  text-align: left;
+}
+
+.guest-home-demo-note i {
+  margin-top: 2px;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--text) 70%, transparent);
+  flex-shrink: 0;
+}
+
 /* Kilit onay isaretine yakin (Figma; madde 6): aradaki bosluk 3 px. */
 .guest-home-secure-lock {
   width: 15px;
