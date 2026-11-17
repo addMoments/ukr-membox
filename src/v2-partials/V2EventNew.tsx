@@ -14,6 +14,7 @@ import { FormState } from '../utils/form_event_parse';
 import { formatUah, formatUahAmount } from '../utils/money';
 import BusinessTailoredSection from '../v2-components/BusinessTailoredSection';
 import { addonImages } from '../utils/addon_images';
+import { demoGuestUrl } from '../utils/demo';
 
 interface V2EventNewProps {
   showSignInSection?: boolean;
@@ -270,6 +271,33 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
             ))}
           </ol>
         </section>
+
+        {/* Canli demo bandi (musteri 17 Kasim, Services & Prices taslagi): paket secmeden once misafir
+            deneyimini gormek icin. Metin musterinin; demo yeni sekmede acilir, fiyat sayfasi kaybolmaz.
+            Ozel paketler sayfasinda yok. */}
+        {!isSpecialPage && (
+          <section className="event-new-demo">
+            <span className="event-new-demo-icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="14" height="14"><path d="M5 3.2v9.6L12.6 8z" fill="currentColor" /></svg>
+            </span>
+            <div className="event-new-demo-text">
+              <p className="event-new-demo-title">
+                {textOr('paywall.demo.title', 'See how it feels for your guests!', 'Відчуйте, як це для ваших гостей!')}
+              </p>
+              <p className="event-new-demo-sub">
+                {textOr(
+                  'paywall.demo.text',
+                  'Go through the same steps as your guests: scan, upload, share. No registration.',
+                  'Пройдіть ті самі кроки, що й ваші гості: скануйте, завантажуйте, діліться. Без реєстрації.',
+                )}
+              </p>
+            </div>
+            <a className="event-new-demo-btn" href={demoGuestUrl(currentLang)} target="_blank" rel="noopener">
+              {textOr('paywall.demo.button', 'Try the live demo', 'Спробувати демо')}
+              <span aria-hidden="true">→</span>
+            </a>
+          </section>
+        )}
 
         {/* Core Packages Section (ozel sayfada ozel paketler). id: alttaki "Compare standard packages" buraya kaydirir. */}
         <section className="event-new-section event-new-packages-section" id="packages">

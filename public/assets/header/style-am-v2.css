@@ -89,6 +89,24 @@ nav.v2-header {
   color: var(--text);
 }
 
+/* "Live demo" (musteri 17 Kasim): onunde lime nokta, digerlerinden koyu. */
+.v2-header-nav-link.is-live-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text);
+}
+
+.v2-header-nav-link.is-live-demo::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #a8bf12;
+  box-shadow: 0 0 0 3px rgba(210, 232, 35, 0.35);
+}
+
 .v2-header-actions {
   flex: 0 0 auto;
   display: flex;
@@ -273,6 +291,12 @@ body.v2-mobile-menu-open {
   line-height: 1.3;
   padding: 16px 0;
   border-bottom: none;
+}
+
+.v2-header-mobile-menu .v2-header-nav-link.is-live-demo {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
 /* Bottom section */

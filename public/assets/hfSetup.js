@@ -153,6 +153,10 @@
     contact_us: "https://addmoments.com.ua/uk/contact-addmoments/",
   };
 
+  // Canli demo etkinligi (musteri 17 Kasim: header'da "Live demo"). src/utils/demo.ts ile ayni adres;
+  // ?lang= demo sayfasini ziyaretcinin dilinde acar. Yeni sekmede acilir.
+  const DEMO_GUEST_PATH = "/guest/dfKM38bpSv-KvP1rDjMvzA";
+
   const setUpHeader = (t = (k)=>k, lang = "en", isWordPress = false)=>{
     let isFirst = false;
     const shouldUseUkWordPressLinks = ()=>(
@@ -304,7 +308,11 @@
       return {
         left: [
           { key: "services_prices", href: withLangParam("/events/services-and-prices", lang) },
-          { key: "how_it_works", href: useUkWordPressLinks ? UK_WORDPRESS_LINKS.how_it_works : "/how-it-works" }
+          { key: "how_it_works", href: useUkWordPressLinks ? UK_WORDPRESS_LINKS.how_it_works : "/how-it-works" },
+          // Misafir sayfalarinda yok: gercek bir etkinligin misafiri "demo" linkini gormesin.
+          ...(isGuestRoute() ? [] : [
+            { key: "live_demo", href: withLangParam(DEMO_GUEST_PATH, lang), extraClass: "is-live-demo", newTab: true }
+          ])
         ],
         right: [
           { key: "faq", href: useUkWordPressLinks ? UK_WORDPRESS_LINKS.faq : "/faq" },
@@ -321,15 +329,18 @@
       logo.setAttribute("href", shouldUseUkWordPressLinks() ? UK_WORDPRESS_LINKS.home : "/");
     };
 
-    const appendHeaderLink = (key, href, section, includeDesktop = true, includeMobile = true)=>{
+    const appendHeaderLink = (key, href, section, includeDesktop = true, includeMobile = true, link = {})=>{
       const text = t(key);
       const mobile = qs(`#mobile-links`);
+      const cls = link.extraClass ? `v2-header-nav-link ${link.extraClass}` : "v2-header-nav-link";
+      const target = link.newTab ? ` target="_blank" rel="noopener"` : "";
+      const html = `<a class="${cls}" href="${href}" data-discover="${key}"${target}>${text}</a>`;
       if (includeDesktop){
         const ref = qs(`.v2-header-section.${section}`);
-        ref.innerHTML += `<a class="v2-header-nav-link" href="${href}" data-discover="${key}">${text}</a>`;
+        ref.innerHTML += html;
       }
       if (includeMobile){
-        mobile.innerHTML += `<a class="v2-header-nav-link" href="${href}" data-discover="${key}">${text}</a>`;
+        mobile.innerHTML += html;
       }
     }
 
@@ -384,14 +395,14 @@
       const headerLinks = getHeaderLinks();
       ["left", "right"].forEach(section=>{
         headerLinks[section].forEach(link=>{
-          appendHeaderLink(link.key, link.href, section, true, false);
+          appendHeaderLink(link.key, link.href, section, true, false, link);
         });
       });
 
       if (!renderGuestMobileLinks()){
         ["left", "right"].forEach(section=>{
           headerLinks[section].forEach(link=>{
-            appendHeaderLink(link.key, link.href, section, false, true);
+            appendHeaderLink(link.key, link.href, section, false, true, link);
           });
         });
       }
