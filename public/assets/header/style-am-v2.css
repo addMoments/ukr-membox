@@ -299,6 +299,30 @@ body.v2-mobile-menu-open {
   gap: 10px;
 }
 
+/* Ucuncu sol link (Live demo) dar masaustunde UK etiketleriyle sag linkleri dil seciminin altina itiyordu:
+   901-1180 px'te bosluk ve yazi kuculur, 901-1040 px'te demo linki yalnizca masaustu header'dan kalkar
+   (hero ve Services & Prices bandinda var; 900 px alti mobil menude duruyor). */
+@media (min-width: 901px) and (max-width: 1180px) {
+  .v2-header-section,
+  .v2-header-section.left {
+    gap: 14px;
+  }
+
+  .v2-header-section.right {
+    padding-left: 14px;
+  }
+
+  .v2-header-nav-link {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1040px) {
+  .v2-header-section .v2-header-nav-link.is-live-demo {
+    display: none;
+  }
+}
+
 /* Bottom section */
 .v2-mobile-menu-bottom {
   flex-shrink: 0;
