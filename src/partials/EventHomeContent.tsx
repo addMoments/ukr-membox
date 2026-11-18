@@ -381,7 +381,7 @@ function EventHomeContent({
                 tiklayinca Events / School / Hero sekmeli paket sayfasi. */}
             {canUpgradeFree && (
               <Link to={`/event/${packedUid}/upgrade`} className="ehc-free-upgrade-btn">
-                {textOr('eventHome.freeUpgrade.button', 'Upgrade your free package', 'Покращіть безкоштовний пакет')}
+                {textOr('eventHome.freeUpgrade.button', 'Upgrade your free package', 'Розширений пакет послуг')}
                 <i className="fa-solid fa-arrow-right" />
               </Link>
             )}
