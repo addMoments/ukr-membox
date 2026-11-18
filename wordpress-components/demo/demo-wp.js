@@ -108,12 +108,12 @@
     '    .am-demo-note { font-size: 13px; }',
     '    .am-demo-note-scan { display: inline; }',
     '    .am-demo-note-tap { display: none; }',
-    '    .am-hero-wrapper .am-steps { top: 572px; left: min(330px, calc(100% - 220px)); }',
+    '    .am-hero-wrapper .am-steps { top: 572px; left: 24px; }',
     '  }',
     '  @media (min-width: 769px) and (max-width: 1100px) {',
     '    .am-hero-wrapper .am-demo-card { top: 322px; left: 0; width: 272px; }',
     '    .am-demo-qr { width: 84px; height: 84px; }',
-    '    .am-hero-wrapper .am-steps { top: 486px; left: 15px; }',
+    '    .am-hero-wrapper .am-steps { top: 486px; left: 18px; }',
     '  }',
     ''
   ].join('\n');
@@ -163,6 +163,26 @@
     return html;
   };
 
+  // Adim listesi (Scan / Upload / Share) demo kartinin altinda, noktalar QR'in sol kenariyla ayni cizgide
+  // (musteri 17 Kasim aksam: "replace the block of information (steps) to the left, so that it was aligned with the QR code
+  // block"). Kart masaustunde left 6px + 2px kenar + 12px ic bosluk + 4px QR boslugu = 24px; 769-1100 px'te 0 + 18 = 18px.
+  // 17 Kasim'da yayinlanan hero'ya uygulanir (hero() artik bu degerlerle yazar). Ikinci kez calistirmak hata verir.
+  var heroStepsAlign = function (html) {
+    html = replaceRe(
+      html,
+      /\.am-hero-wrapper \.am-steps \{ top: 572px; left: min\(330px, calc\(100% - 220px\)\); \}/,
+      '.am-hero-wrapper .am-steps { top: 572px; left: 24px; }',
+      'masaustu adim listesi'
+    );
+    html = replaceRe(
+      html,
+      /\.am-hero-wrapper \.am-steps \{ top: 486px; left: 15px; \}/,
+      '.am-hero-wrapper .am-steps { top: 486px; left: 18px; }',
+      'tablet adim listesi'
+    );
+    return html;
+  };
+
   var HEADER_CSS = [
     '',
     '  /* "Live demo" linki (musteri 17 Kasim 2026): onunde lime nokta, digerlerinden koyu. */',
@@ -208,7 +228,7 @@
     return html;
   };
 
-  var api = { hero: hero, header: header, TEXT: TEXT, DEMO_GUEST_PATH: DEMO_GUEST_PATH };
+  var api = { hero: hero, heroStepsAlign: heroStepsAlign, header: header, TEXT: TEXT, DEMO_GUEST_PATH: DEMO_GUEST_PATH };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.amDemoWp = api;
 })(typeof window !== 'undefined' ? window : this);

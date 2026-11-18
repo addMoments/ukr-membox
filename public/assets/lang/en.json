@@ -638,7 +638,7 @@
             "audio": "Audio",
             "guestbook": "Guestbook",
             "privateSecure": "100% private and secure. No account required.",
-            "demoNote": "This is a demo event. Other visitors can see what you upload, and it is deleted after 1 hour. Up to {{max}} files.",
+            "demoNote": "Attention, this is a demo event.\nAll uploaded files will be visible to other visitors and deleted automatically after 1 hour.\nLimit: up to {{max}} files.",
             "sponsored": "Promotions"
         },
         "album": {

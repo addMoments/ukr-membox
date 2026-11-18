@@ -424,8 +424,8 @@ function V2GuestHome({
               <span>
                 {textOr(
                   'guest.home.demoNote',
-                  'This is a demo event. Other visitors can see what you upload, and it is deleted after 1 hour. Up to {{max}} files.',
-                  'Це демо-подія. Інші відвідувачі бачать те, що ви завантажуєте, а через 1 годину воно видаляється. До {{max}} файлів.',
+                  'Attention, this is a demo event.\nAll uploaded files will be visible to other visitors and deleted automatically after 1 hour.\nLimit: up to {{max}} files.',
+                  'Увага, це демо-подія.\nУсі завантажені файли будуть видимі іншим відвідувачам і автоматично видаляться через 1 годину.\nЛіміт: до {{max}} файлів.',
                   { max: DEMO_GUEST_MEDIA_LIMIT },
                 )}
               </span>

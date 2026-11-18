@@ -408,6 +408,11 @@
   text-align: left;
 }
 
+/* Musteri metni (17 Kasim) uc satir: satir sonlari ceviri metninde \n. */
+.guest-home-demo-note span {
+  white-space: pre-line;
+}
+
 .guest-home-demo-note i {
   margin-top: 2px;
   font-size: 13px;
