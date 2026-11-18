@@ -11,7 +11,9 @@ import GuestAccessCard from '../v2-components/GuestAccessCard';
 import ColoredSettingsBox from '../v2-components/ColoredSettingsBox';
 import '../styles/EventHomeContent.css';
 import ActivityOverviewCard from '../v2-components/ActivityOverviewCard';
-import UpgradeCard from '../v2-components/UpgradeCard';
+import UpgradeCard, { FREE_PACKAGE_ID } from '../v2-components/UpgradeCard';
+import { UpgradeOptionsResponse } from '../client/upgrades';
+import { textOr } from '../utils/admin_i18n';
 import EmptyState from '../v2-components/EmptyState';
 import MediaCard from '../v2-components/MediaCard';
 import PhotoViewerModal, { photoViewerState } from './PhotoViewerModal';
@@ -259,6 +261,14 @@ function EventHomeContent({
 
   const [isCloseToStarting, setIsCloseToStarting] = useState(false);
   const [hasEventEnded, setHasEventEnded] = useState(false);
+  // Free paket: yukseltme kartinin yerine kapagin altindaki dugme (UpgradeCard cevabi bildirir).
+  const [canUpgradeFree, setCanUpgradeFree] = useState(false);
+  const handleUpgradeOptions = (res: UpgradeOptionsResponse | null) => {
+    setCanUpgradeFree(!!res
+      && res.current_package?.id === FREE_PACKAGE_ID
+      && res.window_open
+      && res.options.some((o) => o.kind === 'package'));
+  };
 
   const startingDismissKey = `event-starting-dismiss-${event.uid}`;
   const endedDismissKey = `event-ended-dismiss-${event.uid}`;
@@ -367,6 +377,14 @@ function EventHomeContent({
                 <div className="ehc-hero-image-badge">{t('eventHome.heroCard.eventCover')}</div>
               </div>
             </div>
+            {/* Free paket (musteri 18 Kasim taslagi): kapagin hemen altinda tam genislikte yukseltme dugmesi;
+                tiklayinca Events / School / Hero sekmeli paket sayfasi. */}
+            {canUpgradeFree && (
+              <Link to={`/event/${packedUid}/upgrade`} className="ehc-free-upgrade-btn">
+                {textOr('eventHome.freeUpgrade.button', 'Upgrade your free package', 'Покращіть безкоштовний пакет')}
+                <i className="fa-solid fa-arrow-right" />
+              </Link>
+            )}
             <div className="ehc-hero-content">
               <div className="ehc-hero-meta">
                 {isLive && (
@@ -431,7 +449,7 @@ function EventHomeContent({
             isActive={isLive}
           />
 
-          <UpgradeCard packedUid={packedUid} />
+          <UpgradeCard packedUid={packedUid} onOptions={handleUpgradeOptions} />
 
           <ActivityOverviewCard
             stats={[

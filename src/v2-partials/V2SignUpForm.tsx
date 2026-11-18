@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import '../v2-styles/AuthForm.css';
 import { FormState, parse_submit_event } from '../utils/form_event_parse';
@@ -10,9 +11,13 @@ interface V2SignUpFormProps {
   prefillEmail?: string;
   emailReadOnly?: boolean;
   hideGoogleButton?: boolean;
+  // Free kayit sayfasi (18 Kasim): sunucunun cevabi (hesap var, free kullanilmis ...) formun ustunde,
+  // linkleriyle birlikte gosterilir; gonderim surerken dugme kilitlenir.
+  notice?: ReactNode;
+  busy?: boolean;
 }
 
-function V2SignUpForm({ onSubmit, prefillEmail, emailReadOnly, hideGoogleButton }: V2SignUpFormProps) {
+function V2SignUpForm({ onSubmit, prefillEmail, emailReadOnly, hideGoogleButton, notice, busy = false }: V2SignUpFormProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = parse_submit_event(e);
@@ -56,6 +61,7 @@ function V2SignUpForm({ onSubmit, prefillEmail, emailReadOnly, hideGoogleButton 
           <div className="v2-auth-body">
             <h2 className="v2-auth-title">{t('auth.createAccount')}</h2>
             <p className="v2-auth-subtitle">{t('auth.createAccountSubtitle')}</p>
+            {notice && <div className="v2-auth-notice" role="alert">{notice}</div>}
 
             <form className="v2-auth-form" onSubmit={handleSubmit}>
               <div className="v2-auth-fields">
@@ -136,7 +142,7 @@ function V2SignUpForm({ onSubmit, prefillEmail, emailReadOnly, hideGoogleButton 
                 </label>
               </div>
 
-              <button type="submit" className="v2-auth-submit">
+              <button type="submit" className="v2-auth-submit" disabled={busy}>
                 {t('auth.createAccountBtn')}
               </button>
             </form>

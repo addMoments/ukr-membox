@@ -31,6 +31,7 @@ function ScrollToTop() {
 
 const SignIn = lazy(() => import('./pages/signin'));
 const SignUp = lazy(() => import('./pages/signup'));
+const SignUpFree = lazy(() => import('./pages/signup-free'));
 const Recover = lazy(() => import('./pages/recover'));
 const Events = lazy(() => import('./pages/events'));
 const EventDetail = lazy(() => import('./pages/event-detail/index'));
@@ -41,6 +42,7 @@ const EventCollaborators = lazy(() => import('./pages/event-detail/collaborators
 const EventSettings = lazy(() => import('./pages/event-detail/settings'));
 const EventTheme = lazy(() => import('./pages/event-detail/theme'));
 const EventQR = lazy(() => import('./pages/event-detail/qr'));
+const EventUpgrade = lazy(() => import('./pages/event-detail/upgrade'));
 const EventPoster = lazy(() => import('./pages/event-detail/poster'));
 const Participant = lazy(() => import('./pages/participant/index'));
 const ParticipantUploads = lazy(() => import('./pages/participant/uploads'));
@@ -117,6 +119,7 @@ function AppContent() {
           <Route path="/event/:uid/settings" element={<RequireAuth><EventSettings /></RequireAuth>} />
           <Route path="/event/:uid/theme" element={<RequireAuth><EventTheme /></RequireAuth>} />
           <Route path="/event/:uid/qr" element={<RequireAuth><EventQR /></RequireAuth>} />
+          <Route path="/event/:uid/upgrade" element={<RequireAuth><EventUpgrade /></RequireAuth>} />
           <Route path="/event/:uid/poster" element={<RequireAuth><EventPoster /></RequireAuth>} />
 
           <Route path="/events/services-and-prices" element={<EventNew />} />
@@ -151,6 +154,9 @@ function AppContent() {
           <Route path="/admin/partnerships" element={<AdminRouteGuard requireSuperAdmin><AdminPartnerships /></AdminRouteGuard>} />
           <Route path="/admin/no-access" element={<AdminNoAccess />} />
 
+          {/* Free kayit (musteri 18 Kasim): header'daki "Get started free" buraya gelir. */}
+          <Route path="/signup" element={<SignUpFree />} />
+          <Route path="/signup/" element={<SignUpFree />} />
           <Route path="/signup/:token" element={<SignUp />} />
 
           {!is_live && <Route path="/api/*" element={<ApiRoute />} />}

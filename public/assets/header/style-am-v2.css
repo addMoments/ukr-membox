@@ -641,4 +641,39 @@ padding: 25px;
     padding: 10px 14px;
     font-size: 12px;
   }
+
+  /* "Get started free" / "Почати безкоштовно" (18 Kasim): UK etiketi 390 px'te menu dugmesini ekran disina
+     itiyordu. Kenar ve araliklar daralir; misafir sayfasinin kendi kurali (guest-route) daha ozgul, etkilenmez. */
+  .v2-header-container {
+    padding-left: 14px;
+    padding-right: 14px;
+    gap: 8px;
+  }
+
+  .v2-header-mobile-actions {
+    gap: 4px;
+  }
+
+  .v2-header-cta.v2-header-cta-mobile {
+    padding: 9px 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .v2-header-logo-icon .header-logo {
+    height: 30px;
+  }
+
+  .v2-header-cta.v2-header-cta-mobile {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+}
+
+/* 352 px ve altinda (eski kucuk telefonlar) UK etiketi sigmiyor; dugme menude de var. hfSetup.js data-pub icin
+   satir ici display yaziyor, bu yuzden !important. */
+@media (max-width: 352px) {
+  .v2-header-mobile-actions .v2-header-cta-mobile {
+    display: none !important;
+  }
 }

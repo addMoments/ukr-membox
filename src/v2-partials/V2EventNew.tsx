@@ -25,6 +25,7 @@ interface V2EventNewProps {
 }
 
 const PREMIUM_PACKAGE_ID = 'premium';
+const FREE_PACKAGE_ID = 'free';
 const SPONSORED_ADDON_ID = 'advertorial';
 
 const isSponsoredIncludedInPremium = (product?: { sponsored_included?: boolean; advertorial_included?: boolean }) => {
@@ -75,8 +76,10 @@ function V2EventNew({ showSignInSection = false, onLoadingComplete, variant = 's
   }, [cart.cartItems, cart.init, cart.products]);
 
   const packageOrder = ['standard', 'plus', 'premium'];
+  // Free paket (18 Kasim) header'daki "Get started free" ile /signup'tan alinir. Bu sayfadaki yeri
+  // (Option A: ilk kart) musteriye soruldu; cevap gelene kadar kart listesinde yok.
   const corePackages = cart.products
-    .filter(p => !p.is_add_on && p.is_enabled && !isSpecialPackage(p))
+    .filter(p => !p.is_add_on && p.is_enabled && !isSpecialPackage(p) && p.id !== FREE_PACKAGE_ID)
     .sort((a, b) => {
       const aIdx = packageOrder.indexOf(a.id);
       const bIdx = packageOrder.indexOf(b.id);
@@ -469,7 +472,8 @@ interface PackageCardProps {
   onSelect: () => void;
 }
 
-function PackageCard({ id, displayName, displayDescription, displayBullets, price, tagText, isSelected, onSelect }: PackageCardProps) {
+// Free paketten yukseltme sayfasi (pages/event-detail/upgrade.tsx, musteri 18 Kasim) ayni karti kullanir.
+export function PackageCard({ id, displayName, displayDescription, displayBullets, price, tagText, isSelected, onSelect }: PackageCardProps) {
   const cardClass = `event-new-package-card ${tagText ? 'recommended' : ''} ${isSelected ? 'selected' : ''}`;
   const resolvedName = displayName || id;
   const resolvedDescription = displayDescription || '';

@@ -1,6 +1,6 @@
 import { DB_ROOT, SERV_ROOT } from '../consts';
 import { rm_key } from '../utils/persistence';
-import { fetch, isGuest } from './core';
+import { fetch, FetchHttpError, isGuest } from './core';
 
 export interface SignInRequest {
   email: string;
@@ -67,6 +67,32 @@ export async function signUpEmailWithToken(token: string, request: SignUpWithTok
   }
   return res;
 }
+
+export interface SignUpFreeRequest {
+  email: string;
+  name: string;
+  password: string;
+  confirm_password: string;
+  agreed: boolean;
+}
+
+// Free kayit (musteri 18 Kasim 2026): token'siz kayit, free paket etkinligini tek adimda acar.
+// Basarida sunucu X-Auth-Token + 201 "goto:/events" doner; core fetch token'i saklar ve yonlendirir.
+// Hata kodlari signUpErrorCode ile okunur: ACCOUNT_EXISTS, FREE_PACKAGE_ALREADY_USED,
+// FREE_PACKAGE_UNAVAILABLE, TOO_MANY_ATTEMPTS, INVALID_INPUT.
+export async function signUpFree(request: SignUpFreeRequest): Promise<Response> {
+  return fetch(`${SERV_ROOT}/auth/signup/free`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+}
+
+export const signUpErrorCode = (err: unknown): string | null => {
+  if (!(err instanceof FetchHttpError)) return null;
+  if (!err.body || typeof err.body !== 'object') return null;
+  return typeof err.body.code === 'string' ? err.body.code : null;
+};
 
 export async function attachWithToken(
   token: string,

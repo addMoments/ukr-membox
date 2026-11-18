@@ -3,6 +3,7 @@ import '../v2-styles/AuthForm.css';
 import { FormState, parse_submit_event } from '../utils/form_event_parse';
 import { S3_ROOT } from '../consts';
 import { t } from '../packages/i18n';
+import { textOr } from '../utils/admin_i18n';
 import PasswordInput from '../v2-components/PasswordInput';
 
 interface V2SignInFormProps {
@@ -99,8 +100,9 @@ function V2SignInForm({ onSubmit, compact = false, prefillEmail, emailReadOnly }
             {!compact && (
               <div className="v2-auth-link-section">
                 {t('auth.newHere')}
-                <Link to="/events/services-and-prices/" className="v2-auth-link">
-                  {t('auth.createAnAccount')}
+                {/* Musteri 18 Kasim: "New here? Sign up free" free kayit sayfasina gider. */}
+                <Link to="/signup" className="v2-auth-link">
+                  {textOr('auth.signUpFree', 'Sign up free', 'Зареєструватися безкоштовно')}
                 </Link>
               </div>
             )}

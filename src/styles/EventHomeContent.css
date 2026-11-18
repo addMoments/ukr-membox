@@ -68,6 +68,35 @@
   flex-shrink: 0;
 }
 
+/* Free paket (musteri 18 Kasim taslagi): kapagin hemen altinda tam genislikte yukseltme dugmesi.
+   Kartin 32px boslugunu kapatip kapaga yaklasir; renk panonun koyu mavisi (taslak: "colour can be
+   arranged to current thema"). */
+.ehc-free-upgrade-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: -18px;
+  padding: 15px 24px;
+  border-radius: 16px;
+  background: #3E4C92;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 20px -8px rgba(62, 76, 146, 0.55);
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.ehc-free-upgrade-btn:hover {
+  filter: brightness(1.1);
+  color: #FFFFFF;
+}
+
+.ehc-free-upgrade-btn:active {
+  transform: scale(0.99);
+}
+
 .ehc-hero-image {
   aspect-ratio: 20 / 9;
   border-radius: 24px;

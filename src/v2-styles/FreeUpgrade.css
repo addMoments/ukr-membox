@@ -1,0 +1,233 @@
+/* Free paketten yukseltme sayfasi (pages/event-detail/upgrade.tsx, musteri 18 Kasim 2026).
+   Kartlar ve grid EventNew.css'ten; burada baslik, sekmeler ve alttaki odeme cubugu.
+   Renkler Services & Prices ile ayni (#D2E823 lime, #1A1D21 koyu, #6b7280 gri). */
+
+.free-upgrade-page {
+  padding: 24px 0 140px;
+}
+
+.free-upgrade-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.free-upgrade-back:hover {
+  color: #1A1D21;
+}
+
+.free-upgrade-head {
+  text-align: center;
+  margin: 24px 0 32px;
+}
+
+.free-upgrade-title {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #1A1D21;
+  margin: 0 0 8px;
+}
+
+/* App.css'teki global p kuralini ezer. */
+.free-upgrade-subtitle {
+  font-size: 17px;
+  font-weight: 500;
+  color: #4b5563;
+  margin: 0;
+  text-align: center;
+}
+
+/* Sekmeler: taslakta ince dikey cizgiyle ayrilmis uc baslik, secilinin altinda lime cubuk. */
+.free-upgrade-tabs {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 40px;
+  max-width: 1100px;
+}
+
+.free-upgrade-tab {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px 18px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  position: relative;
+  color: #1A1D21;
+}
+
+.free-upgrade-tab + .free-upgrade-tab::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 22px;
+  width: 1px;
+  background: #d1d5db;
+}
+
+.free-upgrade-tab::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 5px;
+  border-radius: 999px;
+  background: #D2E823;
+  transform: translateX(-50%);
+  transition: width 0.2s;
+}
+
+.free-upgrade-tab.is-active::after {
+  width: min(260px, 70%);
+}
+
+.free-upgrade-tab-title {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.free-upgrade-tab-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  text-align: center;
+}
+
+.free-upgrade-tab:not(.is-active) .free-upgrade-tab-title {
+  color: #374151;
+}
+
+.free-upgrade-empty {
+  text-align: center;
+  color: #6b7280;
+  font-size: 16px;
+  margin: 48px 0;
+}
+
+/* Alttaki odeme cubugu: kart secilince belirginlesir, sayfa kayarken hep gorunur. */
+.free-upgrade-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -12px 30px -18px rgba(0, 0, 0, 0.25);
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+}
+
+.free-upgrade-bar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.free-upgrade-bar-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1D21;
+  min-width: 0;
+}
+
+.free-upgrade-bar-note {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.free-upgrade-pay {
+  flex: 0 0 auto;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 999px;
+  background: #1A1D21;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.free-upgrade-bar.is-visible .free-upgrade-pay {
+  background: #D2E823;
+  color: #1A1D21;
+}
+
+.free-upgrade-pay:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.free-upgrade-bar.is-visible .free-upgrade-pay:disabled {
+  opacity: 1;
+}
+
+.free-upgrade-error {
+  max-width: 1100px;
+  margin: 8px auto 0;
+  color: #b91c1c;
+  font-size: 14px;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  .free-upgrade-title {
+    font-size: 52px;
+  }
+
+  .free-upgrade-subtitle {
+    font-size: 22px;
+  }
+
+  .free-upgrade-tab-title {
+    font-size: 28px;
+  }
+
+  .free-upgrade-tab-subtitle {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .free-upgrade-tabs {
+    margin-bottom: 28px;
+  }
+
+  .free-upgrade-tab {
+    padding: 6px 6px 14px;
+  }
+
+  .free-upgrade-tab-title {
+    font-size: 16px;
+  }
+
+  .free-upgrade-tab-subtitle {
+    font-size: 11px;
+  }
+
+  .free-upgrade-bar-note {
+    display: none;
+  }
+
+  .free-upgrade-pay {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}

@@ -294,6 +294,29 @@
   transform: scale(0.98);
 }
 
+.v2-auth-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Free kayit sayfasi: sunucu cevabi (hesap var, free kullanilmis ...) formun ustunde. */
+.v2-auth-notice {
+  margin: -16px 0 24px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #FEF3C7;
+  color: #78350F;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.v2-auth-notice a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 /* Divider */
 .v2-auth-divider {
   position: relative;

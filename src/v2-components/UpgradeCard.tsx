@@ -137,9 +137,15 @@ const errorMessage = (err: unknown) => {
 
 interface UpgradeCardProps {
   packedUid: string;
+  // Pano, free etkinlikte kartin yerine kapagin altinda "Upgrade your free package" dugmesini
+  // gosterir (musteri 18 Kasim); hangi paket oldugunu bu cevaptan ogrenir.
+  onOptions?: (res: UpgradeOptionsResponse | null) => void;
 }
 
-function UpgradeCard({ packedUid }: UpgradeCardProps) {
+// Free paketin yukseltmesi ayri sayfada (pages/event-detail/upgrade.tsx); bu kart free'de gorunmez.
+export const FREE_PACKAGE_ID = 'free';
+
+function UpgradeCard({ packedUid, onOptions }: UpgradeCardProps) {
   const [data, setData] = useState<UpgradeOptionsResponse | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -165,19 +171,25 @@ function UpgradeCard({ packedUid }: UpgradeCardProps) {
       .then((res) => {
         if (cancelled) return;
         setData(res);
+        onOptions?.(res);
         const firstPackage = res.options.find((o) => o.kind === 'package');
         setSelectedPackage(firstPackage ? firstPackage.id : null);
       })
       // Yetki yoksa (403), etkinlik kapaliysa (410) ya da baska bir hatada kart hic gorunmez.
       .catch(() => {
-        if (!cancelled) setData(null);
+        if (cancelled) return;
+        setData(null);
+        onOptions?.(null);
       });
     return () => {
       cancelled = true;
     };
+    // onOptions bilerek disarida: her render'da yeni fonksiyon gelir, istek tekrarlanmasin.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [packedUid]);
 
   if (!data) return null;
+  if (data.current_package?.id === FREE_PACKAGE_ID) return null;
   const { current_package: current, options, window_open: windowOpen } = data;
   const maxQuantity = data.max_quantity || 10;
   // Galeri suresi bittiyse etkinlik silinmek uzere; satis yok, kart da yok.

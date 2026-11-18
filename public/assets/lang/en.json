@@ -4,6 +4,7 @@
     "faq": "FAQ",
     "sign_in": "Sign in",
     "get_started": "Get started",
+    "get_started_free": "Get started free",
     "footer_description": "The easiest way to collect photos from your guests. Create a digital album for your special events without any app downloads.",
     "duration": {
         "daysOne": "{{n}} day",
@@ -426,6 +427,28 @@
             "settings": "Settings",
             "dismiss": "Dismiss",
             "download": "Download"
+        },
+        "freeUpgrade": {
+            "button": "Upgrade your free package",
+            "pageTitle": "Upgrade your package - AddMoments",
+            "title": "Upgrade your package",
+            "subtitle": "Choose the right package for your event.",
+            "back": "Back to your event",
+            "loading": "Loading packages…",
+            "unavailable": "There are no package upgrades for this event right now.",
+            "choose": "Choose a package",
+            "selected": "{{name}} for your event",
+            "keeps": "Same event, link, QR code and photos.",
+            "pay": "Upgrade · {{price}}",
+            "opening": "Opening payment…",
+            "tabs": {
+                "events": "Events",
+                "eventsSubtitle": "All event types",
+                "school": "School",
+                "schoolSubtitle": "School events, trips and memories",
+                "hero": "Hero",
+                "heroSubtitle": "Only for military members and their families"
+            }
         }
     },
     "products": {
@@ -737,7 +760,7 @@
         "orContinueWith": "Or continue with",
         "google": "Google",
         "facebook": "Facebook",
-        "alreadyHaveAccount": "Already have an account?",
+        "alreadyHaveAccount": "Already a member?",
         "signIn": "Sign in",
         "welcomeBack": "Welcome Back!",
         "welcomeBackSubtitle": "Relive your most beautiful moments.",
@@ -761,7 +784,18 @@
         "invalidInviteLink": "Invalid Invite Link",
         "invalidInviteLinkDesc": "This invite link is invalid or has expired.",
         "showPassword": "Show password",
-        "hidePassword": "Hide password"
+        "hidePassword": "Hide password",
+        "signUpFree": "Sign up free",
+        "signUpFreeTitle": "Sign up free - AddMoments",
+        "signUpFreeDescription": "Create your free AddMoments event and start collecting photos and videos from your guests.",
+        "freeSignup": {
+            "accountExists": "You already have an account with this email.",
+            "alreadyUsed": "This email has already used the free package.",
+            "orChoose": "or choose a package on",
+            "pricesLink": "Services & Prices",
+            "unavailable": "The free package is not available right now. See our packages on",
+            "tooMany": "Too many sign ups from your network. Please try again in an hour."
+        }
     },
     "checkout": {
         "marqueeText": "your selection — review your order — ",
