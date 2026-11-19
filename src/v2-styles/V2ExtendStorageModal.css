@@ -202,3 +202,40 @@
     min-width: 0;
   }
 }
+
+/* Free paket bildirimi (musteri 19 Kasim): dugme yok, 5 sn'de kapanir; alttaki ince cubuk kalan sureyi gosterir. */
+.extend-modal-free {
+  overflow: hidden;
+  padding-bottom: 40px;
+}
+
+.extend-modal-free .extend-modal-message {
+  margin-bottom: 0;
+}
+
+.extend-modal-link {
+  color: #1a1d21;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: #d2e823;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+.extend-modal-timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 100%;
+  background: #d2e823;
+  transform-origin: left center;
+  animation-name: extend-modal-timer;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes extend-modal-timer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}

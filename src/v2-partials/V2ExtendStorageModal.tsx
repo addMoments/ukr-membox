@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { t } from '../packages/i18n';
+import { textOr } from '../utils/admin_i18n';
 import {
   extendStorage,
   isAlreadyExtendedError,
@@ -17,7 +19,29 @@ interface V2ExtendStorageModalProps {
   onSuccess: (storageUntil: string) => void;
   onRefetch: () => void;
   onEventClosed: () => void;
+  // Free paket (musteri 19 Kasim): uzatma yok; kalan gun + yukseltme son tarihi, dugme yok, 5 sn'de kapanir.
+  isFree?: boolean;
+  storageUntil?: string | null;
 }
+
+// Free bildirimi kendiliginden kapanmadan once ekranda kalma suresi (musteri: 5 saniye).
+const FREE_NOTICE_MS = 5000;
+
+const daysLeft = (storageUntil?: string | null) => {
+  if (!storageUntil) return 0;
+  const ms = new Date(storageUntil).getTime() - Date.now();
+  return Math.max(1, Math.ceil(ms / 86400000));
+};
+
+// "7 days" / "7 днів": Ukraynacada 1 день, 2-4 дні, 5+ днів (11-14 днів).
+const dayUnit = (n: number) => {
+  if (t('lang_code') !== 'uk') return n === 1 ? 'day' : 'days';
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'день';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'дні';
+  return 'днів';
+};
 
 // Ne: extendStorage namespace'i icin tum fallback metinleri (en/uk).
 // Nasil: i18n S3'ten yukledigi icin lokal lang dosyasi guncellense bile build ortaminda key bulunamayabiliyor; t() o durumda raw key'i (orn. "extendStorage.modalTitle") donuyor. Bu yuzden burada hardcoded fallback tutuyoruz.
@@ -81,8 +105,17 @@ function V2ExtendStorageModal({
   onSuccess,
   onRefetch,
   onEventClosed,
+  isFree = false,
+  storageUntil,
 }: V2ExtendStorageModalProps) {
   const [submitting, setSubmitting] = useState(false);
+
+  // Free bildirimi 5 sn sonra kendiliginden kapanir; X ve arka plana tiklama yine calisir.
+  useEffect(() => {
+    if (!open || !isFree) return undefined;
+    const timer = window.setTimeout(onClose, FREE_NOTICE_MS);
+    return () => window.clearTimeout(timer);
+  }, [open, isFree, onClose]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -103,6 +136,61 @@ function V2ExtendStorageModal({
   }, [open]);
 
   if (!open) return null;
+
+  if (isFree) {
+    const count = daysLeft(storageUntil);
+    // Silme storage_until anindadir (gece yarisi, UTC); kullaniciya son tam gun yazilir: 19 Kasim'da baslayan
+    // 7 gunluk free 26 Kasim 00:00'da silinir, son gun 25 Kasim (musteri ornegi: 1 Kasim -> 7 Kasim).
+    const date = storageUntil
+      ? new Date(new Date(storageUntil).getTime() - 1000)
+        .toLocaleDateString(t('lang_code'), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+        // "25 листопада 2026 р." + cumlenin noktasi = "р.."; tarihin sondaki noktasi atilir.
+        .replace(/\.$/, '')
+      : '';
+    const message = textOr(
+      'extendStorage.free.message',
+      '{{link}} until {{date}}. Your link, QR code and photos stay the same. After that date the event and all of its photos and videos are deleted.',
+      '{{link}} до {{date}}. Посилання, QR-код і фото залишаться. Після цієї дати івент і всі його фото та відео буде видалено.',
+      // {{link}} yerinde kalsin diye kendisiyle doldurulur; sonra metin oradan bolunup Link konur.
+      { date, link: '{{link}}' },
+    );
+    const [before, after = ''] = message.split('{{link}}');
+    return (
+      <div className="extend-modal-overlay" onClick={onClose}>
+        <div
+          className="extend-modal extend-modal-free"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="extend-modal-title"
+          aria-describedby="extend-modal-message"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button type="button" className="extend-modal-close" onClick={onClose} aria-label="Close">
+            <i className="fa-solid fa-xmark" />
+          </button>
+          <div className="extend-modal-icon">
+            <i className="fa-regular fa-clock" />
+          </div>
+          <h2 id="extend-modal-title" className="extend-modal-title">
+            {textOr(
+              'extendStorage.free.title',
+              'Your free event will be deleted in {{count}} {{unit}}',
+              'Ваш безкоштовний івент буде видалено через {{count}} {{unit}}',
+              { count, unit: dayUnit(count) },
+            )}
+          </h2>
+          <p id="extend-modal-message" className="extend-modal-message">
+            {before}
+            <Link to={`/event/${packedUid}/upgrade`} className="extend-modal-link" onClick={onClose}>
+              {textOr('extendStorage.free.link', 'You can upgrade it', 'Ви можете покращити пакет')}
+            </Link>
+            {after}
+          </p>
+          <span className="extend-modal-timer" style={{ animationDuration: `${FREE_NOTICE_MS}ms` }} />
+        </div>
+      </div>
+    );
+  }
 
   const handleBackdropClick = () => {
     if (submitting) return;

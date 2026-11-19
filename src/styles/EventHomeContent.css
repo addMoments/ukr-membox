@@ -79,18 +79,19 @@
   margin-top: -18px;
   padding: 15px 24px;
   border-radius: 16px;
-  background: #3E4C92;
-  color: #FFFFFF;
+  /* Musteri 19 Kasim: AddMoments lime (Services & Prices ile ayni #D2E823, koyu yazi). */
+  background: #D2E823;
+  color: #1A1D21;
   font-size: 16px;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 8px 20px -8px rgba(62, 76, 146, 0.55);
+  box-shadow: 0 8px 20px -8px rgba(126, 140, 21, 0.55);
   transition: filter 0.2s ease, transform 0.2s ease;
 }
 
 .ehc-free-upgrade-btn:hover {
-  filter: brightness(1.1);
-  color: #FFFFFF;
+  filter: brightness(0.96);
+  color: #1A1D21;
 }
 
 .ehc-free-upgrade-btn:active {

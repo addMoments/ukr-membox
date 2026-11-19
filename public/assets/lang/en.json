@@ -895,7 +895,12 @@
         "toastRejected": "Extension failed (the period may have expired)",
         "toastClosed": "This event has been closed",
         "toastForbidden": "You don't have permission to extend this event",
-        "toastUnknown": "Something went wrong, please try again"
+        "toastUnknown": "Something went wrong, please try again",
+        "free": {
+            "title": "Your free event will be deleted in {{count}} {{unit}}",
+            "message": "{{link}} until {{date}}. Your link, QR code and photos stay the same. After that date the event and all of its photos and videos are deleted.",
+            "link": "You can upgrade it"
+        }
     },
     "admin": {
         "nav": {

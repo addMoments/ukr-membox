@@ -7,6 +7,8 @@ import V2ExtendStorageModal from './V2ExtendStorageModal';
 import { Event } from '../types/events';
 import { pgREST } from '../client/postgrest';
 import { getEventFeatures } from '../client/features';
+import { fetchUpgradeOptions } from '../client/upgrades';
+import { FREE_PACKAGE_ID } from '../v2-components/UpgradeCard';
 import { unpackUUID } from '../packages/uuid';
 import { t } from '../packages/i18n';
 import '../v2-styles/EventDetailLayout.css';
@@ -25,6 +27,9 @@ function EventDetailLayout({ children }: EventDetailLayoutProps) {
   const [features, setFeatures] = useState<number[]>([]);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [extendModalOpen, setExtendModalOpen] = useState(false);
+  // Free pakette ayni modal uzatmasiz bilgi bildirimi olarak acilir (musteri 19 Kasim).
+  const [isFreeEvent, setIsFreeEvent] = useState(false);
+  const closeExtendModal = useCallback(() => setExtendModalOpen(false), []);
 
   // Ne: Host event detayi ve sidebar event listesini PostgREST'ten ceker.
   // Nasil: Mevcut event'i uid ile, event listesini deleted_at=is.null ve created_at.desc siralamasiyla alir; silinmis event acilmissa /events'e yonlendirir.
@@ -54,23 +59,24 @@ function EventDetailLayout({ children }: EventDetailLayoutProps) {
     fetchData();
   }, [fetchData]);
 
-  // Ne: Backend should_show_extend_prompt=true dondugunde uzatma modal'ini otomatik acar.
-  // Nasil: event yuklendiginde alanin true olup olmadigi kontrol edilir; true ise modal ac.
-  // Neden: Event sahibinin storage suresi dolmadan once otomatik tetiklenmesi backend kararina dayansin.
+  // Ne: Backend should_show_extend_prompt=true dondugunde ya da mail linkindeki ?prompt=extend ile
+  //     uzatma modal'ini acar; once etkinligin paketine bakar.
+  // Nasil: Paket yukseltme secenekleri ucundan (current_package) okunur; free ise modal uzatmasiz
+  //        bildirim olarak acilir. Uc hata verirse normal uzatma modal'i acilir.
+  // Neden: Free'de uzatma yok (backend de reddeder); host yalniz kalan sureyi ve yukseltme yolunu gorur.
+  const wantsExtendPrompt = !!event.uid
+    && (!!event.should_show_extend_prompt || searchParams.get('prompt') === 'extend');
   useEffect(() => {
-    if (event?.should_show_extend_prompt) {
-      setExtendModalOpen(true);
-    }
-  }, [event?.should_show_extend_prompt]);
-
-  // Ne: Mail/deep link uzerinden gelen ?prompt=extend query parametresine cevap olarak modal'i acar.
-  // Nasil: Event yuklendikten sonra (event.uid varken) URL parametresi 'extend' ise modal acilir.
-  // Neden: Backend bayragi false donse bile mail butonu link'iyle gelen kullanici icin cift garanti.
-  useEffect(() => {
-    if (searchParams.get('prompt') === 'extend' && event.uid) {
-      setExtendModalOpen(true);
-    }
-  }, [searchParams, event.uid]);
+    if (!wantsExtendPrompt || !packedUid) return undefined;
+    let cancelled = false;
+    fetchUpgradeOptions(packedUid)
+      .then((res) => !cancelled && setIsFreeEvent(res?.current_package?.id === FREE_PACKAGE_ID))
+      .catch(() => !cancelled && setIsFreeEvent(false))
+      .finally(() => !cancelled && setExtendModalOpen(true));
+    return () => {
+      cancelled = true;
+    };
+  }, [wantsExtendPrompt, packedUid]);
 
   useEffect(() => {
     if (!mobileNavOpen) {
@@ -165,10 +171,12 @@ function EventDetailLayout({ children }: EventDetailLayoutProps) {
       <V2ExtendStorageModal
         open={extendModalOpen}
         packedUid={packedUid || ''}
-        onClose={() => setExtendModalOpen(false)}
+        onClose={closeExtendModal}
         onSuccess={handleExtendSuccess}
         onRefetch={handleExtendRefetch}
         onEventClosed={handleEventClosed}
+        isFree={isFreeEvent}
+        storageUntil={event.storage_until}
       />
 
       <Footer />
