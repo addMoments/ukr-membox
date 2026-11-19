@@ -203,39 +203,75 @@
   }
 }
 
-/* Free paket bildirimi (musteri 19 Kasim): dugme yok, 5 sn'de kapanir; alttaki ince cubuk kalan sureyi gosterir. */
+/* Free paket bildirimi (musteri tasarimi 19 Kasim 17:05): ikon ve sure cubugu yok, 5 sn'de kapanir. */
 .extend-modal-free {
-  overflow: hidden;
-  padding-bottom: 40px;
+  max-width: 600px;
+  padding: 56px 40px 40px;
+}
+
+.extend-modal-free .extend-modal-title {
+  margin-bottom: 10px;
+  font-size: 32px;
+  letter-spacing: -0.8px;
+}
+
+.extend-modal-free-plan {
+  margin: 0 0 22px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #292524;
 }
 
 .extend-modal-free .extend-modal-message {
-  margin-bottom: 0;
+  margin: 0;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e7e5e4;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #1c1917;
 }
 
 .extend-modal-link {
-  color: #1a1d21;
+  color: #8db600;
   font-weight: 700;
+  text-decoration: none;
+}
+
+.extend-modal-link:hover {
+  color: #7a9e00;
   text-decoration: underline;
-  text-decoration-color: #d2e823;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 3px;
 }
 
-.extend-modal-timer {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 4px;
-  width: 100%;
-  background: #d2e823;
-  transform-origin: left center;
-  animation-name: extend-modal-timer;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
+.extend-modal-free-note {
+  margin: 22px auto 0;
+  max-width: 400px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #78716c;
 }
 
-@keyframes extend-modal-timer {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
+@media (max-width: 600px) {
+  .extend-modal-free {
+    padding: 48px 22px 28px;
+  }
+
+  .extend-modal-free .extend-modal-title {
+    font-size: 24px;
+  }
+
+  .extend-modal-free-plan {
+    font-size: 15px;
+    margin-bottom: 18px;
+  }
+
+  .extend-modal-free .extend-modal-message {
+    font-size: 15px;
+    padding-bottom: 18px;
+  }
+
+  .extend-modal-free-note {
+    font-size: 14px;
+    margin-top: 18px;
+  }
 }

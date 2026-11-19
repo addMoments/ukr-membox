@@ -27,22 +27,6 @@ interface V2ExtendStorageModalProps {
 // Free bildirimi kendiliginden kapanmadan once ekranda kalma suresi (musteri: 5 saniye).
 const FREE_NOTICE_MS = 5000;
 
-const daysLeft = (storageUntil?: string | null) => {
-  if (!storageUntil) return 0;
-  const ms = new Date(storageUntil).getTime() - Date.now();
-  return Math.max(1, Math.ceil(ms / 86400000));
-};
-
-// "7 days" / "7 днів": Ukraynacada 1 день, 2-4 дні, 5+ днів (11-14 днів).
-const dayUnit = (n: number) => {
-  if (t('lang_code') !== 'uk') return n === 1 ? 'day' : 'days';
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'день';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'дні';
-  return 'днів';
-};
-
 // Ne: extendStorage namespace'i icin tum fallback metinleri (en/uk).
 // Nasil: i18n S3'ten yukledigi icin lokal lang dosyasi guncellense bile build ortaminda key bulunamayabiliyor; t() o durumda raw key'i (orn. "extendStorage.modalTitle") donuyor. Bu yuzden burada hardcoded fallback tutuyoruz.
 // Neden: i18n cache'i yenilenene kadar UI'da raw key gorunmesin; dile gore Ukraynaca/Ingilizce metin dogru gozuksun.
@@ -138,23 +122,25 @@ function V2ExtendStorageModal({
   if (!open) return null;
 
   if (isFree) {
-    const count = daysLeft(storageUntil);
     // Silme storage_until anindadir (gece yarisi, UTC); kullaniciya son tam gun yazilir: 19 Kasim'da baslayan
     // 7 gunluk free 26 Kasim 00:00'da silinir, son gun 25 Kasim (musteri ornegi: 1 Kasim -> 7 Kasim).
+    const isUk = t('lang_code') === 'uk';
     const date = storageUntil
       ? new Date(new Date(storageUntil).getTime() - 1000)
-        .toLocaleDateString(t('lang_code'), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
-        // "25 листопада 2026 р." + cumlenin noktasi = "р.."; tarihin sondaki noktasi atilir.
-        .replace(/\.$/, '')
+        .toLocaleDateString(isUk ? 'uk' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+        // Musteri tasarimi (19 Kasim 17:09): "25 листопада 2026 року" ("р." kisaltmasi yerine).
+        .replace(/\s*р\.$/, ' року')
       : '';
     const message = textOr(
       'extendStorage.free.message',
-      '{{link}} until {{date}}. Your link, QR code and photos stay the same. After that date the event and all of its photos and videos are deleted.',
-      '{{link}} до {{date}}. Посилання, QR-код і фото залишаться. Після цієї дати івент і всі його фото та відео буде видалено.',
+      '{{link}} {{date}} to keep your memories longer.',
+      '{{link}} {{date}}, щоб зберігати спогади довше.',
       // {{link}} yerinde kalsin diye kendisiyle doldurulur; sonra metin oradan bolunup Link konur.
       { date, link: '{{link}}' },
     );
     const [before, after = ''] = message.split('{{link}}');
+    // Musteri tasarimi (19 Kasim 17:05): ikon ve sure cubugu yok; baslik, paket satiri, lime "Upgrade by" + tarih,
+    // ayirici cizgi, gri hesap notu. 5 sn'de kapanma ayni kaldi.
     return (
       <div className="extend-modal-overlay" onClick={onClose}>
         <div
@@ -168,25 +154,30 @@ function V2ExtendStorageModal({
           <button type="button" className="extend-modal-close" onClick={onClose} aria-label="Close">
             <i className="fa-solid fa-xmark" />
           </button>
-          <div className="extend-modal-icon">
-            <i className="fa-regular fa-clock" />
-          </div>
           <h2 id="extend-modal-title" className="extend-modal-title">
-            {textOr(
-              'extendStorage.free.title',
-              'Your free event will be deleted in {{count}} {{unit}}',
-              'Ваш безкоштовний івент буде видалено через {{count}} {{unit}}',
-              { count, unit: dayUnit(count) },
-            )}
+            {textOr('extendStorage.free.title', 'Try Out Your Free Event', 'Спробуйте безкоштовну подію')}
           </h2>
+          <p className="extend-modal-free-plan">
+            {textOr(
+              'extendStorage.free.plan',
+              'Enjoy 30 photos, 7 days of upload & storage.',
+              '30 фото, 7 днів на завантаження та зберігання.',
+            )}
+          </p>
           <p id="extend-modal-message" className="extend-modal-message">
             {before}
             <Link to={`/event/${packedUid}/upgrade`} className="extend-modal-link" onClick={onClose}>
-              {textOr('extendStorage.free.link', 'You can upgrade it', 'Ви можете покращити пакет')}
+              {textOr('extendStorage.free.link', 'Upgrade by', 'Оновіть тариф до')}
             </Link>
             {after}
           </p>
-          <span className="extend-modal-timer" style={{ animationDuration: `${FREE_NOTICE_MS}ms` }} />
+          <p className="extend-modal-free-note">
+            {textOr(
+              'extendStorage.free.note',
+              'Your account will always be here, so you can come back anytime and create more events.',
+              'Ваш акаунт завжди доступний, тож Ви можете будь-коли повернутись та створити нові події.',
+            )}
+          </p>
         </div>
       </div>
     );

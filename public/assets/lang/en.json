@@ -897,9 +897,11 @@
         "toastForbidden": "You don't have permission to extend this event",
         "toastUnknown": "Something went wrong, please try again",
         "free": {
-            "title": "Your free event will be deleted in {{count}} {{unit}}",
-            "message": "{{link}} until {{date}}. Your link, QR code and photos stay the same. After that date the event and all of its photos and videos are deleted.",
-            "link": "You can upgrade it"
+            "title": "Try Out Your Free Event",
+            "plan": "Enjoy 30 photos, 7 days of upload & storage.",
+            "message": "{{link}} {{date}} to keep your memories longer.",
+            "link": "Upgrade by",
+            "note": "Your account will always be here, so you can come back anytime and create more events."
         }
     },
     "admin": {
