@@ -19,13 +19,13 @@ interface V2ExtendStorageModalProps {
   onSuccess: (storageUntil: string) => void;
   onRefetch: () => void;
   onEventClosed: () => void;
-  // Free paket (musteri 19 Kasim): uzatma yok; kalan gun + yukseltme son tarihi, dugme yok, 5 sn'de kapanir.
+  // Free paket (musteri 19 Kasim): uzatma yok; kalan gun + yukseltme son tarihi, dugme yok, 9 sn'de kapanir.
   isFree?: boolean;
   storageUntil?: string | null;
 }
 
-// Free bildirimi kendiliginden kapanmadan once ekranda kalma suresi (musteri: 5 saniye).
-const FREE_NOTICE_MS = 5000;
+// Free bildirimi kendiliginden kapanmadan once ekranda kalma suresi (musteri: 5 sn, 19 Kasim 21:06'dan beri 9 sn).
+const FREE_NOTICE_MS = 9000;
 
 // Ne: extendStorage namespace'i icin tum fallback metinleri (en/uk).
 // Nasil: i18n S3'ten yukledigi icin lokal lang dosyasi guncellense bile build ortaminda key bulunamayabiliyor; t() o durumda raw key'i (orn. "extendStorage.modalTitle") donuyor. Bu yuzden burada hardcoded fallback tutuyoruz.
@@ -94,7 +94,7 @@ function V2ExtendStorageModal({
 }: V2ExtendStorageModalProps) {
   const [submitting, setSubmitting] = useState(false);
 
-  // Free bildirimi 5 sn sonra kendiliginden kapanir; X ve arka plana tiklama yine calisir.
+  // Free bildirimi 9 sn sonra kendiliginden kapanir; X ve arka plana tiklama yine calisir.
   useEffect(() => {
     if (!open || !isFree) return undefined;
     const timer = window.setTimeout(onClose, FREE_NOTICE_MS);
@@ -140,7 +140,7 @@ function V2ExtendStorageModal({
     );
     const [before, after = ''] = message.split('{{link}}');
     // Musteri tasarimi (19 Kasim 17:05): ikon ve sure cubugu yok; baslik, paket satiri, lime "Upgrade by" + tarih,
-    // ayirici cizgi, gri hesap notu. 5 sn'de kapanma ayni kaldi.
+    // ayirici cizgi, gri hesap notu. 9 sn'de kapanir.
     return (
       <div className="extend-modal-overlay" onClick={onClose}>
         <div
