@@ -1,0 +1,248 @@
+/* Etkinlige sonradan ek urun sayfasi (pages/event-detail/addons.tsx) ve panodaki Add-ons karti
+   (v2-components/AddonsCard.tsx). Sayfa duzeni Checkout.css'ten (checkout-grid/summary/item). */
+
+.event-addons-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.event-addons-back:hover {
+  color: #1A1D21;
+}
+
+.event-addons-head {
+  margin: 20px 0 36px;
+  text-align: left;
+}
+
+/* Checkout sayfa duzeninden ortalanmis metin miras alinmasin. */
+.event-addons-page .event-addons-available,
+.event-addons-page .event-addons-summary-empty,
+.addons-card {
+  text-align: left;
+}
+
+.event-addons-title {
+  font-size: 36px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: #1A1D21;
+  margin: 0 0 8px;
+}
+
+.event-addons-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.event-addons-empty {
+  font-size: 16px;
+  color: #4b5563;
+  padding: 32px 0;
+}
+
+.event-addons-available-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1D21;
+  margin: 8px 0 16px;
+}
+
+.event-addons-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .event-addons-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.event-addons-tile {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.event-addons-tile-image {
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  background-position: center;
+  background-color: #f3f4f6;
+}
+
+.event-addons-tile-icon {
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
+
+.event-addons-tile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 18px;
+  flex: 1;
+}
+
+.event-addons-tile-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1D21;
+  margin: 0;
+}
+
+.event-addons-tile-desc {
+  font-size: 14px;
+  line-height: 1.45;
+  color: #4b5563;
+  margin: 0;
+}
+
+.event-addons-tile-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.event-addons-tile-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1D21;
+}
+
+.event-addons-tile-add {
+  border: none;
+  border-radius: 999px;
+  background: #1A1D21;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.event-addons-tile-add:hover {
+  background: #33373d;
+}
+
+.event-addons-tile-note {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.event-addons-summary-empty {
+  font-size: 15px;
+  color: #4b5563;
+  margin: 0 0 16px;
+}
+
+.event-addons-error {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 12px 0 0;
+}
+
+.event-addons-page .checkout-complete-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .event-addons-title {
+    font-size: 28px;
+  }
+}
+
+/* Panodaki kart */
+.addons-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addons-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1D21;
+  margin: 0;
+}
+
+.addons-card-text {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 0;
+}
+
+.addons-card-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.addons-card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: #1A1D21;
+}
+
+.addons-card-item-price {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.addons-card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  background: #1A1D21;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 20px;
+  text-decoration: none;
+}
+
+.addons-card-btn:hover {
+  background: #33373d;
+  color: #fff;
+}
+
+.addons-card-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #15803d;
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 10px 12px;
+}

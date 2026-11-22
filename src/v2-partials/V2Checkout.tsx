@@ -21,7 +21,7 @@ import { markMetaEventOnce, trackMetaAddToCart } from '../client/meta-pixel';
 import { formatUah } from '../utils/money';
 import { addonImages } from '../utils/addon_images';
 
-interface ShippingAddress {
+export interface ShippingAddress {
   full_name: string;
   phone: string;
   city_ref: string;       // NP DeliveryCity UUID
@@ -30,7 +30,7 @@ interface ShippingAddress {
   warehouse_name: string; // display only
 }
 
-interface ConfigField {
+export interface ConfigField {
   key: string;
   label: string;
   label_uk?: string;
@@ -38,7 +38,7 @@ interface ConfigField {
   maxLength?: number;
 }
 
-interface Overlay {
+export interface Overlay {
   type: 'text' | 'qr';
   field_key?: string;   // for type=text: which config field to read
   value?: string;       // for type=qr: static value (placeholder)
@@ -54,7 +54,7 @@ interface Overlay {
   placeholder?: string;
 }
 
-interface Design {
+export interface Design {
   id: string;
   label: string;
   label_uk?: string;
@@ -102,7 +102,7 @@ function buildMetaCartSignature(cartItems: ReadonlyArray<{ product_uid: string; 
 
 // Ne: Iletisim telefonunu "+380991234567" bicimine getirir: bosluk, tire, parantez atilir; Ukrayna'nin yerel
 //     "099..." ve kodsuz "99..." yazimlari +380'e cevrilir, ulke kodlu numaralar oldugu gibi kalir.
-const normalizeContactPhone = (raw: string) => {
+export const normalizeContactPhone = (raw: string) => {
   const digits = raw.replace(/\D/g, '');
   if (!digits) return '';
   if (raw.trim().startsWith('+')) return `+${digits}`;
@@ -112,7 +112,7 @@ const normalizeContactPhone = (raw: string) => {
 };
 
 // Uluslararasi numaralar 9-15 hane (E.164); backend ayni kurali uygular (product.go Purchase).
-const isContactPhoneValid = (raw: string) => /^\+\d{9,15}$/.test(normalizeContactPhone(raw));
+export const isContactPhoneValid = (raw: string) => /^\+\d{9,15}$/.test(normalizeContactPhone(raw));
 
 function V2Checkout() {
   const cart = useSnapshot(cartState);
@@ -841,7 +841,7 @@ function BannerCanvas({ design, config }: BannerCanvasProps) {
   );
 }
 
-interface CartItemCardProps {
+export interface CartItemCardProps {
   product: Product;
   displayName: string;
   displayDescription: string;
@@ -854,7 +854,7 @@ interface CartItemCardProps {
   useSpecialImages?: boolean;
 }
 
-function CartItemCard({ product, displayName, displayDescription, quantity, config, onConfigChange, onQtyChange, onRemove, useSpecialImages = false }: CartItemCardProps) {
+export function CartItemCard({ product, displayName, displayDescription, quantity, config, onConfigChange, onQtyChange, onRemove, useSpecialImages = false }: CartItemCardProps) {
   const isPhysical = product.fullfillment_type === 'physical';
   const isAddOn = !!product.is_add_on;
   const showQuantityStepper = isAddOn && !SINGLE_QUANTITY_ADDON_IDS.has(product.id);
@@ -1170,7 +1170,7 @@ const nameErrorText = (field: 'firstName' | 'lastName', code: NameErrorCode): st
   return textOr(entry.key, entry.en, entry.uk);
 };
 
-function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
+export function AddressModal({ initial, onConfirm, onClose }: AddressModalProps) {
   const nameParts = initial?.full_name?.trim().split(/\s+/) || [];
   const [firstName, setFirstName] = useState(nameParts[0] || '');
   const [lastName, setLastName] = useState(nameParts.slice(1).join(' ') || '');

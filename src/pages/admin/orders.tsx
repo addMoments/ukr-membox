@@ -25,6 +25,8 @@ interface OrderSummary {
   // Excel 2.18: mevcut bir etkinligin yukseltmesi; uygulanmadiysa applied_at bos.
   upgrade_event_uid?: string | null;
   upgrade_applied_at?: string | null;
+  // 'upgrade' ya da 'addons' (etkinlige sonradan alinan ek urunler)
+  event_order_kind?: string | null;
 }
 
 interface OrderFilters {
@@ -255,9 +257,13 @@ function AdminOrders() {
                     {order.buyer_name && <span className="admin-order-card-name">{order.buyer_name}</span>}
                     {order.upgrade_event_uid && (
                       <span className="admin-order-card-name">
-                        {order.upgrade_applied_at
-                          ? at('admin.orders.upgradeApplied', 'Upgrade · applied', 'Покращення · застосовано')
-                          : at('admin.orders.upgradeNotApplied', 'Upgrade · not applied', 'Покращення · не застосовано')}
+                        {order.event_order_kind === 'addons'
+                          ? (order.upgrade_applied_at
+                            ? at('admin.orders.addonsApplied', 'Add-ons for an event · applied', 'Послуги для події · застосовано')
+                            : at('admin.orders.addonsNotApplied', 'Add-ons for an event · not applied', 'Послуги для події · не застосовано'))
+                          : order.upgrade_applied_at
+                            ? at('admin.orders.upgradeApplied', 'Upgrade · applied', 'Покращення · застосовано')
+                            : at('admin.orders.upgradeNotApplied', 'Upgrade · not applied', 'Покращення · не застосовано')}
                       </span>
                     )}
                   </div>

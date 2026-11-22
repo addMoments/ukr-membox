@@ -12,6 +12,7 @@ import ColoredSettingsBox from '../v2-components/ColoredSettingsBox';
 import '../styles/EventHomeContent.css';
 import ActivityOverviewCard from '../v2-components/ActivityOverviewCard';
 import UpgradeCard, { FREE_PACKAGE_ID } from '../v2-components/UpgradeCard';
+import AddonsCard from '../v2-components/AddonsCard';
 import { UpgradeOptionsResponse } from '../client/upgrades';
 import { textOr } from '../utils/admin_i18n';
 import EmptyState from '../v2-components/EmptyState';
@@ -450,6 +451,8 @@ function EventHomeContent({
           />
 
           <UpgradeCard packedUid={packedUid} onOptions={handleUpgradeOptions} />
+
+          <AddonsCard packedUid={packedUid} />
 
           <ActivityOverviewCard
             stats={[
