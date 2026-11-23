@@ -39,6 +39,8 @@
   font-size: 16px;
   color: #6b7280;
   margin: 0;
+  /* App.css'teki global "p { text-align: center }" basligin altinda ortaliyordu; baslik sola dayali. */
+  text-align: left;
 }
 
 .event-addons-empty {

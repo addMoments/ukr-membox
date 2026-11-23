@@ -261,6 +261,10 @@ function AdminOrders() {
                           ? (order.upgrade_applied_at
                             ? at('admin.orders.addonsApplied', 'Add-ons for an event · applied', 'Послуги для події · застосовано')
                             : at('admin.orders.addonsNotApplied', 'Add-ons for an event · not applied', 'Послуги для події · не застосовано'))
+                          : order.event_order_kind === 'upgrade_addons'
+                            ? (order.upgrade_applied_at
+                              ? at('admin.orders.upgradeAddonsApplied', 'Upgrade + add-ons · applied', 'Покращення + послуги · застосовано')
+                              : at('admin.orders.upgradeAddonsNotApplied', 'Upgrade + add-ons · not applied', 'Покращення + послуги · не застосовано'))
                           : order.upgrade_applied_at
                             ? at('admin.orders.upgradeApplied', 'Upgrade · applied', 'Покращення · застосовано')
                             : at('admin.orders.upgradeNotApplied', 'Upgrade · not applied', 'Покращення · не застосовано')}

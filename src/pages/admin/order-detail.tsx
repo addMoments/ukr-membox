@@ -96,8 +96,9 @@ interface OrderDetail {
     event_name: string;
     paid: boolean;
     applied_at: string | null;
-    // 'upgrade' paket/sure yukseltmesi, 'addons' etkinlige sonradan alinan ek urunler (event-addons.go)
-    kind?: 'upgrade' | 'addons' | '';
+    // 'upgrade' paket/sure yukseltmesi, 'addons' etkinlige sonradan alinan ek urunler (event-addons.go),
+    // 'upgrade_addons' eklerle birlikte paket yukseltmesi (free yukseltmesinin 2. adimi, 23 Kasim 2026)
+    kind?: 'upgrade' | 'addons' | 'upgrade_addons' | '';
   };
 }
 
@@ -470,7 +471,9 @@ function UpgradeCard({
         <h3 className="admin-resend-activation-title">
           {upgrade.kind === 'addons'
             ? at('admin.orderDetail.addonsTitle', 'Add-ons for an existing event', 'Додаткові послуги для наявної події')
-            : at('admin.orderDetail.upgradeTitle', 'Upgrade of an existing event', 'Покращення наявної події')}
+            : upgrade.kind === 'upgrade_addons'
+              ? at('admin.orderDetail.upgradeAddonsTitle', 'Upgrade with add-ons for an existing event', 'Покращення з послугами для наявної події')
+              : at('admin.orderDetail.upgradeTitle', 'Upgrade of an existing event', 'Покращення наявної події')}
         </h3>
         <p className="admin-resend-activation-hint">
           {upgrade.event_name || at('admin.orderDetail.untitledEvent', 'Untitled event', 'Подія без назви')} · {upgrade.event_packed_uid}

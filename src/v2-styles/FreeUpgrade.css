@@ -231,3 +231,15 @@
     font-size: 15px;
   }
 }
+
+/* Yukseltme 2. adimi (paketle birlikte ekler, 23 Kasim 2026): basligin ustundeki adim etiketi. */
+.free-upgrade-step {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+  /* global p { text-align: center } kuralini ezer. */
+  text-align: left;
+}

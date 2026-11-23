@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import V2Header from '../../v2-components/V2Header';
 import V2Footer from '../../v2-components/V2Footer';
+import AddonsCheckout from '../../v2-components/AddonsCheckout';
+import { addonErrorMessage } from './addons';
 import { PackageCard } from '../../v2-partials/V2EventNew';
 import { getPaywallProducts } from '../../client/cart';
 import {
@@ -27,6 +29,10 @@ import '../../v2-styles/FreeUpgrade.css';
 // gecer ve bekleme sayfasi hostu /event/<uid>?upgrade=done'a geri yollar.
 // Secenekler sunucudan (yalniz gecerli paketi free olan etkinlige); kart metinleri /api/products'tan
 // (yalniz acik urunler, yani admin'in kapattigi paket burada da gorunmez).
+// 2. adim (Fatih 23 Kasim 2026, "Option 2"): paket secilip "Continue"a basilinca o paketle alinabilecek ekler
+// gelir (secenegin addons listesi; Premium'a reklam alani, ozel paketlere reklam alani, hicbir pakete sesli mesaj
+// satilmaz). Ekler istege bagli; tek odeme paket + ekler. Adim adreste (?package=<secenek id>), tarayicinin geri
+// tusu 1. adima doner. Paketle ek gelmiyorsa (liste bos) dugme eskisi gibi dogrudan odemeyi acar.
 
 type TabKey = 'events' | 'school' | 'hero';
 const TAB_ORDER: TabKey[] = ['events', 'school', 'hero'];
@@ -85,6 +91,9 @@ interface Choice {
 
 function EventUpgrade() {
   const { uid: packedUid = '' } = useParams<{ uid: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [data, setData] = useState<UpgradeOptionsResponse | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,12 +149,31 @@ function EventUpgrade() {
   const tabs = TAB_ORDER.filter((key) => choicesByTab[key].length > 0);
   const activeTab = tab && tabs.includes(tab) ? tab : tabs[0];
   const shown = activeTab ? choicesByTab[activeTab] : [];
-  const selectedChoice = tabs.flatMap((key) => choicesByTab[key]).find((c) => c.option.id === selected) || null;
+  const allChoices = tabs.flatMap((key) => choicesByTab[key]);
+  const selectedChoice = allChoices.find((c) => c.option.id === selected) || null;
   const eventHref = `/event/${packedUid}`;
   const isFree = data?.current_package?.id === 'free';
+  // 2. adim: adresteki paket gecerli ve o paketle ek satiliyorsa.
+  const addonsChoice = allChoices.find((c) => c.option.id === searchParams.get('package')) || null;
+  const addonsStep = !!addonsChoice && (addonsChoice.option.addons || []).length > 0 && !!data?.window_open && isFree;
+  const selectedHasAddons = (selectedChoice?.option.addons || []).length > 0;
+
+  // Adres degisince sayfanin basina (2. adima geciste ve geri donuste).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [addonsStep]);
+  // Geri tusuyla 1. adima donulunce adimdaki paket secili kalsin.
+  useEffect(() => {
+    if (addonsChoice) setSelected(addonsChoice.option.id);
+  }, [addonsChoice]);
 
   const pay = async () => {
     if (!selectedChoice || busy) return;
+    if (selectedHasAddons) {
+      setError('');
+      setSearchParams({ package: selectedChoice.option.id }, { state: { fromPackages: true } });
+      return;
+    }
     setBusy(true);
     setError('');
     try {
@@ -156,6 +184,65 @@ function EventUpgrade() {
       setError(errorMessage(err));
     }
   };
+
+  if (addonsStep && addonsChoice) {
+    const packageName = displayName(addonsChoice.product);
+    const packagePrice = Number(addonsChoice.option.price);
+    return (
+      <div className="checkout-page event-addons-page free-upgrade-addons-page">
+        <V2Header />
+        <main className="checkout-main">
+          <Link
+            to={`/event/${packedUid}/upgrade`}
+            replace
+            className="event-addons-back"
+            onClick={(e) => {
+              // 1. adimdan gelindiyse geri git (gecmiste ayni sayfa iki kez kalmasin).
+              if ((location.state as { fromPackages?: boolean } | null)?.fromPackages) {
+                e.preventDefault();
+                navigate(-1);
+              }
+            }}
+          >
+            <i className="fa-solid fa-arrow-left" />
+            {textOr('eventHome.freeUpgrade.changePackage', 'Change package', 'Змінити пакет')}
+          </Link>
+          <header className="event-addons-head">
+            <p className="free-upgrade-step">{textOr('eventHome.freeUpgrade.step2', 'Step 2 of 2', 'Крок 2 з 2')}</p>
+            <h1 className="event-addons-title">{textOr('eventHome.freeUpgrade.addonsTitle', 'Add extras (optional)', 'Додайте послуги (за бажанням)')}</h1>
+            <p className="event-addons-subtitle">
+              {textOr(
+                'eventHome.freeUpgrade.addonsSubtitle',
+                'Add-ons for your {{name}} package, paid together with the upgrade. You can also add them later from your event.',
+                'Послуги до пакета {{name}}, оплата разом із покращенням. Їх також можна додати пізніше на сторінці події.',
+                { name: packageName },
+              )}
+            </p>
+          </header>
+          <AddonsCheckout
+            key={addonsChoice.option.id}
+            options={addonsChoice.option.addons || []}
+            allowEmpty
+            leadRows={[{
+              key: addonsChoice.option.id,
+              label: textOr('eventHome.freeUpgrade.packageRow', '{{name}} package', 'Пакет {{name}}', { name: packageName }),
+              amount: packagePrice,
+            }]}
+            payLabel={(total) => textOr('eventHome.addons.pay', 'Pay {{price}}', 'Сплатити {{price}}', { price: formatUah(total) })}
+            onPay={(payload) => startUpgradePayment(
+              packedUid,
+              [{ product_id: addonsChoice.option.id, quantity: 1 }, ...payload.items],
+              payload.items.length > 0
+                ? { phone: payload.phone, buyer_configs: payload.buyer_configs, shipping_address: payload.shipping_address }
+                : undefined,
+            )}
+            errorMessage={addonErrorMessage}
+          />
+        </main>
+        <V2Footer />
+      </div>
+    );
+  }
 
   const backLink = (
     <Link to={eventHref} className="free-upgrade-back">
@@ -228,9 +315,13 @@ function EventUpgrade() {
             <button type="button" className="free-upgrade-pay" disabled={!selectedChoice || busy} onClick={pay}>
               {busy
                 ? textOr('eventHome.freeUpgrade.opening', 'Opening payment…', 'Відкриваємо оплату…')
-                : textOr('eventHome.freeUpgrade.pay', 'Upgrade · {{price}}', 'Покращити · {{price}}', {
-                  price: formatUah(selectedChoice ? selectedChoice.option.price : 0),
-                })}
+                : selectedHasAddons
+                  ? textOr('eventHome.freeUpgrade.continue', 'Continue · {{price}}', 'Продовжити · {{price}}', {
+                    price: formatUah(selectedChoice ? selectedChoice.option.price : 0),
+                  })
+                  : textOr('eventHome.freeUpgrade.pay', 'Upgrade · {{price}}', 'Покращити · {{price}}', {
+                    price: formatUah(selectedChoice ? selectedChoice.option.price : 0),
+                  })}
             </button>
           </div>
           {error && <p className="free-upgrade-error" role="alert">{error}</p>}
