@@ -173,7 +173,10 @@ function AddonsCheckout({ options, leadRows = [], allowEmpty = false, payLabel, 
           {available.length > 0 && (
             <section className="event-addons-available" aria-label={textOr('eventHome.addons.availableTitle', 'Available add-ons', 'Доступні послуги')}>
               {selected.length > 0 && (
-                <h2 className="event-addons-available-title">{textOr('eventHome.addons.more', 'Add more', 'Додати ще')}</h2>
+                <h2 className="event-addons-available-title">
+                  <span className="event-addons-available-icon" aria-hidden="true"><i className="fa-solid fa-plus" /></span>
+                  {textOr('eventHome.addons.more', 'Add more', 'Додати ще')}
+                </h2>
               )}
               <div className="event-addons-grid">
                 {available.map((product) => {

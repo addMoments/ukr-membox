@@ -49,11 +49,30 @@
   padding: 32px 0;
 }
 
+/* "Add more" basligi daha belirgin (ekip 23 Kasim 2026): lime "+" rozeti, daha buyuk ve kalin yazi. */
 .event-addons-available-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1A1D21;
-  margin: 8px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #191B0E;
+  margin: 24px 0 20px;
+}
+
+.event-addons-available-icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #D2E823;
+  color: #191B0E;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
 }
 
 .event-addons-grid {
@@ -166,9 +185,120 @@
   cursor: not-allowed;
 }
 
+/* Order Summary bu sayfalarda (sonradan ek + yukseltmenin 2. adimi) daha kompakt ve eklerden belirgin bir
+   boslukla ayri (ekip 23 Kasim 2026): masaustunde ozet sutunu dar, aradaki bosluk genis; icerik orantili kucuk.
+   Services & Prices checkout'u degismez. */
+@media (min-width: 1024px) {
+  .event-addons-page .checkout-grid {
+    grid-template-columns: minmax(0, 1fr) clamp(320px, 28vw, 380px);
+    column-gap: clamp(64px, 7vw, 112px);
+  }
+}
+
+.event-addons-page .checkout-summary {
+  padding: 28px;
+  border-radius: 20px;
+  /* Yapiskan ozet sabit header'in (72px) altinda dursun; 48px'te ust kenari header'in altinda kaliyordu. */
+  top: 96px;
+}
+
+.event-addons-page .checkout-summary-title {
+  font-size: 22px;
+  margin: 0 0 20px;
+}
+
+.event-addons-page .checkout-summary-rows {
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.event-addons-page .checkout-summary-row {
+  gap: 12px;
+  font-size: 15px;
+}
+
+.event-addons-page .checkout-summary-row-value {
+  white-space: nowrap;
+}
+
+.event-addons-page .checkout-summary-total {
+  padding-top: 12px;
+}
+
+.event-addons-page .checkout-summary-total-label {
+  font-size: 16px;
+}
+
+.event-addons-page .checkout-summary-total-value {
+  font-size: 34px;
+}
+
+.event-addons-page .event-addons-summary-empty {
+  font-size: 13px;
+  margin: 0;
+}
+
+.event-addons-page .checkout-email-group {
+  margin-bottom: 24px;
+}
+
+.event-addons-page .checkout-email-label {
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.event-addons-page .checkout-email-input {
+  height: 50px;
+  padding: 0 22px;
+  font-size: 16px;
+}
+
+.event-addons-page .checkout-shipping-section {
+  margin-bottom: 24px;
+  padding-top: 20px;
+}
+
+.event-addons-page .checkout-complete-btn {
+  height: 60px;
+  padding: 0 14px 0 28px;
+}
+
+.event-addons-page .checkout-complete-btn-text {
+  font-size: 16px;
+}
+
+.event-addons-page .checkout-complete-btn-icon {
+  width: 36px;
+  height: 36px;
+}
+
 @media (max-width: 768px) {
   .event-addons-title {
     font-size: 28px;
+  }
+
+  .event-addons-available-title {
+    font-size: 22px;
+    gap: 10px;
+  }
+
+  .event-addons-available-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .event-addons-page .checkout-summary {
+    padding: 22px;
+  }
+
+  .event-addons-page .checkout-summary-total-value {
+    font-size: 30px;
+  }
+
+  .event-addons-page .checkout-complete-btn {
+    height: 56px;
+    padding: 0 12px 0 22px;
   }
 }
 
