@@ -32,6 +32,8 @@ function Participant() {
   const [recentUploads, setRecentUploads] = useState<UploadEntry[]>([]);
   const [participantUid, setParticipantUid] = useState('');
   const [participantName, setParticipantName] = useState('');
+  // Demo etkinliginin sahibi/ortak yoneticisi kendi participant'iyla girdi (serv whoami demo_owner).
+  const [demoOwner, setDemoOwner] = useState(false);
   const [showPackageLimitError, setShowPackageLimitError] = useState(false);
   const [eventClosedMessage, setEventClosedMessage] = useState('');
   // Beklenmeyen bootstrap hatasi: eskiden /404'e yonlendiriliyordu, artik tekrar
@@ -107,6 +109,7 @@ function Participant() {
         }
         const user = await whoAmI();
         setParticipantUid(user.ui);
+        setDemoOwner(user.demo_owner === true);
 
         const [eventData, uploadsData, participantData, advertorialData, albumsData, mediaCounts] = await Promise.all([
           pgREST(`/events_public?uid=eq.${uid}`),
@@ -268,6 +271,7 @@ function Participant() {
       albums={albums}
       albumsLoaded={albumsLoaded}
       albumMediaCounts={albumMediaCounts}
+      demoOwner={demoOwner}
     />
   );
 }

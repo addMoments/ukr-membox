@@ -1,3 +1,4 @@
+import { SERV_ROOT } from "../consts";
 import { get_key, rm_key, set_key } from "../utils/persistence";
 
 type ErrorBody = Record<string, unknown> | null;
@@ -105,8 +106,21 @@ export const fetch = async (url: string, options: RequestInit = {}, config: { bl
 
     if (isGuestVar){
         headers["X-Event"] = guestPackedEventUid();
+        // Ne: Misafir sayfasinda tarayicida hesap girisi varsa hesap token'i ayri baslikla
+        //     yalnizca serv'e gider; Authorization misafir token'i olarak kalir.
+        // Neden: Demo etkinliginin sahibi (partnership@) demo linkinden yukleyince anonim
+        //        ziyaretci sayiliyor, dosyalari bir saatte siliniyordu (Fatih 25 Kasim). Serv
+        //        hesap bu demo etkinliginin yoneticisiyse misafir token'ini sahibin
+        //        participant'iyla verir; diger etkinliklerde basligi yok sayar. PostgREST'e
+        //        ve R2'ye gonderilmez: orada ise yaramaz, CORS on kontrolunu de degistirirdi.
+        if (url.startsWith(SERV_ROOT)) {
+            const accountToken = await get_key("tkn").catch(() => null);
+            if (accountToken) {
+                headers["X-Account-Token"] = accountToken;
+            }
+        }
     }
-    
+
     options.headers = headers;
 
     let res = await window.fetch(url, options);

@@ -52,6 +52,8 @@ export interface V2GuestHomeProps {
   // React disinda; iframe'de yok. Onizleme gercek sayfaya benzesin diye durum cubugu payi ve
   // header'in kopyasi (logo + burger balonu) cizilir.
   preview?: boolean;
+  // Demo etkinliginde sahip/ortak yonetici kendi kimligiyle girdi: yuklemeleri silinmez, not ona gore.
+  demoOwner?: boolean;
 }
 
 // Ne: Tema onizlemesinin ustu: telefonun durum cubugu / dinamik ada payi ve misafir header'inin
@@ -253,6 +255,7 @@ function V2GuestHome({
   albumsLoaded = false,
   albumMediaCounts = null,
   preview = false,
+  demoOwner = false,
 }: V2GuestHomeProps) {
   // Yukleme modali ayri bilesende (GuestUploadModal); dosyalar ref uzerinden verilir.
   const uploadModalRef = useRef<GuestUploadModalHandle>(null);
@@ -422,7 +425,11 @@ function V2GuestHome({
             <p className="guest-home-demo-note" role="note">
               <i className="fa-solid fa-circle-info" aria-hidden="true" />
               <span>
-                {textOr(
+                {demoOwner ? textOr(
+                  'guest.home.demoOwnerNote',
+                  'You are signed in as the owner of this demo event.\nYour uploads stay and have no limit.\nVisitors\' uploads are deleted after 1 hour.',
+                  'Ви увійшли як власник цієї демо-події.\nВаші файли залишаються і не мають ліміту.\nФайли відвідувачів видаляються через 1 годину.',
+                ) : textOr(
                   'guest.home.demoNote',
                   'Attention, this is a demo event.\nAll uploaded files will be visible to other visitors and deleted automatically after 1 hour.\nLimit: up to {{max}} files.',
                   'Увага, це демо-подія.\nУсі завантажені файли будуть видимі іншим відвідувачам і автоматично видаляться через 1 годину.\nЛіміт: до {{max}} файлів.',

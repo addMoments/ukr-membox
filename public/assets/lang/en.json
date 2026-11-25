@@ -662,6 +662,7 @@
             "guestbook": "Guestbook",
             "privateSecure": "100% private and secure. No account required.",
             "demoNote": "Attention, this is a demo event.\nAll uploaded files will be visible to other visitors and deleted automatically after 1 hour.\nLimit: up to {{max}} files.",
+            "demoOwnerNote": "You are signed in as the owner of this demo event.\nYour uploads stay and have no limit.\nVisitors' uploads are deleted after 1 hour.",
             "sponsored": "Promotions"
         },
         "album": {
