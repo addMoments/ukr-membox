@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ProductIcon from './ProductIcon';
 import {
   AddressModal,
@@ -12,6 +12,8 @@ import {
 } from '../v2-partials/V2Checkout';
 import { UpgradeItem } from '../client/upgrades';
 import { getQtyRule } from '../client/cart';
+import { getPromoErrorMessage, isPromoError, validatePromoCode } from '../client/promo';
+import { PromoValidationResponse } from '../types/promo';
 import { Product } from '../types/products';
 import { t } from '../packages/i18n';
 import { textOr } from '../utils/admin_i18n';
@@ -34,6 +36,8 @@ export interface AddonsCheckoutPayload {
   // product_id -> config alanlarinin JSON metni (design_id dahil), checkout ile ayni bicim
   buyer_configs: Record<string, string>;
   shipping_address: ShippingAddress | null;
+  // Uygulanmis promosyon kodu (yalniz promoItems verildiyse ve Apply basariliysa).
+  promo_code?: string;
 }
 
 interface LeadRow {
@@ -51,6 +55,9 @@ interface Props {
   payLabel: (total: number, selectedCount: number) => string;
   onPay: (payload: AddonsCheckoutPayload) => Promise<void>;
   errorMessage: (err: unknown) => string;
+  // Verilirse ozette promosyon kodu alani cikar (yalniz free paketten yukseltme, Fatih 24 Kasim 2026). Deger,
+  // leadRows'un dogrulamaya giden kalemleri (urun id -> adet); secili ekler yanina eklenir.
+  promoItems?: Record<string, number>;
 }
 
 const isUk = () => t('lang_code') === 'uk';
@@ -59,7 +66,7 @@ const displayDescription = (p: Product) => (isUk()
   ? p.display_description_uk || p.display_description_en
   : p.display_description_en || p.display_description_uk) || '';
 
-function AddonsCheckout({ options, leadRows = [], allowEmpty = false, payLabel, onPay, errorMessage }: Props) {
+function AddonsCheckout({ options, leadRows = [], allowEmpty = false, payLabel, onPay, errorMessage, promoItems }: Props) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [configs, setConfigs] = useState<Record<string, Record<string, string>>>({});
   const [phone, setPhone] = useState('');
@@ -67,6 +74,10 @@ function AddonsCheckout({ options, leadRows = [], allowEmpty = false, payLabel, 
   const [showAddress, setShowAddress] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<PromoValidationResponse | null>(null);
+  const [promoApplying, setPromoApplying] = useState(false);
+  const [promoMessage, setPromoMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   const selected = options.filter((p) => (quantities[p.id] || 0) > 0);
   const available = options.filter((p) => !(quantities[p.id] > 0));
@@ -75,6 +86,58 @@ function AddonsCheckout({ options, leadRows = [], allowEmpty = false, payLabel, 
   const total = leadTotal + selected.reduce((sum, p) => sum + Number(p.price || 0) * quantities[p.id], 0);
   // Telefon ve adres yalniz ek secilince istenir (yalniz paket odemesinde gerekmez).
   const needsContact = selected.length > 0 || !allowEmpty;
+
+  // Ne: Sepet (secili ekler ve adetleri) degisince uygulanmis promo kalkar; gec gelen Apply cevabi
+  //     baska bir sepete aitse yok sayilir.
+  // Neden: S&P checkout'taki gibi indirim yalniz dogrulandigi sepete gecerli; tutar sunucuda yeniden hesaplanir.
+  const cartKey = selected.map((p) => `${p.id}:${quantities[p.id]}`).join(',');
+  const cartKeyRef = useRef(cartKey);
+  cartKeyRef.current = cartKey;
+  useEffect(() => {
+    setAppliedPromo(null);
+    setPromoMessage(null);
+  }, [cartKey]);
+
+  const applyPromo = async () => {
+    if (!promoItems || promoApplying) return;
+    const code = promoInput.trim();
+    if (!code) {
+      setAppliedPromo(null);
+      setPromoMessage({ ok: false, text: textOr('checkout.promoRequired', 'Please enter a promo code', 'Будь ласка, введіть промокод') });
+      return;
+    }
+    const requestKey = cartKey;
+    const purchaseInfo: Record<string, number> = { ...promoItems };
+    selected.forEach((p) => {
+      purchaseInfo[p.id] = quantities[p.id];
+    });
+    setPromoApplying(true);
+    setPromoMessage({ ok: true, text: textOr('checkout.promoApplyingMessage', 'Applying promo code...', 'Застосовуємо промокод...') });
+    try {
+      const result = await validatePromoCode({ promo_code: code, purchase_info: purchaseInfo });
+      if (cartKeyRef.current !== requestKey) return;
+      setAppliedPromo(result);
+      setPromoMessage({ ok: true, text: textOr(
+        'checkout.promoApplied',
+        `Promo code ${result.promo_code_text_snapshot} applied.`,
+        `Промокод ${result.promo_code_text_snapshot} застосовано.`,
+        { code: result.promo_code_text_snapshot },
+      ) });
+    } catch (err) {
+      if (cartKeyRef.current !== requestKey) return;
+      setAppliedPromo(null);
+      setPromoMessage({ ok: false, text: getPromoErrorMessage(err) });
+    } finally {
+      setPromoApplying(false);
+    }
+  };
+
+  const payTotal = appliedPromo ? appliedPromo.net_total : total;
+  // Indirim yalniz paket satirina (leadRows) uygulanir; yuzde onun uzerinden (S&P'de premiumSubtotal).
+  const promoPercent = appliedPromo && leadTotal > 0 ? (appliedPromo.discount_amount / leadTotal) * 100 : null;
+  const promoPercentText = promoPercent === null
+    ? ''
+    : (Number.isInteger(promoPercent) ? promoPercent.toFixed(0) : promoPercent.toFixed(1));
 
   const add = (product: Product) => {
     setError('');
@@ -144,10 +207,17 @@ function AddonsCheckout({ options, leadRows = [], allowEmpty = false, payLabel, 
         phone: selected.length > 0 ? normalizeContactPhone(phone) : '',
         buyer_configs: buyerConfigs,
         shipping_address: hasPhysical ? address : null,
+        ...(appliedPromo ? { promo_code: appliedPromo.promo_code_text_snapshot } : {}),
       });
       // Tarayici LiqPay'e gidiyor; dugme kilitli kalir.
     } catch (err) {
       setBusy(false);
+      if (isPromoError(err)) {
+        // Kod Apply'dan sonra gecersizlesti (limit doldu, suresi bitti): indirim kalkar, mesaj promo kutusunda.
+        setAppliedPromo(null);
+        setPromoMessage({ ok: false, text: getPromoErrorMessage(err) });
+        return;
+      }
       setError(errorMessage(err));
     }
   };
@@ -234,11 +304,58 @@ function AddonsCheckout({ options, leadRows = [], allowEmpty = false, payLabel, 
                 <span className="checkout-summary-row-value">{formatUah(Number(product.price) * quantities[product.id])}</span>
               </div>
             ))}
+            {appliedPromo && (
+              <div className="checkout-summary-row checkout-summary-discount-row">
+                <span className="checkout-summary-row-label">{textOr('checkout.promoDiscount', 'Promo discount', 'Знижка за промокодом')}</span>
+                <span className="checkout-summary-row-value">
+                  -{formatUah(appliedPromo.discount_amount)}
+                  {promoPercentText ? ` (-${promoPercentText}%)` : ''}
+                </span>
+              </div>
+            )}
             <div className="checkout-summary-total">
-              <span className="checkout-summary-total-label">{t('checkout.total')}</span>
-              <span className="checkout-summary-total-value">{formatUah(total)}</span>
+              <span className="checkout-summary-total-label">
+                {appliedPromo ? textOr('checkout.netTotal', 'Net total', 'До сплати') : t('checkout.total')}
+              </span>
+              <span className="checkout-summary-total-value">{formatUah(payTotal)}</span>
             </div>
           </div>
+
+          {promoItems && (
+            <div className="checkout-promo-section">
+              <label className="checkout-email-label" htmlFor="addons-promo">{textOr('checkout.promoLabel', 'Promo code', 'Промокод')}</label>
+              <div className="checkout-promo-row">
+                <input
+                  id="addons-promo"
+                  className="checkout-promo-input"
+                  placeholder={t('checkout.promoPlaceholder')}
+                  autoComplete="off"
+                  value={promoInput}
+                  onChange={(e) => {
+                    setPromoInput(e.target.value);
+                    setAppliedPromo(null);
+                    setPromoMessage(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      applyPromo();
+                    }
+                  }}
+                />
+                <button type="button" className="checkout-promo-apply-btn" onClick={applyPromo} disabled={promoApplying || busy}>
+                  {promoApplying
+                    ? textOr('checkout.promoApplyingButton', 'Applying...', 'Застосовуємо...')
+                    : textOr('checkout.promoApply', 'Apply', 'Застосувати')}
+                </button>
+              </div>
+              {promoMessage && (
+                <p className={promoMessage.ok ? 'checkout-promo-message-ok' : 'checkout-promo-message-error'} role={promoMessage.ok ? undefined : 'alert'}>
+                  {promoMessage.text}
+                </p>
+              )}
+            </div>
+          )}
 
           {needsContact && (
             <div className="checkout-email-group checkout-phone-group">
@@ -290,11 +407,12 @@ function AddonsCheckout({ options, leadRows = [], allowEmpty = false, payLabel, 
 
           {error && <p className="event-addons-error" role="alert">{error}</p>}
 
-          <button type="button" className="checkout-complete-btn" disabled={busy || (!allowEmpty && selected.length === 0)} onClick={pay}>
+          {/* Promo dogrulanirken odeme acilmasin (indirimsiz tutarla LiqPay'e gitmesin). */}
+          <button type="button" className="checkout-complete-btn" disabled={busy || promoApplying || (!allowEmpty && selected.length === 0)} onClick={pay}>
             <span className="checkout-complete-btn-text">
               {busy
                 ? textOr('eventHome.freeUpgrade.opening', 'Opening payment…', 'Відкриваємо оплату…')
-                : payLabel(total, selected.length)}
+                : payLabel(payTotal, selected.length)}
             </span>
             <div className="checkout-complete-btn-icon">
               <i className="fa-solid fa-arrow-right"></i>

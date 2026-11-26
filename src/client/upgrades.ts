@@ -64,13 +64,16 @@ export interface UpgradeAddonExtras {
 //        ({type: 'liqpay_form', data, signature}); form V2Checkout'taki gibi gonderilir.
 //        Yerel ortamdaki mock saglayici {url} doner. Paket kaleminin yaninda ek urun kalemleri de
 //        gonderilebilir (extras ile telefon, tasarim ayarlari ve Nova Poshta adresi).
-export const startUpgradePayment = async (packedUid: string, items: UpgradeItem[], extras?: UpgradeAddonExtras): Promise<void> => {
+//        promoCode yalniz free paketten yukseltmede (Fatih 24 Kasim 2026); %100 kodla tutar 0 ise sunucu
+//        LiqPay'siz uygular ve {type: 'redirect', url} doner, asagidaki `url` dali onu izler.
+export const startUpgradePayment = async (packedUid: string, items: UpgradeItem[], extras?: UpgradeAddonExtras, promoCode?: string): Promise<void> => {
   const res = await authFetch(`${SERV_ROOT}/api/event/${packedUid}/upgrade`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({
       items,
       provider_id: 'liqpay',
+      ...(promoCode ? { promo_code: promoCode } : {}),
       ...(extras ? {
         phone: extras.phone,
         buyer_configs: extras.buyer_configs,

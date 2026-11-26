@@ -33,6 +33,7 @@ import '../../v2-styles/FreeUpgrade.css';
 // gelir (secenegin addons listesi; Premium'a reklam alani, ozel paketlere reklam alani, hicbir pakete sesli mesaj
 // satilmaz). Ekler istege bagli; tek odeme paket + ekler. Adim adreste (?package=<secenek id>), tarayicinin geri
 // tusu 1. adima doner. Paketle ek gelmiyorsa (liste bos) dugme eskisi gibi dogrudan odemeyi acar.
+// 2. adimin ozetinde promosyon kodu alani var (Fatih 24 Kasim 2026); yalniz Premium indirim alir.
 
 type TabKey = 'events' | 'school' | 'hero';
 const TAB_ORDER: TabKey[] = ['events', 'school', 'hero'];
@@ -229,12 +230,16 @@ function EventUpgrade() {
               amount: packagePrice,
             }]}
             payLabel={(total) => textOr('eventHome.addons.pay', 'Pay {{price}}', 'Сплатити {{price}}', { price: formatUah(total) })}
+            // Promosyon kodu alani (Fatih 23-24 Kasim 2026): free'den yukseltme "yeni satin alim gibi"; indirim
+            // S&P'deki kuralla yalniz Premium'a, ekler indirimsiz. Diger paketlerde Apply "yalniz Premium" der.
+            promoItems={{ [addonsChoice.option.id]: 1 }}
             onPay={(payload) => startUpgradePayment(
               packedUid,
               [{ product_id: addonsChoice.option.id, quantity: 1 }, ...payload.items],
               payload.items.length > 0
                 ? { phone: payload.phone, buyer_configs: payload.buyer_configs, shipping_address: payload.shipping_address }
                 : undefined,
+              payload.promo_code,
             )}
             errorMessage={addonErrorMessage}
           />

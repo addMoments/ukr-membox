@@ -120,6 +120,15 @@ const promoErrorTexts: Record<string, { key: string; en: string; uk: string }> =
   invalid_purchase_info: { key: 'checkout.promoErrors.invalidPurchase', en: 'Cart information is invalid', uk: 'Дані кошика некоректні' },
 };
 
+// Ne: Hata bir promo dogrulama hatasi mi (backend kodu promo_...).
+// Neden: Yukseltme odemesinde kod Apply'dan sonra gecersizlesirse (limit doldu, suresi bitti) uygulanmis
+//        indirim kaldirilip mesaj promo kutusunun altinda gosterilsin.
+export function isPromoError(err: unknown): boolean {
+  if (!(err instanceof FetchHttpError)) return false;
+  const code = asRecord(err.body).code;
+  return typeof code === 'string' && code.startsWith('promo_');
+}
+
 // Ne: Backend promo hata cevabindan kullaniciya gosterilecek hata kodunu ceker.
 // Nasil: error_code/code/error/message alanlarini sirayla dener ve bilinen kodlari map'ler.
 // Neden: Backend hata formatinda ufak farklar olsa bile checkout kullaniciya okunur mesaj gostersin.
