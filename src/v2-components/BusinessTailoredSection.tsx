@@ -137,7 +137,7 @@ function BusinessTailoredSection({ quoteHref, contactHref, onComparePackages }: 
           </ol>
           <div className="business-tailored-actions">
             <a href={quoteHref} className="business-tailored-btn business-tailored-btn-primary">
-              {textOr('paywall.business.requestQuote', 'Request a custom quote', 'Запросити пропозицію')}
+              {textOr('paywall.business.requestQuote', 'Request a custom quote', 'Отримати пропозицію')}
               <ArrowIcon size={18} color="#d9ec8b" />
             </a>
             <a
